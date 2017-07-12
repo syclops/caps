@@ -1,0 +1,73 @@
+\section{Signaling HTTPS Deployment}
+\label{sec:signaling}
+
+In this section, we describe the details of how we signal \ac{https} deployment
+in \ac{name}.
+
+\subsection{Data Sources}
+
+The authors of CRLite~\cite{larisch2017crlite} observed that
+Censys~\cite{durumeric2015search} and Google's set of \ac{ct}
+logs\footnote{\url{https://www.certificate-transparency.org/known-logs}} have
+played a critical role in making the set of all currently known \ac{tls}
+certificates easily accessible. While the authors of CRLite used this knowledge
+to space-efficiently store the set of all revoked certificates, in \ac{name} we
+are interested in space-efficiently storing the set of all domains that have
+deployed \ac{https}. We note that we can use the same data sources as CRLite
+does and simply extract the set of domain names appearing in currently valid
+certificates to obtain a list of all domains deploying \ac{https}.
+
+To this end, Censys provides a scan of the entire IPv4 address space on port 443
+(the default port number for \ac{https}) and the resulting \ac{tls} handshake
+attempts.  \steve{(todo) We also downloaded a dump of XX \ac{ct} logs and
+extracted domain names from the certificates stored at these logs.} After
+extracting the data from the \steve{(update) May 18, 2017} scan results
+\steve{(todo) and from the \ac{ct} log databasse}, we obtained a list of
+\steve{(update) just over 69 million} domain names that take up a total of
+\steve{(update) 147 MB}. This set excludes duplicate domain names as well as
+common names \steve{(todo) explain in background} that are invalid DNS names.
+
+\subsection{Approaches}
+
+\steve{This subsection is in note form, and for now is just to summarize the
+approaches I have tried.}
+
+CRLite makes use of filter cascades (based on Bloom filters) to efficiently
+store the set of all revoked certificates in around 10 MB. However, CRLite's
+approach relies on having access to the set of all known certificates, which
+Censys and the \ac{ct} logs can provide. While it is possible to access many of
+the top-level domain zone files in DNS (including \texttt{.com}), many of the
+registrars of country-specific top-level domains do not publicize their
+information. Moreover, CRLite relies on the \steve{reasonable} assumption that
+only a small minority of certificates will be revoked. By contrast, the rate of
+\ac{https} deployment cannot be bounded by such assumptions, particular with the
+advent of services such as Let's Encrypt, which has already increased the
+\ac{https} deployment rate in its early stages \steve{(todo) wording}.
+
+Constructing the signal set by simply compressing the set of \ac{https} domains
+is also possible. As with most data compression algorithms, there is a clear
+tradeoff between speed and compression ratio. For example, using lz4
+\steve{(todo) cite} takes less than a second to compress and decompress, but
+only obtains a compression ratio of 2.26 (for a compressed size of 65 MB). Using
+bzip2, on the other hand, takes just over 10 seconds and has a ratio of 3.68 (40
+MB compressed). Using xz took 64 seconds and produced a ratio of 4.45 (33 MB
+compressed), and the best performer, zpaq (with the largest block size), took
+4.5 minutes and produced a ratio of 5.88 (25 MB compressed). Unfortunately,
+decompression with zpaq is slow, taking 7 minutes, and thus cannot be used to
+support real-time signal set checking.
+
+Succinct data structures provide a way for us to encode the signal set in a
+space-efficient way while supporting efficient membership queries in the
+succinctly encoded state. If we build a trie (also called a prefix tree) based
+on the reversed domain names (capturing the highly repeated use of TLDs), we can
+use the LOUDS (level order unary degree sequence) representation of the prefix
+tree to efficiently encode the tree. In particular, we can represent the full
+signal set in 73.3 MB. \steve{We also tried the use of minimal acyclic finite
+  state automata (MAFSAs), which can represent the same information as a trie in
+fewer states. However, this approach is quite slow for the number of domains we
+want to represent, and there are fewer ways of efficiently encoding MAFSAs,
+which in our case are effectively directed acyclic graphs with labeled edges.}
+
+\subsection{Client Procedure}
+
+\steve{How the client actually performs the lookup}

@@ -1,0 +1,118 @@
+\section{Registration Authority}
+\label{sec:ra}
+
+\subsection{Policy}
+\label{sec:ra:policy}
+
+In a nutshell, a policy associates a domain with the public keys it uses during
+the TLS handshake; a policy thus effectively pins a set of public keys to a
+domain. Specifically, a policy binds a domain name to a set of \emph{policy
+public keys}, an \emph{update threshold}, a \emph{registration proof}, and a set
+of \emph{authentication public keys}. We describe each of these components
+below.
+
+The policy public keys and update threshold are used to authenticate updates to
+the domain's policy. Specifically, to update its policy, a domain must provide a
+threshold number of signatures on the new desired policy, and each of these
+signatures must successfully verify with a distinct policy public key. Such an
+update mechanism allows each domain to tune its policy's security to a desired
+level: a lower update threshold means that an adversary needs to compromise
+fewer policy private keys to maliciously update a domain's policy, while a
+higher update threshold means that a domain must generate more signatures
+(resulting in more computation) and send more information (resulting in higher
+bandwidth cost) to update its policy.
+
+The registration proof is used when the domain registers or recovers its policy.
+A proof consists of one or more certificate chains that meet certain criteria
+and a signature on the new desired policy. The RA maintains a list of root keys
+in which each of these chains must be anchored. A proof also has an attribute
+called \emph{strength}, which represents the number of keys that must be
+compromised to forge all certificate chains. As we describe below, the strength
+of a proof can be efficiently computed.
+
+Finally, the authentication public keys are a set of whitelisted keys for
+clients. In other words, a client will not accept a public key as belonging to a
+domain if it does not appear in the domain's set of authentication public keys.
+Whitelisting keys rather than certificates means that the domain does not have
+to change its policy each time it obtains a new certificate. \steve{how often do
+keys change between certificates from the same CA?}
+
+%The use of domain-specified policies to provide authentication information is
+%not new. DANE~\cite{rfc6698} allows domains to communicate similar policies via
+%DNS records. However, DANE relies on DNSSEC (otherwise, the records containing
+%these policies cannot be authenticated), and does not enable trust agility:
+%clients must trust DNS to validate a DANE record.
+%PoliCert~\cite{szalachowski2014policert} provides a slightly richer range of
+%policies, but also lacks 
+
+\subsection{Registration Proof Strength}
+\label{sec:ra:proof}
+
+The strength of a registration proof can be efficiently calculated. For the
+purposes of computing strength, we represent a registration proof as a set of
+chains $\{C_1, \ldots, C_n\}$. Each chain can be represented as a sequence of
+keys $C_i = (K_i^1, \ldots, K_i^{\ell_i})$ where $K_i^1 \in R$ (assuming that
+$R$ is the set of the root keys allowed by the RA) and $K_i^{\ell_i} = K_D$. We
+then transform this set of chains into a graph as follows: the set of vertices
+$V$ consists of a source node $S$ along with two nodes for each $K$ where $K \in
+C_i$ for some $i$ such that $1 \le i \le n$. For a given $K$, we label these
+nodes as $K$ and $K'$. The set of labeled edges $E$ is defined as follows: $(S,
+K_i^1) \in E$ for all $i$ where $1 \le i \le n$, and all such edges are labeled
+with $\infty$. In addition, for all $i$ such that $1 \le i \le n$ and all $j$
+such that $1 \le j < \ell_i$, $(K_i^j, {K_i^j}') \in E$ and all such edges are
+labeled with 1. Finally, for all $i$ such that $1 \le i \le n$ and all $j$ such
+that $1 \le j < \ell_i$, $({K_i^j}', K_i^{j+1}) \in E$ and all such edges are
+labeled with $\infty$.
+
+We can then consider these edge labels as capacities in a minimum cut problem
+with $S$ as the source and $K_D$ as the sink. The minimum cut will go through
+some number of edges labeled with 1, and each of these edges represents a key
+that needs to be compromised in order to disconnect all certificate chains. Thus
+the minimum cut in this graph represents the minimum number of keys that must be
+compromised in order to forge the entire set of certificate chains.
+
+\subsection{RA Overview}
+\label{sec:ra:overview}
+
+The RA maintains a mapping of domain names to policies, as well as information
+pertaining to domain policy registration. Specifically, the RA has a list of
+accepted root public keys for registration proofs, as well as a mapping of
+domain names to their most recent registration proofs.
+
+The RA offers an API consisting of five methods, covering initial registration,
+updates using policy keys, recovery using a stronger registration proof, lookup,
+and enumeration of the RA database. We describe each below. \steve{Add
+algorithmic descriptions}
+
+The \texttt{register} method takes as input a domain name, a registration proof
+consisting of a set of certificate chains and a signature on the desired policy,
+and the desired policy itself. The domain name cannot already be present in the
+RA's mapping. For each certificate chain, the RA checks that the leaf key can be
+used to verify the signature on the desired policy, that each certificate has a
+valid signature and has not expired, and that the chain is rooted in the RA's
+set of root public keys. The RA then computes the strength of the proof and
+associates the desired policy with the domain name. It also stores the
+registration proof and strength, associated with the domain name.
+
+The \texttt{update} method takes as input a domain name, the new desired policy,
+and a set of signatures on the above information. The RA checks that each
+signature can be verified with a distinct policy public key, and that the number
+of signatures is at least the update threshold. If these checks pass, the RA
+stores the new policy in its domain-policy mapping.
+
+The \texttt{recover} method takes as input a domain name, a new desired policy,
+and a registration proof. The domain name must be present in the RA's mapping.
+The RA checks the registration proof in the same way as for initial
+registration, but also checks that the proof is stronger than the current
+strength of the domain's proof. If this check passes, the RA associates the new
+policy with the domain name and updates the domain's registration proof
+strength. We note that the new desired policy can be the same as the domain's
+current policy, thus allowing a domain to ``strengthen'' its own registered
+policy.
+
+The \texttt{lookup} method takes as input a domain name and returns its policy,
+registration proof, and proof strength. The domain name must be present in the
+RA's mapping.
+
+The \texttt{enumerate} methods takes no inputs and returns a list of all domain
+names registered at the RA.

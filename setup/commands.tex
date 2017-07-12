@@ -1,0 +1,16 @@
+% User-defined commands go here.
+
+\newcommand{\steve}[1]{\textcolor{magenta}{[SM: #1]}}
+\newcommand{\draft}[1]{\textcolor{blue}{[Draft text: #1]}}
+\newcommand{\emxs}[1]{\ensuremath{#1}\xspace}
+
+\newcommand{\evidence}{\emxs{E}}
+\newcommand{\regstr}{\emxs{S}}
+
+%\newcommand\definitionautorefname{Definition}
+\renewcommand*{\equationautorefname}{Equation}
+\renewcommand*{\figureautorefname}{Figure}
+\renewcommand*{\sectionautorefname}{Section}
+%\renewcommand*{\itemautorefname}{Definition}
+\let\subsectionautorefname\sectionautorefname
+%\newcommand{\algorithmautorefname}{Algorithm}

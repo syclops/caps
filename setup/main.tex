@@ -1,0 +1,32 @@
+% This is the setup file. It contains usepackage commands, acronyms, and other
+% useful commands needed to set up the paper. Uncomment the relevant sections to
+% use them.
+
+\input{setup/packages}
+
+\input{setup/acros}
+
+\input{setup/commands}
+
+\input{setup/misc}
+
+% Fix ugly citation style: [1],[2] --> [1,2]
+
+%\usepackage[noadjust]{cite}
+%\renewcommand{\citepunct}{, }
+%\renewcommand{\citedash}{--}
+
+% Compression tricks - use if we need more space.
+
+%\geometry{tmargin=.7in,bmargin=.7in,lmargin=.7in,rmargin=.7in}
+%\renewcommand{\baselinestretch}{0.99}
+
+% Aggressive space hacks. Use only in case of emergency!
+%\usepackage[font=footnotesize]{caption}
+%\usepackage{titlesec}
+%\titlespacing\section{0pt}{5pt plus 1pt minus 0pt}{1pt minus 1pt}
+%\titlespacing\subsection{0pt}{4pt plus 2pt minus 0pt}{1pt minus 0pt}
+%\titleformat{name=\section}{\fontsize{11.7pt}{14pt}\bfseries}{\thesection}{1em}{}
+%\titleformat{name=\subsection}{\fontsize{10.73pt}{12.87pt}\bfseries}{\thesubsection}{1em}{}
+%\usepackage[final,babel,step=1,stretch=30,shrink=40]{microtype}
+%\usepackage[all=normal,lists,paragraphs,wordspacing,leading]{savetrees}
