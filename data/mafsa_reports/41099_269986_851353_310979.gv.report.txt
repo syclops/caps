@@ -1,0 +1,140 @@
+States: 269986
+Edges: 310979
+In/out-degree entropy: 0.8968707380056309 bits
+Label entropy: 4.742399263586508 bits
+1 in, 1 out: 238708
+1 in, 2 out: 9535
+2 in, 1 out: 8192
+1 in, 3 out: 2816
+3 in, 1 out: 2642
+1 in, 4 out: 1296
+4 in, 1 out: 1200
+1 in, 5 out: 791
+5 in, 1 out: 678
+1 in, 6 out: 498
+6 in, 1 out: 480
+1 in, 7 out: 376
+7 in, 1 out: 336
+1 in, 8 out: 247
+8 in, 1 out: 215
+1 in, 9 out: 181
+9 in, 1 out: 174
+10 in, 1 out: 150
+1 in, 10 out: 135
+11 in, 1 out: 118
+1 in, 11 out: 104
+12 in, 1 out: 92
+13 in, 1 out: 77
+1 in, 12 out: 65
+14 in, 1 out: 62
+1 in, 13 out: 58
+1 in, 14 out: 55
+1 in, 16 out: 47
+1 in, 15 out: 42
+1 in, 18 out: 37
+15 in, 1 out: 37
+16 in, 1 out: 37
+1 in, 17 out: 33
+17 in, 1 out: 32
+18 in, 1 out: 29
+1 in, 19 out: 29
+1 in, 20 out: 28
+20 in, 1 out: 28
+19 in, 1 out: 26
+21 in, 1 out: 23
+1 in, 21 out: 22
+1 in, 22 out: 17
+25 in, 1 out: 14
+1 in, 24 out: 13
+23 in, 1 out: 13
+27 in, 1 out: 12
+1 in, 27 out: 11
+22 in, 1 out: 11
+1 in, 25 out: 11
+1 in, 28 out: 10
+31 in, 1 out: 10
+32 in, 1 out: 9
+1 in, 23 out: 9
+1 in, 29 out: 8
+1 in, 26 out: 8
+28 in, 1 out: 8
+24 in, 1 out: 8
+26 in, 1 out: 8
+29 in, 1 out: 7
+30 in, 1 out: 5
+47 in, 1 out: 4
+1 in, 30 out: 4
+46 in, 1 out: 3
+42 in, 1 out: 3
+41 in, 1 out: 3
+36 in, 1 out: 3
+1 in, 32 out: 3
+1 in, 31 out: 3
+1 in, 36 out: 2
+70 in, 1 out: 2
+54 in, 1 out: 2
+49 in, 1 out: 2
+40 in, 1 out: 2
+39 in, 1 out: 2
+35 in, 1 out: 2
+33 in, 1 out: 2
+44 in, 1 out: 2
+182 in, 0 out: 1
+1 in, 35 out: 1
+2 in, 2 out: 1
+75 in, 1 out: 1
+66 in, 1 out: 1
+65 in, 1 out: 1
+63 in, 1 out: 1
+61 in, 1 out: 1
+58 in, 1 out: 1
+57 in, 1 out: 1
+55 in, 1 out: 1
+53 in, 1 out: 1
+52 in, 1 out: 1
+45 in, 1 out: 1
+38 in, 1 out: 1
+37 in, 1 out: 1
+34 in, 1 out: 1
+93 in, 1 out: 1
+0 in, 26 out: 1
+e: 27249
+a: 23510
+i: 19064
+r: 18222
+o: 18040
+s: 17638
+t: 16937
+n: 16895
+c: 13318
+l: 13255
+.: 12258
+d: 10120
+m: 9405
+u: 8944
+p: 8676
+-: 8119
+b: 7046
+h: 7015
+g: 6873
+f: 5585
+k: 4741
+v: 4563
+w: 4251
+y: 4244
+2: 2323
+1: 2229
+0: 2055
+x: 2032
+4: 1990
+z: 1892
+3: 1813
+8: 1643
+9: 1636
+7: 1574
+5: 1568
+6: 1565
+j: 1548
+q: 1092
+_: 32
+*: 19

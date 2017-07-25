@@ -1,0 +1,150 @@
+States: 348659
+Edges: 404645
+In/out-degree entropy: 0.9320494564122114 bits
+Label entropy: 4.738193037520429 bits
+1 in, 1 out: 306296
+1 in, 2 out: 13242
+2 in, 1 out: 10774
+1 in, 3 out: 3861
+3 in, 1 out: 3556
+1 in, 4 out: 1754
+4 in, 1 out: 1636
+1 in, 5 out: 985
+5 in, 1 out: 953
+1 in, 6 out: 685
+6 in, 1 out: 644
+1 in, 7 out: 446
+7 in, 1 out: 424
+1 in, 8 out: 359
+8 in, 1 out: 306
+1 in, 9 out: 268
+9 in, 1 out: 231
+1 in, 10 out: 198
+10 in, 1 out: 179
+1 in, 11 out: 161
+11 in, 1 out: 139
+12 in, 1 out: 122
+1 in, 12 out: 110
+13 in, 1 out: 104
+14 in, 1 out: 88
+1 in, 13 out: 84
+1 in, 14 out: 77
+15 in, 1 out: 70
+1 in, 15 out: 62
+16 in, 1 out: 54
+1 in, 16 out: 47
+19 in, 1 out: 44
+18 in, 1 out: 43
+1 in, 18 out: 40
+1 in, 19 out: 40
+17 in, 1 out: 39
+1 in, 17 out: 38
+1 in, 20 out: 35
+20 in, 1 out: 31
+1 in, 23 out: 30
+22 in, 1 out: 26
+1 in, 21 out: 25
+1 in, 22 out: 24
+1 in, 24 out: 23
+21 in, 1 out: 22
+23 in, 1 out: 21
+25 in, 1 out: 19
+24 in, 1 out: 19
+27 in, 1 out: 14
+26 in, 1 out: 13
+30 in, 1 out: 13
+1 in, 25 out: 13
+32 in, 1 out: 12
+1 in, 29 out: 11
+1 in, 30 out: 11
+29 in, 1 out: 10
+1 in, 27 out: 9
+28 in, 1 out: 7
+1 in, 26 out: 7
+1 in, 28 out: 7
+1 in, 31 out: 4
+34 in, 1 out: 4
+33 in, 1 out: 4
+31 in, 1 out: 4
+42 in, 1 out: 4
+36 in, 1 out: 4
+37 in, 1 out: 4
+1 in, 33 out: 3
+43 in, 1 out: 3
+45 in, 1 out: 3
+51 in, 1 out: 3
+1 in, 36 out: 3
+38 in, 1 out: 3
+40 in, 1 out: 3
+64 in, 1 out: 3
+56 in, 1 out: 3
+35 in, 1 out: 3
+41 in, 1 out: 3
+39 in, 1 out: 2
+48 in, 1 out: 2
+1 in, 32 out: 2
+1 in, 34 out: 2
+2 in, 2 out: 2
+63 in, 1 out: 2
+54 in, 1 out: 2
+52 in, 1 out: 2
+47 in, 1 out: 2
+127 in, 1 out: 1
+104 in, 1 out: 1
+295 in, 0 out: 1
+98 in, 1 out: 1
+83 in, 1 out: 1
+80 in, 1 out: 1
+79 in, 1 out: 1
+76 in, 1 out: 1
+69 in, 1 out: 1
+62 in, 1 out: 1
+59 in, 1 out: 1
+58 in, 1 out: 1
+57 in, 1 out: 1
+55 in, 1 out: 1
+53 in, 1 out: 1
+50 in, 1 out: 1
+49 in, 1 out: 1
+46 in, 1 out: 1
+0 in, 26 out: 1
+e: 35308
+a: 30843
+i: 24477
+r: 23807
+o: 23567
+s: 22770
+t: 22389
+n: 21969
+c: 17681
+l: 17176
+.: 16078
+d: 13148
+m: 12248
+u: 11735
+p: 11118
+-: 10393
+h: 9347
+b: 9154
+g: 9023
+f: 7098
+k: 6253
+v: 6016
+y: 5650
+w: 5596
+1: 2945
+2: 2772
+0: 2645
+x: 2643
+4: 2518
+z: 2473
+3: 2376
+8: 2109
+5: 2012
+9: 1985
+7: 1978
+6: 1973
+j: 1933
+q: 1356
+_: 60
+*: 23

@@ -1,0 +1,133 @@
+States: 242496
+Edges: 278883
+In/out-degree entropy: 0.895929403478596 bits
+Label entropy: 4.728179037305118 bits
+1 in, 1 out: 214338
+1 in, 2 out: 8494
+2 in, 1 out: 7575
+1 in, 3 out: 2551
+3 in, 1 out: 2343
+1 in, 4 out: 1229
+4 in, 1 out: 1079
+1 in, 5 out: 659
+5 in, 1 out: 630
+1 in, 6 out: 459
+6 in, 1 out: 391
+1 in, 7 out: 309
+7 in, 1 out: 297
+1 in, 8 out: 217
+8 in, 1 out: 197
+9 in, 1 out: 164
+1 in, 9 out: 145
+1 in, 10 out: 126
+10 in, 1 out: 105
+11 in, 1 out: 100
+1 in, 11 out: 92
+12 in, 1 out: 86
+1 in, 12 out: 80
+13 in, 1 out: 55
+14 in, 1 out: 51
+1 in, 13 out: 50
+1 in, 14 out: 45
+15 in, 1 out: 43
+1 in, 15 out: 42
+1 in, 17 out: 37
+16 in, 1 out: 37
+17 in, 1 out: 33
+18 in, 1 out: 32
+1 in, 16 out: 29
+1 in, 19 out: 29
+1 in, 18 out: 26
+20 in, 1 out: 21
+19 in, 1 out: 20
+1 in, 20 out: 19
+1 in, 23 out: 17
+23 in, 1 out: 15
+1 in, 21 out: 15
+22 in, 1 out: 14
+1 in, 24 out: 13
+21 in, 1 out: 12
+24 in, 1 out: 12
+1 in, 28 out: 11
+1 in, 27 out: 10
+25 in, 1 out: 10
+26 in, 1 out: 9
+1 in, 26 out: 8
+27 in, 1 out: 8
+28 in, 1 out: 8
+31 in, 1 out: 8
+1 in, 25 out: 7
+1 in, 22 out: 7
+1 in, 29 out: 6
+37 in, 1 out: 6
+1 in, 31 out: 5
+38 in, 1 out: 5
+29 in, 1 out: 4
+30 in, 1 out: 4
+47 in, 1 out: 4
+46 in, 1 out: 3
+36 in, 1 out: 3
+56 in, 1 out: 3
+32 in, 1 out: 3
+34 in, 1 out: 2
+39 in, 1 out: 2
+40 in, 1 out: 2
+42 in, 1 out: 2
+43 in, 1 out: 2
+1 in, 30 out: 2
+60 in, 1 out: 2
+1 in, 36 out: 2
+45 in, 1 out: 2
+160 in, 0 out: 1
+1 in, 32 out: 1
+1 in, 35 out: 1
+2 in, 2 out: 1
+3 in, 2 out: 1
+88 in, 1 out: 1
+41 in, 1 out: 1
+44 in, 1 out: 1
+54 in, 1 out: 1
+55 in, 1 out: 1
+63 in, 1 out: 1
+68 in, 1 out: 1
+0 in, 25 out: 1
+e: 24703
+a: 21028
+i: 16849
+r: 16651
+o: 16233
+s: 16102
+t: 15283
+n: 15143
+c: 12021
+l: 11929
+.: 11305
+d: 9123
+m: 8450
+u: 8057
+p: 7745
+-: 6829
+h: 6338
+g: 6309
+b: 6298
+f: 5019
+k: 4303
+v: 4141
+y: 4020
+w: 3910
+1: 1957
+2: 1904
+x: 1879
+0: 1756
+z: 1697
+4: 1613
+3: 1608
+j: 1325
+6: 1314
+8: 1300
+5: 1299
+9: 1231
+7: 1200
+q: 976
+_: 28
+*: 7

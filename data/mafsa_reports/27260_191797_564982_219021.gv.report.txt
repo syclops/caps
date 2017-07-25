@@ -1,0 +1,129 @@
+States: 191797
+Edges: 219021
+In/out-degree entropy: 0.8579440834630517 bits
+Label entropy: 4.7225666482555555 bits
+1 in, 1 out: 170700
+1 in, 2 out: 6380
+2 in, 1 out: 5679
+1 in, 3 out: 1848
+3 in, 1 out: 1733
+1 in, 4 out: 923
+4 in, 1 out: 829
+1 in, 5 out: 508
+5 in, 1 out: 491
+1 in, 6 out: 327
+6 in, 1 out: 319
+1 in, 7 out: 235
+7 in, 1 out: 217
+8 in, 1 out: 162
+1 in, 8 out: 157
+1 in, 9 out: 121
+9 in, 1 out: 120
+10 in, 1 out: 91
+1 in, 10 out: 88
+11 in, 1 out: 76
+1 in, 11 out: 60
+12 in, 1 out: 59
+1 in, 12 out: 53
+1 in, 13 out: 49
+1 in, 14 out: 43
+13 in, 1 out: 41
+1 in, 15 out: 38
+15 in, 1 out: 32
+17 in, 1 out: 29
+16 in, 1 out: 28
+14 in, 1 out: 28
+1 in, 18 out: 25
+1 in, 16 out: 24
+1 in, 17 out: 23
+18 in, 1 out: 17
+1 in, 19 out: 15
+1 in, 22 out: 13
+22 in, 1 out: 13
+1 in, 25 out: 13
+21 in, 1 out: 12
+1 in, 26 out: 11
+19 in, 1 out: 10
+26 in, 1 out: 10
+28 in, 1 out: 10
+20 in, 1 out: 9
+1 in, 21 out: 9
+24 in, 1 out: 9
+25 in, 1 out: 9
+1 in, 20 out: 7
+33 in, 1 out: 7
+1 in, 29 out: 6
+23 in, 1 out: 6
+1 in, 24 out: 6
+1 in, 23 out: 5
+1 in, 28 out: 5
+1 in, 27 out: 5
+1 in, 31 out: 4
+30 in, 1 out: 4
+27 in, 1 out: 4
+39 in, 1 out: 3
+37 in, 1 out: 3
+29 in, 1 out: 2
+1 in, 30 out: 2
+52 in, 1 out: 2
+1 in, 36 out: 2
+45 in, 1 out: 2
+41 in, 1 out: 2
+38 in, 1 out: 2
+36 in, 1 out: 2
+35 in, 1 out: 2
+32 in, 1 out: 2
+31 in, 1 out: 2
+40 in, 1 out: 2
+134 in, 0 out: 1
+1 in, 34 out: 1
+66 in, 1 out: 1
+34 in, 1 out: 1
+43 in, 1 out: 1
+44 in, 1 out: 1
+47 in, 1 out: 1
+48 in, 1 out: 1
+58 in, 1 out: 1
+61 in, 1 out: 1
+65 in, 1 out: 1
+0 in, 25 out: 1
+e: 19439
+a: 16499
+i: 13400
+o: 13062
+r: 12984
+s: 12644
+t: 12060
+n: 11927
+c: 9403
+l: 9391
+.: 9011
+d: 7172
+m: 6487
+u: 6325
+p: 6160
+-: 5417
+h: 5013
+g: 4970
+b: 4825
+f: 3724
+k: 3440
+v: 3224
+w: 3157
+y: 2987
+2: 1482
+1: 1472
+x: 1403
+0: 1291
+z: 1265
+4: 1252
+3: 1173
+8: 1081
+5: 1043
+j: 1035
+7: 988
+6: 988
+9: 987
+q: 792
+_: 41
+*: 7

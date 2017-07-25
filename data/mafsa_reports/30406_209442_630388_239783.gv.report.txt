@@ -1,0 +1,133 @@
+States: 209442
+Edges: 239783
+In/out-degree entropy: 0.869293244079433 bits
+Label entropy: 4.7338484839045964 bits
+1 in, 1 out: 186065
+1 in, 2 out: 7039
+2 in, 1 out: 6239
+1 in, 3 out: 2092
+3 in, 1 out: 1966
+1 in, 4 out: 972
+4 in, 1 out: 928
+1 in, 5 out: 615
+5 in, 1 out: 550
+1 in, 6 out: 361
+6 in, 1 out: 327
+7 in, 1 out: 259
+1 in, 7 out: 237
+1 in, 8 out: 182
+8 in, 1 out: 157
+1 in, 9 out: 129
+9 in, 1 out: 125
+10 in, 1 out: 93
+1 in, 10 out: 92
+11 in, 1 out: 92
+1 in, 11 out: 78
+12 in, 1 out: 66
+1 in, 12 out: 66
+13 in, 1 out: 65
+1 in, 14 out: 48
+1 in, 13 out: 43
+1 in, 15 out: 42
+14 in, 1 out: 39
+15 in, 1 out: 32
+1 in, 16 out: 31
+17 in, 1 out: 27
+18 in, 1 out: 26
+1 in, 17 out: 26
+16 in, 1 out: 23
+1 in, 18 out: 21
+1 in, 19 out: 21
+21 in, 1 out: 19
+20 in, 1 out: 19
+1 in, 21 out: 16
+1 in, 20 out: 15
+23 in, 1 out: 12
+1 in, 22 out: 12
+1 in, 23 out: 11
+1 in, 25 out: 11
+19 in, 1 out: 10
+26 in, 1 out: 10
+22 in, 1 out: 9
+25 in, 1 out: 9
+1 in, 27 out: 8
+28 in, 1 out: 7
+1 in, 28 out: 7
+37 in, 1 out: 6
+29 in, 1 out: 6
+1 in, 24 out: 6
+1 in, 29 out: 5
+27 in, 1 out: 5
+33 in, 1 out: 5
+1 in, 26 out: 5
+31 in, 1 out: 4
+34 in, 1 out: 4
+40 in, 1 out: 4
+1 in, 30 out: 3
+1 in, 31 out: 3
+38 in, 1 out: 3
+42 in, 1 out: 3
+1 in, 32 out: 2
+32 in, 1 out: 2
+56 in, 1 out: 2
+1 in, 36 out: 2
+30 in, 1 out: 2
+54 in, 1 out: 2
+39 in, 1 out: 2
+121 in, 0 out: 1
+1 in, 35 out: 1
+2 in, 2 out: 1
+68 in, 1 out: 1
+24 in, 1 out: 1
+35 in, 1 out: 1
+36 in, 1 out: 1
+41 in, 1 out: 1
+43 in, 1 out: 1
+44 in, 1 out: 1
+45 in, 1 out: 1
+47 in, 1 out: 1
+48 in, 1 out: 1
+51 in, 1 out: 1
+53 in, 1 out: 1
+62 in, 1 out: 1
+0 in, 26 out: 1
+e: 20970
+a: 18199
+i: 14587
+r: 14063
+o: 14020
+s: 13721
+t: 13245
+n: 12898
+c: 10371
+l: 10259
+.: 9719
+d: 7805
+m: 7193
+u: 6839
+p: 6681
+-: 6155
+h: 5540
+b: 5385
+g: 5322
+f: 4237
+k: 3709
+v: 3601
+w: 3474
+y: 3383
+1: 1739
+2: 1632
+0: 1516
+x: 1493
+4: 1466
+z: 1423
+3: 1342
+8: 1213
+5: 1196
+6: 1162
+9: 1150
+j: 1100
+7: 1082
+q: 851
+_: 32
+*: 10

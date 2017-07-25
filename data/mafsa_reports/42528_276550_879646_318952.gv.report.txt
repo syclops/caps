@@ -1,0 +1,138 @@
+States: 276550
+Edges: 318952
+In/out-degree entropy: 0.9012382467578263 bits
+Label entropy: 4.736039389733921 bits
+1 in, 1 out: 244342
+1 in, 2 out: 9859
+2 in, 1 out: 8425
+1 in, 3 out: 2895
+3 in, 1 out: 2606
+1 in, 4 out: 1374
+4 in, 1 out: 1244
+1 in, 5 out: 762
+5 in, 1 out: 745
+1 in, 6 out: 529
+6 in, 1 out: 497
+1 in, 7 out: 367
+7 in, 1 out: 343
+8 in, 1 out: 281
+1 in, 8 out: 250
+1 in, 9 out: 203
+9 in, 1 out: 168
+1 in, 10 out: 143
+10 in, 1 out: 133
+11 in, 1 out: 106
+12 in, 1 out: 95
+1 in, 11 out: 94
+1 in, 12 out: 86
+13 in, 1 out: 78
+14 in, 1 out: 70
+1 in, 13 out: 66
+1 in, 14 out: 60
+15 in, 1 out: 57
+1 in, 16 out: 47
+1 in, 17 out: 43
+16 in, 1 out: 38
+1 in, 15 out: 37
+1 in, 18 out: 35
+19 in, 1 out: 34
+1 in, 20 out: 33
+1 in, 19 out: 25
+22 in, 1 out: 25
+17 in, 1 out: 25
+20 in, 1 out: 24
+1 in, 21 out: 22
+21 in, 1 out: 17
+1 in, 22 out: 16
+18 in, 1 out: 15
+25 in, 1 out: 15
+1 in, 24 out: 14
+24 in, 1 out: 14
+1 in, 25 out: 13
+1 in, 27 out: 11
+1 in, 23 out: 10
+29 in, 1 out: 10
+26 in, 1 out: 10
+23 in, 1 out: 10
+33 in, 1 out: 9
+27 in, 1 out: 9
+30 in, 1 out: 8
+31 in, 1 out: 7
+1 in, 26 out: 7
+1 in, 30 out: 6
+1 in, 28 out: 6
+1 in, 32 out: 5
+1 in, 29 out: 5
+37 in, 1 out: 5
+1 in, 31 out: 4
+36 in, 1 out: 4
+35 in, 1 out: 4
+32 in, 1 out: 3
+60 in, 1 out: 3
+53 in, 1 out: 3
+43 in, 1 out: 3
+41 in, 1 out: 3
+1 in, 33 out: 2
+1 in, 36 out: 2
+57 in, 1 out: 2
+50 in, 1 out: 2
+49 in, 1 out: 2
+47 in, 1 out: 2
+40 in, 1 out: 2
+38 in, 1 out: 2
+34 in, 1 out: 2
+28 in, 1 out: 2
+48 in, 1 out: 2
+198 in, 0 out: 1
+1 in, 35 out: 1
+3 in, 2 out: 1
+118 in, 1 out: 1
+42 in, 1 out: 1
+44 in, 1 out: 1
+54 in, 1 out: 1
+55 in, 1 out: 1
+64 in, 1 out: 1
+69 in, 1 out: 1
+83 in, 1 out: 1
+89 in, 1 out: 1
+0 in, 25 out: 1
+e: 27871
+a: 24155
+i: 19378
+o: 18749
+r: 18641
+s: 18310
+t: 17552
+n: 17349
+c: 13943
+l: 13623
+.: 12558
+d: 10269
+m: 9595
+u: 9016
+p: 8860
+-: 8207
+h: 7374
+b: 7260
+g: 7172
+f: 5640
+k: 4885
+v: 4659
+w: 4493
+y: 4470
+1: 2343
+2: 2198
+0: 2145
+x: 2070
+z: 2022
+4: 1967
+3: 1806
+8: 1578
+5: 1546
+j: 1537
+9: 1536
+6: 1501
+7: 1491
+q: 1137
+_: 35
+*: 11

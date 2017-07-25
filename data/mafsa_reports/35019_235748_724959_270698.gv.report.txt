@@ -1,0 +1,134 @@
+States: 235748
+Edges: 270698
+In/out-degree entropy: 0.8830121750676048 bits
+Label entropy: 4.730692043052696 bits
+1 in, 1 out: 209000
+1 in, 2 out: 7958
+2 in, 1 out: 7014
+1 in, 3 out: 2496
+3 in, 1 out: 2310
+1 in, 4 out: 1132
+4 in, 1 out: 1064
+1 in, 5 out: 670
+5 in, 1 out: 612
+1 in, 6 out: 417
+6 in, 1 out: 400
+7 in, 1 out: 306
+1 in, 7 out: 296
+1 in, 8 out: 201
+8 in, 1 out: 193
+9 in, 1 out: 177
+1 in, 9 out: 174
+10 in, 1 out: 115
+1 in, 10 out: 107
+11 in, 1 out: 89
+1 in, 11 out: 86
+1 in, 12 out: 80
+12 in, 1 out: 72
+13 in, 1 out: 56
+1 in, 13 out: 53
+1 in, 15 out: 42
+1 in, 14 out: 40
+14 in, 1 out: 39
+15 in, 1 out: 37
+1 in, 16 out: 33
+17 in, 1 out: 31
+1 in, 18 out: 30
+1 in, 17 out: 27
+16 in, 1 out: 27
+19 in, 1 out: 24
+18 in, 1 out: 23
+1 in, 20 out: 22
+1 in, 19 out: 21
+20 in, 1 out: 18
+1 in, 21 out: 17
+1 in, 24 out: 15
+1 in, 22 out: 15
+23 in, 1 out: 14
+25 in, 1 out: 14
+1 in, 26 out: 13
+21 in, 1 out: 12
+22 in, 1 out: 10
+24 in, 1 out: 10
+1 in, 23 out: 9
+28 in, 1 out: 9
+1 in, 28 out: 9
+1 in, 29 out: 9
+29 in, 1 out: 9
+26 in, 1 out: 8
+27 in, 1 out: 6
+32 in, 1 out: 5
+37 in, 1 out: 5
+1 in, 27 out: 5
+36 in, 1 out: 5
+44 in, 1 out: 4
+1 in, 32 out: 4
+1 in, 25 out: 4
+31 in, 1 out: 3
+35 in, 1 out: 3
+33 in, 1 out: 3
+49 in, 1 out: 3
+30 in, 1 out: 2
+53 in, 1 out: 2
+1 in, 31 out: 2
+1 in, 36 out: 2
+46 in, 1 out: 2
+42 in, 1 out: 2
+40 in, 1 out: 2
+34 in, 1 out: 2
+38 in, 1 out: 2
+147 in, 0 out: 1
+1 in, 30 out: 1
+1 in, 35 out: 1
+85 in, 1 out: 1
+39 in, 1 out: 1
+43 in, 1 out: 1
+45 in, 1 out: 1
+47 in, 1 out: 1
+50 in, 1 out: 1
+52 in, 1 out: 1
+56 in, 1 out: 1
+64 in, 1 out: 1
+67 in, 1 out: 1
+70 in, 1 out: 1
+0 in, 25 out: 1
+e: 24135
+a: 20456
+i: 16439
+r: 15911
+o: 15721
+s: 15510
+t: 14875
+n: 14750
+c: 11806
+l: 11569
+.: 10861
+d: 8878
+m: 8184
+u: 7769
+p: 7400
+-: 6845
+h: 6186
+b: 6081
+g: 6058
+f: 4638
+k: 4047
+v: 3998
+y: 3851
+w: 3801
+1: 1952
+2: 1841
+x: 1830
+z: 1725
+0: 1700
+4: 1630
+3: 1550
+8: 1385
+6: 1314
+5: 1302
+9: 1290
+7: 1273
+j: 1233
+q: 862
+_: 31
+*: 11

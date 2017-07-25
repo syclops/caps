@@ -1,0 +1,199 @@
+States: 752885
+Edges: 895409
+In/out-degree entropy: 1.0334048699283207 bits
+Label entropy: 4.756538336555518 bits
+1 in, 1 out: 649031
+1 in, 2 out: 34003
+2 in, 1 out: 24708
+1 in, 3 out: 9932
+3 in, 1 out: 8182
+1 in, 4 out: 4623
+4 in, 1 out: 3738
+1 in, 5 out: 2669
+5 in, 1 out: 2239
+1 in, 6 out: 1652
+6 in, 1 out: 1420
+1 in, 7 out: 1123
+7 in, 1 out: 978
+1 in, 8 out: 838
+8 in, 1 out: 741
+9 in, 1 out: 601
+1 in, 9 out: 595
+1 in, 10 out: 504
+10 in, 1 out: 420
+1 in, 11 out: 394
+11 in, 1 out: 344
+1 in, 12 out: 306
+12 in, 1 out: 305
+1 in, 13 out: 237
+13 in, 1 out: 236
+1 in, 14 out: 210
+14 in, 1 out: 205
+15 in, 1 out: 199
+1 in, 15 out: 177
+1 in, 16 out: 153
+16 in, 1 out: 137
+17 in, 1 out: 113
+1 in, 17 out: 112
+1 in, 18 out: 99
+20 in, 1 out: 99
+19 in, 1 out: 92
+18 in, 1 out: 91
+21 in, 1 out: 78
+1 in, 20 out: 67
+1 in, 19 out: 67
+23 in, 1 out: 63
+1 in, 21 out: 63
+22 in, 1 out: 59
+1 in, 22 out: 56
+24 in, 1 out: 52
+1 in, 23 out: 44
+27 in, 1 out: 43
+28 in, 1 out: 39
+1 in, 24 out: 39
+1 in, 25 out: 38
+25 in, 1 out: 35
+1 in, 26 out: 34
+1 in, 27 out: 33
+29 in, 1 out: 32
+26 in, 1 out: 31
+30 in, 1 out: 24
+33 in, 1 out: 23
+34 in, 1 out: 22
+1 in, 31 out: 20
+35 in, 1 out: 19
+1 in, 29 out: 19
+32 in, 1 out: 17
+2 in, 2 out: 17
+1 in, 30 out: 16
+39 in, 1 out: 16
+1 in, 33 out: 15
+31 in, 1 out: 15
+1 in, 32 out: 14
+42 in, 1 out: 14
+41 in, 1 out: 13
+36 in, 1 out: 13
+40 in, 1 out: 13
+1 in, 28 out: 12
+37 in, 1 out: 10
+38 in, 1 out: 8
+1 in, 34 out: 8
+45 in, 1 out: 7
+46 in, 1 out: 7
+48 in, 1 out: 7
+44 in, 1 out: 7
+51 in, 1 out: 7
+60 in, 1 out: 7
+52 in, 1 out: 6
+3 in, 2 out: 6
+47 in, 1 out: 6
+75 in, 1 out: 4
+1 in, 36 out: 4
+50 in, 1 out: 4
+49 in, 1 out: 4
+1 in, 35 out: 4
+88 in, 1 out: 3
+81 in, 1 out: 3
+95 in, 1 out: 3
+103 in, 1 out: 3
+66 in, 1 out: 3
+43 in, 1 out: 3
+65 in, 1 out: 3
+53 in, 1 out: 3
+56 in, 1 out: 3
+62 in, 1 out: 3
+54 in, 1 out: 3
+73 in, 1 out: 2
+57 in, 1 out: 2
+83 in, 1 out: 2
+84 in, 1 out: 2
+64 in, 1 out: 2
+55 in, 1 out: 2
+99 in, 1 out: 2
+101 in, 1 out: 2
+104 in, 1 out: 2
+127 in, 1 out: 2
+4 in, 2 out: 2
+257 in, 1 out: 1
+225 in, 1 out: 1
+7 in, 2 out: 1
+105 in, 1 out: 1
+112 in, 1 out: 1
+113 in, 1 out: 1
+114 in, 1 out: 1
+117 in, 1 out: 1
+119 in, 1 out: 1
+132 in, 1 out: 1
+134 in, 1 out: 1
+138 in, 1 out: 1
+140 in, 1 out: 1
+141 in, 1 out: 1
+143 in, 1 out: 1
+146 in, 1 out: 1
+154 in, 1 out: 1
+428 in, 1 out: 1
+182 in, 1 out: 1
+191 in, 1 out: 1
+985 in, 0 out: 1
+106 in, 1 out: 1
+98 in, 1 out: 1
+221 in, 1 out: 1
+97 in, 1 out: 1
+59 in, 1 out: 1
+61 in, 1 out: 1
+63 in, 1 out: 1
+67 in, 1 out: 1
+69 in, 1 out: 1
+70 in, 1 out: 1
+71 in, 1 out: 1
+72 in, 1 out: 1
+74 in, 1 out: 1
+78 in, 1 out: 1
+79 in, 1 out: 1
+80 in, 1 out: 1
+82 in, 1 out: 1
+85 in, 1 out: 1
+86 in, 1 out: 1
+342 in, 1 out: 1
+94 in, 1 out: 1
+0 in, 26 out: 1
+e: 77511
+a: 67554
+i: 53720
+r: 51868
+o: 51544
+s: 50769
+t: 48804
+n: 47953
+c: 38781
+l: 37401
+.: 34081
+d: 29268
+m: 26911
+u: 25690
+p: 24926
+-: 24142
+b: 20942
+h: 20528
+g: 20184
+f: 16214
+k: 13927
+v: 13303
+w: 12804
+y: 12327
+1: 6881
+2: 6585
+0: 6182
+4: 5979
+x: 5805
+z: 5558
+3: 5540
+8: 4866
+5: 4805
+9: 4742
+7: 4738
+6: 4654
+j: 4436
+q: 3252
+_: 125
+*: 109
