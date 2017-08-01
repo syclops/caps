@@ -1,2 +1,73 @@
 \section{Related Work}
 \label{sec:related}
+
+In this section, we discuss related work, covering both the academic literature
+and projects from the industry and open-source communities. We first examine
+previous work that has addressed the problem of specifying or inferring domain
+certificate policy. We then examine work that has addressed the problem of
+signaling HTTPS deployment in domains.
+
+\subsection{Specifying and Inferring Domain Policy}
+
+Previous work has proposed the use of domain-specified policies to protect
+against \ac{mitm} attacks. In AKI~\cite{kim2013accountable} and its successor
+ARPKI~\cite{basin2014arpki}, these policies are embedded within the certificates
+themselves and specify attributes such as trusted \acp{ca} and public logs as
+well as a ``cool-off period'' that forces potentially malicious certificates to
+be visible in logs for some period of time before client can accept them. In
+PoliCert~\cite{szalachowski2014policert}, the policies are stored separately in
+logs as in \ac{name}. Other work, such as Blockstack~\cite{ali2016blockstack} or
+IKP~\cite{matsumoto2017ikp}, has proposed placing policy information into a
+blockchain. While IKP's policies operate similarly to those of PoliCert,
+Blockstack simply provides the domain's keys directly, and is thus more similar
+to DANE~\cite{rfc6698}. Of these proposals, only ARPKI leverages the
+relationship between \acp{ca} and logs to ease the burden on the domain during
+certificate issuance, but all proposals require the domain to specify its policy
+in detail to prevent \ac{mitm} attacks resulting from misbehaving \acp{ca}.
+
+There has also been some work that takes a heuristic approach, using the past
+behavior of \acp{ca} in order to determine how clients should trust them. For
+example, CAge~\cite{kasten2013cage} propose a system that displays a browser
+warning to users for certificates whose names are under a DNS top-level domain
+that the issuing \ac{ca} has never signed for before. Perl, Fahl and Smith
+propose to outright remove root certificates that have not been used to sign
+(either directly or through \ac{ca} delegation) any observed certificates in the
+past~\cite{perl2014you}. Both of these proposals use data from Censys or its
+predecessors, but do not use any information from the domains themselves.
+Because of this, these approaches may encounter situations where they mistake an
+attempted \ac{mitm} attack with a legitimate, domain-initiated change and thus
+block a user from visiting a benign site or expose a user to the \ac{mitm}
+attack. Indeed, a previous study of changes in the Web \ac{pki}'s trust graph
+suggests that legitimate changes and attacks share properties to the point that
+they cannot be easily distinguished~\cite{amann2013no}.
+
+\subsection{Signaling \ac{https} Deployment}
+
+Though \ac{hsts}~\cite{rfc6797} enforces the use of \ac{https} for a site after
+a client has connected with that site over \ac{https} for the first time,
+previous work has acknowledged the difficulty (in terms of both storage and
+latency overhead) of identifying \ac{https}-deploying domains before the first
+visit. The prevailing solution among browser vendors is \emph{\ac{hsts}
+preloading}~\cite{keeler2012preloading}, in which browser vendors include a list
+of the most popular sites that have deployed \ac{https}. These lists are
+incomplete (covering only \steve{TODO: fill in} names in Chrome), domains must
+explicitly opt into adding themselves. As indicated by vendor-provided
+guidelines,\footnote{\url{https://hstspreload.org/}} this process is prone to
+mistakes by domain operators that lead to site inaccessibility.
+
+As described in \steve{TODO: refer to previous section if mentioned elsewhere},
+most approaches to disseminating certificate revocation information fail for
+signaling because they rely on assumptions that do not hold in the signaling
+problem. In particular, the use of \acp{crl}~\cite{rfc5280} does not scale to
+the number of \ac{https}-deploying sites because we cannot assume that the
+number of sites deploying \ac{https} will remain small compared to the overall
+number of sites. More efficient versions of \acp{crl} also do not work: an
+approach similar to Chrome's CRLsets~\cite{langley2012revocation} suffers from
+the same incompleteness and opt-in hurdles mentioned above, and an approach
+similar to CRLite~\cite{larisch2017crlite} relies on knowledge of all domain
+names, which is infeasible in today's DNS due to many country code top-level
+domains keeping their registries private. Approaches such as using 2-3
+trees~\cite{naor1998certificate} or optimized Merkle hash
+trees~\cite{laurie2012revocation}, while providing efficient proofs of
+\ac{https} deployment, require online checks by clients, greatly increasing the
+latency of connection establishment.
