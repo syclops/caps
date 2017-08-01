@@ -1,0 +1,17 @@
+\section{Evaluation}
+\label{sec:evaluation}
+
+\subsection{Signaling Mechanism}
+
+We implemented our signal set in \steve{probably C++}. We first compare our
+FSA-based approach to other methods, in particular, simply compressing the
+signal set and the use of Bloom filters.
+
+\steve{We first eliminated many compression algorithms from consideration by
+  considering the Pareto frontier of the compressed size and the decompression
+  time. We only compared the decompression time, not the full lookup time,
+  because once the set is decompressed, it is the same regardless of compression
+algorithm and we would expect the lookup times to be the same.}
+
+We first ask simply how much space the compressed representation of the signal
+set takes on disk. We compared 
