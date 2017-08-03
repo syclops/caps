@@ -2,42 +2,95 @@
 \label{sec:overview}
 
 \begin{figure}
-  \centering
-  \includegraphics[width=\linewidth]{fig/overview}
-  \caption{Overview of \ac{name} architecture. Dotted lines denote browser
-  components, and italic text denotes new components or actions in \ac{name}.}
+  \centering \includegraphics[width=\linewidth]{fig/overview} \caption{Overview
+    of \ac{name} architecture (log auditors and monitors not shown). The browser
+    is part of the client. Dotted lines denote browser components, and italic
+    text denotes new components or actions in \ac{name}.}
   \label{fig:overview}
 \end{figure}
 
-As shown in \autoref{fig:overview}, \ac{name} extends the standard \ac{ct}
-architecture. In particular, in \ac{name} we make use of a \emph{signal set},
-stored locally by client browsers. Browsers query for the presence or absence of
-a given domain name in the signal set to determine whether that domain has
-deployed \acs{https}. Because Censys~\cite{durumeric2015search} currently
-reports that close to 70 million known domains deploy \ac{https} and Verisign
-reports almost 330 million domain names overall~\cite{dnib-14-1}, we design our
-signal set to be scalable to hundreds of millions \steve{or billions, hopefully}
-of names, while taking up minimal space on client devices and supporting
-efficient membership queries. While \ac{ct} leverages public append-only logs to
-ensure that any \ac{ca} misbehavior for domains that have deployed \ac{https}
-must be made publicly visible before \iac{mitm} attack, the use of a signal set
-prevents an attack that can be made even with full \ac{ct} deployment, in which
-an adversary tries to fraudulently convince a client that a domain has not
-deployed \ac{https}. In \autoref{sec:signaling}, we provide a detailed
-look at our signal set design.
+In this section, we present a high-level overview of \ac{name}. We first present
+one of our central insights and then describe the \ac{name} architecture. We
+then provide an intuitive explanation for the policy and signaling mechanisms.
 
-\ac{name} further adds misbehavior prevention to the misbehavior detection
-capabilities of \ac{ct} through the use of \steve{policies for domains
-  maintained at public logs}. Specifically, public logs in \ac{name} maintain
-  policies for each domain that encode \steve{\acp{ca} authorized to issue
-  certificates for a domain or the number of independent certificate chains a
-domain must present to the client}. In contrast to other extensions of \ac{ct}
-that use log-based certificate policies such as
-PoliCert~\cite{szalachowski2014policert}, these policies do not need to be
-directly specified by the domain. \steve{I suppose this leaves out authorized
-  \ac{ca} specification unless we are willing to admit errors using a heuristic
-approach.} In \autoref{sec:policy}, we provide a detailed look at our policy
-mechanism.
+To move towards \iac{pki} with increased resilience to the compromise of trusted
+parties (i.e., \acp{ca}), we need to prevent \iac{ca} that misissues a
+certificate for a domain from exposing that domain to \iac{mitm} attack. We
+observe that \steve{more signatures means more trust}, and therefore we design
+\ac{name} around the idea that domains should be able to obtain and communicate
+the presence of multiple signatures on a certificate. We can then protect
+domains from \ac{mitm} attacks by simply communicating to the client the number
+of signatures to expect. This approach results in simple policies that require
+domain involvement only in rare cases of deliberate misissuance, and allow
+security-conscious domains to ``ratchet up'' their security to their desired
+level.
+
+\ac{name} leverages \ac{ct}'s infrastructure in its policy mechanism, and
+therefore the two systems have similar architectures, as shown in
+\autoref{fig:overview}. \steve{TODO: add Censys data and an external service or
+browser vendor to the overview figure} \ac{name} assumes a full deployment of
+\ac{ct}, that is, all certificates must be logged for clients to accept them as
+valid. Beginning in October 2017, Chrome will begin enforcing this requirement
+for all \ac{https} sites, so this assumption is a reasonable one. For the
+purposes of obtaining \acp{sct}, the logging process works just as it does in
+\ac{ct}. Also as with \ac{ct}, public logs are kept accountable by auditors and
+monitors, and an external party (Google in the case of \ac{ct}) maintains a list
+of known trusted logs.
+
+In \ac{name}, however, logs maintain an additional database of certificate
+policies alongside their database of certificates. The logging process also
+triggers changes in this policy database. Domains periodically request the proof
+for their latest policy from the logs and provide both their policy and proof to
+clients during the \ac{tls} handshake. We further describe the details of our
+policy mechanism in \autoref{sec:policy}.
+
+Client browsers locally maintain a \emph{signal set}, which indicate whether or
+not a given domain has deployed \ac{https}. The networking module of the browser
+(which handles the establishment of \ac{https} connections) queries the signal
+set upon requesting a connection to a site in order to determine whether or not
+to expect a certificate. If the signal set indicates that the domain has
+deployed \ac{https} but the server does not provide a certificate, the browser
+aborts the connection and displays an error message.
+
+The signal set is created by using data from Censys~\cite{durumeric2015search},
+which provides regular scans of the IPv4 address space on port 443, usually
+reserved for \ac{https}. This data is used to construct a list of all DNS names
+for which a \ac{tls} certificate has been observed (either as the main subject
+or as a subject alternative name). This list is then represented using
+\iac{dafsa} that recognizes the DNS names of sites that deploy \ac{https}. By
+using compression techniques, we compact this \ac{dafsa} into a representation
+that requires little storage. Such a compact representation allows us to store
+the \ac{dafsa} in memory, offering performant lookups. We further describe the
+details of our signal set design in \autoref{sec:signaling}.
+
+%In particular, in \ac{name} we make use of a \emph{signal set},
+%stored locally by client browsers. Browsers query for the presence or absence of
+%a given domain name in the signal set to determine whether that domain has
+%deployed \acs{https}. Because Censys~\cite{durumeric2015search} currently
+%reports that close to 70 million known domains deploy \ac{https} and Verisign
+%reports almost 330 million domain names overall~\cite{dnib-14-1}, we design our
+%signal set to be scalable to hundreds of millions \steve{or billions, hopefully}
+%of names, while taking up minimal space on client devices and supporting
+%efficient membership queries. While \ac{ct} leverages public append-only logs to
+%ensure that any \ac{ca} misbehavior for domains that have deployed \ac{https}
+%must be made publicly visible before \iac{mitm} attack, the use of a signal set
+%prevents an attack that can be made even with full \ac{ct} deployment, in which
+%an adversary tries to fraudulently convince a client that a domain has not
+%deployed \ac{https}. In \autoref{sec:signaling}, we provide a detailed
+%look at our signal set design.
+
+%\ac{name} further adds misbehavior prevention to the misbehavior detection
+%capabilities of \ac{ct} through the use of \steve{policies for domains
+  %maintained at public logs}. Specifically, public logs in \ac{name} maintain
+  %policies for each domain that encode \steve{\acp{ca} authorized to issue
+  %certificates for a domain or the number of independent certificate chains a
+%domain must present to the client}. In contrast to other extensions of \ac{ct}
+%that use log-based certificate policies such as
+%PoliCert~\cite{szalachowski2014policert}, these policies do not need to be
+%directly specified by the domain. \steve{I suppose this leaves out authorized
+  %\ac{ca} specification unless we are willing to admit errors using a heuristic
+%approach.} In \autoref{sec:policy}, we provide a detailed look at our policy
+%mechanism.
 
 %For comparison, we first present a
 %purely DNS-based approach.

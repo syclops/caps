@@ -11,78 +11,156 @@
   %security and agility?
 %\end{compactitem}
 
-The Web's \ac{pki} enables client browsers to authenticate the public keys of
-the domains they communicate with, and together with the \ac{tls}
-protocol~\cite{rfc5246} allows a client and domain to establish an end-to-end
-secure communication channel through \acs{https}. In the Web \ac{pki},
-trusted third parties called \emph{\acp{ca}} vouch for the binding between a
-domain's name and its public key. The correct operation of \acp{ca} are critical
-to the security of the Web \ac{pki}, and failures can lead to the client
-establishing a secure channel with the wrong domain. In some cases this
-scenario can lead to a \emph{\ac{mitm} attack}, in which even though the
-confidentiality and integrity guarantees of communication over \ac{tls} hold,
-they provide no benefit because an adversary is impersonating the client and
-domain to each other and can read and modify all communication between them.
+\acs{https}, built on \ac{tls}~\cite{rfc5246} and the Web \ac{pki}, lies at the
+heart of secure end-to-end communication on the Web. \Acp{ca}, who vouch for the
+binding between a domain's name and its public key, play a critical role in the
+Web \ac{pki}. \Iac{ca}'s failure to correctly sign this binding in the form of a
+public key certificate can lead to \iac{mitm} attack, allowing an adversary to
+intercept and modify all communication between a client and domain. Recent years
+have seen a plethora of these failures, both
+accidental~\cite{sleevi2015sustaining} and
+intentional~\cite{valsorda2015komodia}.
 
-While there are many proposals (enumerated in \autoref{sec:related}) to fix the
-Web \ac{pki} by deterring, preventing, or recovering from \ac{ca} misbehavior,
-Google's \emph{\ac{ct}} system~\cite{rfc6962} has recently emerged as a widely
-deployed example of such a system, being scheduled for full deployment in
-October 2017. \ac{ct} does not prevent \ac{mitm} attacks, but rather enables
-widespread detection of \ac{ca} misbehavior. In \ac{ct}, a set of \emph{public
-logs} maintain a database of certificates they have observed (primarily sent to
-them by the \acp{ca} themselves) and provide cryptographic proofs called
-\emph{\acp{sct}} that show when these certificates were submitted to the log.
-Clients do not accept certificates unless they are sent with a requisite number
-of these \acp{sct}, ensuring that an adversary cannot use an unauthorized
-certificate for \ac{mitm} attacks without first exposing that certificate to the
-world.
+The failures of \acp{ca} continually remind us of the weakest-link security of
+the Web \ac{pki}: a single misbehaving \ac{ca} can expose a domain to \ac{mitm}
+attacks. Because we cannot prevent \acp{ca} from misissuing certificates,
+protecting clients from these \ac{mitm} attacks entails making the \ac{pki}
+resilient to certificate misissuance by enabling clients to detect and reject
+misissued certificates. However, only domains themselves can with certainty
+identify certificates misissued in their name. Clients therefore need a way to
+determine a domain's \emph{certificate policy} (i.e., criteria for which
+certificates the clients should consider correctly issued).
 
-However, \ac{ct} has several notable shortcomings. \ac{ct} does not make
-\ac{mitm} attack prevention an explicit goal, but specifies the behavior of
-\emph{monitors}, who periodically download newly logged certificates and check
-for suspicious certificates. However, only domains know which certificates they
-have authorized, and \ac{ct} does not allow domains to check logs for
-certificates issued in their name. This disparity means that some manual effort,
-on the part of the monitors, domains, or both, is required to prevent \ac{mitm}
-attacks that result from unauthorized certificates. Both monitors and domains
-face hurdles due to this manual effort.
+So far, proposed systems for communicating policy information to clients have
+not gained traction in practice. These systems introduce additional trusted
+parties~\cite{kim2013accountable} or assume that the entire Web will increase
+its security at once~\cite{basin2014arpki}. These shortcomings motivate the
+problem of designing a simple and deployable policy mechanism that requires
+minimal effort from domains. \steve{The last part isn't motivated well; it would
+  be nice if we could show that most policies are overkill for preventing
+\ac{mitm} attacks that could have resulted from recent \ac{ca} failures.}
 
-With the increasing deployment of \ac{https} through certificate services such
-as Let's Encrypt,\footnote{\texttt{https://letsencrypt.org/}} monitors may not
-be able to keep up with the number of suspicious certificates that require
-further manual investigation. Previous work enables domains to alleviate this
-pressure on monitors by explicitly supplying \emph{policies} that specify
-criteria that a domain's certificates should meet, but it is not clear that the
-expressiveness of these policies and the burden they impose on domain operators
-is worth the benefit of protecting them from common certificate misissuances. We
-therefore seek a simpler, more automated system for specifying certificate
-policies through the \ac{ct} infrastructure. In particular, we aim to move
-towards \iac{pki} in which one-off mistakes by \acp{ca} do not expose domains to
-\ac{mitm} attacks.
+%The Web's \ac{pki} enables client browsers to authenticate the public keys of
+%the domains they communicate with, and together with the \ac{tls}
+%protocol~\cite{rfc5246} allows a client and domain to establish an end-to-end
+%secure communication channel through \acs{https}. In the Web \ac{pki},
+%trusted third parties called \emph{\acp{ca}} vouch for the binding between a
+%domain's name and its public key. The correct operation of \acp{ca} are critical
+%to the security of the Web \ac{pki}, and failures can lead to the client
+%establishing a secure channel with the wrong domain. In some cases this
+%scenario can lead to a \emph{\ac{mitm} attack}, in which even though the
+%confidentiality and integrity guarantees of communication over \ac{tls} hold,
+%they provide no benefit because an adversary is impersonating the client and
+%domain to each other and can read and modify all communication between them.
+
+%While there are many proposals (enumerated in \autoref{sec:related}) to fix the
+%Web \ac{pki} by deterring, preventing, or recovering from \ac{ca} misbehavior,
+%Google's \emph{\ac{ct}} system~\cite{rfc6962} has recently emerged as a widely
+%deployed example of such a system, being scheduled for full deployment in
+%October 2017. \ac{ct} does not prevent \ac{mitm} attacks, but rather enables
+%widespread detection of \ac{ca} misbehavior. In \ac{ct}, a set of \emph{public
+%logs} maintain a database of certificates they have observed (primarily sent to
+%them by the \acp{ca} themselves) and provide cryptographic proofs called
+%\emph{\acp{sct}} that show when these certificates were submitted to the log.
+%Clients do not accept certificates unless they are sent with a requisite number
+%of these \acp{sct}, ensuring that an adversary cannot use an unauthorized
+%certificate for \ac{mitm} attacks without first exposing that certificate to the
+%world.
+
+%However, \ac{ct} has several notable shortcomings. \ac{ct} does not make
+%\ac{mitm} attack prevention an explicit goal, but specifies the behavior of
+%\emph{monitors}, who periodically download newly logged certificates and check
+%for suspicious certificates. However, only domains know which certificates they
+%have authorized, and \ac{ct} does not allow domains to check logs for
+%certificates issued in their name. This disparity means that some manual effort,
+%on the part of the monitors, domains, or both, is required to prevent \ac{mitm}
+%attacks that result from unauthorized certificates. Both monitors and domains
+%face hurdles due to this manual effort.
+
+%With the increasing deployment of \ac{https} through certificate services such
+%as Let's Encrypt,\footnote{\texttt{https://letsencrypt.org/}} monitors may not
+%be able to keep up with the number of suspicious certificates that require
+%further manual investigation. Previous work enables domains to alleviate this
+%pressure on monitors by explicitly supplying \emph{policies} that specify
+%criteria that a domain's certificates should meet, but it is not clear that the
+%expressiveness of these policies and the burden they impose on domain operators
+%is worth the benefit of protecting them from common certificate misissuances. We
+%therefore seek a simpler, more automated system for specifying certificate
+%policies through the \ac{ct} infrastructure. In particular, we aim to move
+%towards \iac{pki} in which one-off mistakes by \acp{ca} do not expose domains to
+%\ac{mitm} attacks.
 
 Unfortunately, even with such policies, we still fall short of a truly secure
-\ac{pki}. An adversary can bypass these protections by convincing the client
-that the target domain does not deploy \ac{https} at all. We therefore need a
-\emph{signaling} mechanism that can securely inform the client whether or not a
-target domain should be expected to deploy \ac{https}. While browser
-enhancements offer signaling for some sites, they are often woefully incomplete
-(covering only popular sites known to deploy \ac{https}) or degrade connection
-latency by first trying \ac{https} and falling back to standard HTTP in case of
-errors. In the latter case, an adversary could simply block the \ac{https}
-connection request to make the client expect a normal HTTP connection.
+\ac{pki}. Domains may not only have different policies, but some domains may not
+have policies at all because they do not deploy \ac{https}. Because we
+realistically expect a world of partial deployment in which the set of deploying
+domains increases incrementally over time, we need a mechanism to inform clients
+\emph{when} to expect a certificate policy, not just \emph{what} policy to
+expect. Moreover, this mechanism must be external to the Web \ac{pki} because it
+indicates certification in the Web \ac{pki} itself. We call the problem of
+designing such a mechanism the \emph{signaling} problem.
 
-In order to address the problems of automated policy management and \ac{https}
-deployment signaling, we propose \ac{name}, a system that leverages the heavy
-roles of public logs and browser vendors in a fully \ac{ct}-deployed setting.
-\ac{name} stores policy information at public logs and can automatically manage
-policies that protect security-conscious domains against misbehaving \acp{ca}.
-\ac{name} also leverages compression techniques to compactly represent the set
-of nearly all known domains that deploy \ac{https} in a way that can be stored
-locally by client browsers while providing \steve{reasonably good} performance.
+%These policies only exist for domains that actually deploy \ac{https};
+%therefore, an adversary can bypass these protections by convincing the client
+%that the target domain does not deploy \ac{https} at all (e.g., by blocking
+%connections to port 443 over which domains usually serve \ac{https}). We
+%therefore need a \emph{signaling} mechanism that securely indicates whether or
+%not the client should expect the domain to deploy \ac{https}. Some existing
+%approaches are opt-in, meaning that domains must explicitly register for these
+%mechanisms, and thus only provide signaling for some sites (e.g., popular
+%sites). Furthermore, the opt-in process is prone to misconfigurations, such as
+%domains accidentally signaling that a subdomain deploys \ac{https}, thus
+%rendering that part of the site inaccessible to clients. Other approaches
+%require clients to perform online checks, degrading connection latency. Is it
+%possible to improve on these approaches by reducing the action required by
+%domains and by broadening the scope of domains that can signal \ac{https}
+%deployment \emph{without} significantly increasing connection latency?
 
-\steve{Once the bulk of the technical content is there, add a paragraph more and
-list our contributions.}
+Existing approaches to the signaling problem
+(\autoref{sec:background:signaling}) suffer from critical shortcomings. Some
+require domains to opt in using a process prone to misconfiguration, and render
+the domain inaccessible if misconfiguration occurs. Approaches that store
+deployment information locally only signal \ac{https} deployment in a subset of
+sites due to storage costs, and approaches that rely on external information
+incur significant latency penalties and introduce additional trusted parties. We
+therefore observe the need to address the signaling problem with a solution that
+allows clients to confidently distinguish a site that deploys \ac{https} without
+imposing performance penalties or trust assumptions.
+
+To address the problems of managing certificate policies and of signaling
+\ac{https} deployment in a simple and practical manner, we propose \ac{name}, a
+system that \steve{gradually} increases the resilience of the Web \ac{pki}
+against misbehaving \acp{ca}. \ac{name} leverages Google's
+\ac{ct}~\cite{rfc6698} infrastructure, which relies on \emph{public logs} that
+maintain a database of all issued certificates in the Web \ac{pki}.
+%Because all certificates must be publicly logged to be accepted in Chrome
+%browsers starting in October
+%2017,\footnote{\url{https://cabforum.org/2016/10/19/2016-10-19-20-f2f-meeting-39-minutes/}}
+\ac{name} repurposes these logs to also maintain certificate policies. \ac{name}
+also achieves simplicity of policies by only tracking the number of \ac{ca}
+certificates for a given key a client should expect. This simple approach also
+means that for the vast majority of cases, domains do not need to change they
+way they obtain certificates, and in fact only requires domains to occasionally
+fetch information from a public log.
+
+\ac{name} uses data from \ac{ct} logs and from Censys~\cite{durumeric2015search}
+scans of \ac{https} sites to provide a complete view of all sites deploying
+\ac{https}. Using data from these sources also means that domains do not have to
+opt in to signal \ac{https} deployment. By using finite state methods and data
+compression techniques, \ac{name} can also succinctly encode the set of sites
+deploying \ac{https} to achieve fast, local signaling with efficient updates and
+minimal additional connection latency.
+
+In summary, this paper makes the following contributions:
+\begin{compactitem}
+\item It leverages \ac{ct} to propose a simple, deployable, and automated
+  mechanism for maintaining and disseminating domain certificate policies.
+\item It leverages finite state automata and data compression to present  a
+  succinct design for communicating the set of sites deploying \ac{https}.
+\item It shows through a comparative evaluation that \ac{name} requires only
+  \steve{} extra communication, \steve{} additional storage, and \steve{}
+  additional latency.
+\end{compactitem}
 
 %The Web \ac{pki} has seen several important improvements in recent years.
 %\steve{Summary of CT, CAA, DANE, CAge, CRLite}

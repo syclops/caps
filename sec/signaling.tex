@@ -13,61 +13,105 @@ played a critical role in making the set of all currently known \ac{tls}
 certificates easily accessible. While the authors of CRLite used this knowledge
 to space-efficiently store the set of all revoked certificates, in \ac{name} we
 are interested in space-efficiently storing the set of all domains that have
-deployed \ac{https}. We note that we can use the same data sources as CRLite
-does and simply extract the set of domain names appearing in currently valid
-certificates to obtain a list of all domains deploying \ac{https}.
+deployed \ac{https}. We can use the same data sources as CRLite does and simply
+extract the set of domain names appearing in currently valid certificates (as
+subject names or as subject alternative names) to obtain a list of all domains
+deploying \ac{https}.
 
-To this end, Censys provides a scan of the entire IPv4 address space on port 443
+To this end, Censys provides scans of the entire IPv4 address space on port 443
 (the default port number for \ac{https}) and the resulting \ac{tls} handshake
-attempts.  \steve{(todo) We also downloaded a dump of XX \ac{ct} logs and
-extracted domain names from the certificates stored at these logs.} After
-extracting the data from the \steve{(update) May 18, 2017} scan results
-\steve{(todo) and from the \ac{ct} log databasse}, we obtained a list of
-\steve{(update) just over 69 million} domain names that take up a total of
-\steve{(update) 147 MB}. This set excludes duplicate domain names as well as
-common names \steve{(todo) explain in background} that are invalid DNS names.
+attempts. \steve{TODO: Get \ac{ct} log info and domain names from them.} After
+extracting the data from the \steve{May 18, 2017} scan results, we obtained a
+list of \steve{15.1M} domain names that take up a total of \steve{327.7 MB}.
+This set excludes duplicate domain names as well as common names that are
+invalid DNS names (i.e., those with invalid characters or incorrect wildcard
+placement).
 
-\subsection{Approaches}
+\steve{Maybe include some interesting stats on the domain names we observed}
 
-\steve{This subsection is in note form, and for now is just to summarize the
-approaches I have tried.}
+\subsection{Design}
 
-CRLite makes use of filter cascades (based on Bloom filters) to efficiently
-store the set of all revoked certificates in around 10 MB. However, CRLite's
-approach relies on having access to the set of all known certificates, which
-Censys and the \ac{ct} logs can provide. While it is possible to access many of
-the top-level domain zone files in DNS (including \texttt{.com}), many of the
-registrars of country-specific top-level domains do not publicize their
-information. Moreover, CRLite relies on the \steve{reasonable} assumption that
-only a small minority of certificates will be revoked. By contrast, the rate of
-\ac{https} deployment cannot be bounded by such assumptions, particular with the
-advent of services such as Let's Encrypt, which has already increased the
-\ac{https} deployment rate in its early stages \steve{(todo) wording}.
+\draft{To construct our \ac{dafsa}, we use an established algorithm for
+incrementally constructing and minimizing a \ac{dafsa} from a list of
+words~\cite{daciuk2000incremental}. Intuitively, the algorithm works by
+constructing branches of a basic prefix tree and then finding and combining
+equivalent states. In order to limit the branching that occurs early in the
+\ac{dafsa} and to support efficient wildcard name lookups, we construct the
+\ac{dafsa} using reverse DNS names (e.g., \texttt{www.example.com} becomes
+\texttt{com.example.www}).}
 
-Constructing the signal set by simply compressing the set of \ac{https} domains
-is also possible. As with most data compression algorithms, there is a clear
-tradeoff between speed and compression ratio. For example, using lz4
-\steve{(todo) cite} takes less than a second to compress and decompress, but
-only obtains a compression ratio of 2.26 (for a compressed size of 65 MB). Using
-bzip2, on the other hand, takes just over 10 seconds and has a ratio of 3.68 (40
-MB compressed). Using xz took 64 seconds and produced a ratio of 4.45 (33 MB
-compressed), and the best performer, zpaq (with the largest block size), took
-4.5 minutes and produced a ratio of 5.88 (25 MB compressed). Unfortunately,
-decompression with zpaq is slow, taking 7 minutes, and thus cannot be used to
-support real-time signal set checking.
+\draft{Once the \ac{dafsa} has been constructed, we can efficiently represent it
+  using a variety of techniques. Some techniques, such as storing only the state
+  transitions and using variable-length encoding as well as flags for common
+  cases~\cite{daciuk2012smaller}, are established in the finite state methods
+literature.}
 
-Succinct data structures provide a way for us to encode the signal set in a
-space-efficient way while supporting efficient membership queries in the
-succinctly encoded state. If we build a trie (also called a prefix tree) based
-on the reversed domain names (capturing the highly repeated use of TLDs), we can
-use the LOUDS (level order unary degree sequence) representation of the prefix
-tree to efficiently encode the tree. In particular, we can represent the full
-signal set in 73.3 MB. \steve{We also tried the use of minimal acyclic finite
-  state automata (MAFSAs), which can represent the same information as a trie in
-fewer states. However, this approach is quite slow for the number of domains we
-want to represent, and there are fewer ways of efficiently encoding MAFSAs,
-which in our case are effectively directed acyclic graphs with labeled edges.}
+\draft{When we construct our \ac{dafsa}, we use single-character state
+transitions. Once we have built the \ac{dafsa}, we can reduce the
+size of the underlying directed acyclic graph by compacting edges as follows:
+for every arc of the graph (a chain of state transitions where each intermediate
+state has one incoming and one outgoing transition), eliminate the intermediate
+states and replace the transitions with a single transition from the start to
+the end of the arc with a label of the concatenation of the arc labels. Due to
+the nature of domain names, this approach can greatly reduce the size of the
+\ac{dafsa}, as shown in \autoref{sec:evaluation}.}
 
-\subsection{Client Procedure}
+\draft{We can further reduce the size of the \ac{dafsa} by similarly replacing
+states with one incoming transition and two outgoing transitions with two
+transitions from the state's direct predecessor to its successors.}
 
-\steve{How the client actually performs the lookup}
+\draft{Finally, we can more succinctly encode the labels and transitions by
+using efficient binary codes. \steve{TODO}}
+
+%\subsection{Approaches}
+
+%\steve{This subsection is in note form, and for now is just to summarize the
+%approaches I have tried.}
+
+%CRLite makes use of filter cascades (based on Bloom filters) to efficiently
+%store the set of all revoked certificates in around 10 MB. However, CRLite's
+%approach relies on having access to the set of all known certificates, which
+%Censys and the \ac{ct} logs can provide. While it is possible to access many of
+%the top-level domain zone files in DNS (including \texttt{.com}), many of the
+%registrars of country-specific top-level domains do not publicize their
+%information. Moreover, CRLite relies on the \steve{reasonable} assumption that
+%only a small minority of certificates will be revoked. By contrast, the rate of
+%\ac{https} deployment cannot be bounded by such assumptions, particular with the
+%advent of services such as Let's Encrypt, which has already increased the
+%\ac{https} deployment rate in its early stages \steve{(todo) wording}.
+
+%Constructing the signal set by simply compressing the set of \ac{https} domains
+%is also possible. As with most data compression algorithms, there is a clear
+%tradeoff between speed and compression ratio. For example, using lz4
+%\steve{(todo) cite} takes less than a second to compress and decompress, but
+%only obtains a compression ratio of 2.26 (for a compressed size of 65 MB). Using
+%bzip2, on the other hand, takes just over 10 seconds and has a ratio of 3.68 (40
+%MB compressed). Using xz took 64 seconds and produced a ratio of 4.45 (33 MB
+%compressed), and the best performer, zpaq (with the largest block size), took
+%4.5 minutes and produced a ratio of 5.88 (25 MB compressed). Unfortunately,
+%decompression with zpaq is slow, taking 7 minutes, and thus cannot be used to
+%support real-time signal set checking.
+
+%Succinct data structures provide a way for us to encode the signal set in a
+%space-efficient way while supporting efficient membership queries in the
+%succinctly encoded state. If we build a trie (also called a prefix tree) based
+%on the reversed domain names (capturing the highly repeated use of TLDs), we can
+%use the LOUDS (level order unary degree sequence) representation of the prefix
+%tree to efficiently encode the tree. In particular, we can represent the full
+%signal set in 73.3 MB. \steve{We also tried the use of minimal acyclic finite
+  %state automata (MAFSAs), which can represent the same information as a trie in
+%fewer states. However, this approach is quite slow for the number of domains we
+%want to represent, and there are fewer ways of efficiently encoding MAFSAs,
+%which in our case are effectively directed acyclic graphs with labeled edges.}
+
+\subsection{Operational Procedure}
+
+\draft{An external service (such as a browser vendor) periodically retrieves the
+latest Censys scan and obtains a list of all domains that have a certificate.
+After the \ac{dafsa} is initially constructed, any new domains in subsequent
+scans are added to the \ac{dafsa} and the difference is computed. This
+difference is then sent to browsers as an update message.}
+
+\draft{Upon receiving an update message, clients verify the update and then
+  construct the updated signal set locally. The clients can then begin using the
+signal set for deployment checking.}

@@ -1,19 +1,14 @@
-\section{Background}
+\section{Background and Related Work}
 \label{sec:background}
 
-In this section, we cover relevant background referred to in the remainder of
-the paper.
-
-%\subsection{Trust Agility}
-%\label{sec:background:agility}
-
-%The concept of \emph{trust agility} was first described by Moxie Marlinspike in
-%2011~\cite{marlinspike2011ssl}. Broadly, trust agility covers two main
-%principles:
-%\begin{inparaenum}
-%\item a trust decision can be easily revised at any time, and
-%\item individual users have the option of deciding where to anchor their trust.
-%\end{inparaenum}
+In this section, we describe relevant background and related work. We first
+provide background on Merkle hash trees and \acl{ct}, both of which we refer to
+in the remainder of the paper. We then discuss related work from both the
+academic literature and projects from the industry and open-source communities
+and their shortcomings. We then examine previous work that has addressed the
+problem of specifying or inferring a domain's certificate policy. We conclude by
+examining work that has addressed the problem of signaling HTTPS deployment in
+domains.
 
 \subsection{Merkle Hash Trees}
 \label{sec:background:mht}
@@ -117,19 +112,99 @@ domain uses \ac{ct} and that its certificate has been logged. Alternately, the
 domain can send extra information such as \acp{sct} or audit proofs in the
 \ac{tls} handshake using a \ac{tls} protocol extension.
 
-\draft{Monitoring and auditing details. Monitors periodically downloads all new
-  entries and verifies consistency proof. Does not need to keep cert entries
-  after finishing. Auditors periodically query for random audit proofs or
-  consistency proofs. Specifically, can pass a cert hash and a size of the tree
-  and get an audit proof in return, or pass two sizes of the tree and get a
-  consistency proof in return. To verify this information, log also provides a
-  function to get the latest signed tree head. In order to detect
-  \emph{equivocation} (i.e., showing different versions of the log to different
-  queries), auditors must gossip tree heads. The log's public key is known
-  through a trusted entity such as Google.}
+%\draft{Monitoring and auditing details. Monitors periodically downloads all new
+  %entries and verifies consistency proof. Does not need to keep cert entries
+  %after finishing. Auditors periodically query for random audit proofs or
+  %consistency proofs. Specifically, can pass a cert hash and a size of the tree
+  %and get an audit proof in return, or pass two sizes of the tree and get a
+  %consistency proof in return. To verify this information, log also provides a
+  %function to get the latest signed tree head. In order to detect
+  %\emph{equivocation} (i.e., showing different versions of the log to different
+  %queries), auditors must gossip tree heads. The log's public key is known
+  %through a trusted entity such as Google.}
 
-\draft{\ac{ct} does not check for revocation, though multiple extensions
-designed to handle revocation have been proposed (see \autoref{sec:related}).
-Perhaps the easiest way to do to this is to create a new Merkle hash tree every
-\ac{mmd} that contains as its leaves the list of \emph{currently valid}
-certificates.}
+%\draft{\ac{ct} does not check for revocation, though multiple extensions
+%designed to handle revocation have been proposed (see \autoref{sec:related}).
+%Perhaps the easiest way to do to this is to create a new Merkle hash tree every
+%\ac{mmd} that contains as its leaves the list of \emph{currently valid}
+%certificates.}
+
+\subsection{Specifying and Inferring Domain Policy}
+\label{sec:background:policy}
+
+Previous work has proposed the use of domain-specified policies to protect
+against \ac{mitm} attacks. In AKI~\cite{kim2013accountable} and its successor
+ARPKI~\cite{basin2014arpki}, these policies are embedded within the certificates
+themselves and specify attributes such as trusted \acp{ca} and public logs as
+well as a ``cool-off period'' that forces potentially malicious certificates to
+be visible in logs for some period of time before client can accept them. In
+PoliCert~\cite{szalachowski2014policert}, the policies are stored separately in
+logs. Other work, such as Blockstack~\cite{ali2016blockstack} or
+IKP~\cite{matsumoto2017ikp}, has proposed placing policy information into a
+blockchain. While IKP's policies operate similarly to those of PoliCert,
+Blockstack simply provides the domain's keys directly. Of these proposals, only
+ARPKI leverages the relationship between \acp{ca} and logs to ease the burden on
+the domain during certificate issuance, but all proposals require the domain to
+specify its policy in detail to prevent \ac{mitm} attacks resulting from
+misbehaving \acp{ca}.
+
+There has also been some work that takes a heuristic approach, using the past
+behavior of \acp{ca} in order to determine how clients should trust them. For
+example, CAge~\cite{kasten2013cage} propose a system that displays a browser
+warning to users for certificates whose names are under a DNS top-level domain
+that the issuing \ac{ca} has never signed for before. Perl, Fahl and Smith
+propose to outright remove root certificates that have not been used to sign
+(either directly or through \ac{ca} delegation) any observed certificates in the
+past~\cite{perl2014you}. Both of these proposals use data from
+Censys~\cite{durumeric2015search} or its predecessors, but do not use any
+information from the domains themselves. Because of this, these approaches may
+encounter situations where they mistake a legitimate, domain-initiated change
+with an attempted \ac{mitm} attack and thus block a user from visiting a benign
+site or expose a user to the \ac{mitm} attack. Indeed, a previous study of
+changes in the Web \ac{pki}'s trust graph suggests that legitimate changes and
+attacks share properties to the point that they cannot be easily
+distinguished~\cite{amann2013no}.
+
+\subsection{Signaling \ac{https} Deployment}
+\label{sec:background:signaling}
+
+Although \ac{hsts}~\cite{rfc6797} enforces the use of \ac{https} for a site
+after a client has connected with that site over \ac{https} for the first time,
+previous work has acknowledged the difficulty (in terms of both storage and
+latency overhead) of identifying \ac{https}-deploying domains before the first
+visit. The prevailing solution among browser vendors is \emph{\ac{hsts}
+preloading}~\cite{keeler2012preloading}, in which browser vendors include a list
+of the most popular sites that have deployed \ac{https}. These lists are
+incomplete (covering only \steve{TODO: fill in} names in Chrome), and domains
+must explicitly opt into adding themselves. As indicated by vendor-provided
+guidelines,\footnote{\url{https://hstspreload.org/}} this process is prone to
+mistakes by domain operators that lead to site inaccessibility.
+
+As described in \steve{TODO: refer to previous section if mentioned elsewhere},
+most approaches to disseminating certificate revocation information fail for
+signaling because they rely on assumptions that do not hold in the signaling
+problem. In particular, the use of \acp{crl}~\cite{rfc5280} does not scale to
+the number of \ac{https}-deploying sites because we cannot assume that the
+number of sites deploying \ac{https} will remain small compared to the overall
+number of sites. More efficient versions of \acp{crl} also do not work: an
+approach similar to Chrome's CRLsets~\cite{langley2012revocation} suffers from
+the same incompleteness and opt-in hurdles mentioned above, and an approach
+similar to CRLite~\cite{larisch2017crlite} relies on knowledge of all domain
+names, which is infeasible in today's DNS due to many country code top-level
+domains keeping their registries private. Approaches such as storing data in a
+2-3 tree~\cite{naor1998certificate} or aoptimized Merkle hash
+tree~\cite{laurie2012revocation}, while able to provide efficient proofs of
+\ac{https} deployment, require online checks by clients, greatly increasing the
+latency of connection establishment.
+
+DANE~\cite{rfc6698}, which uses DNS to send a public key, certificate, or
+\ac{ca} that the client should expect, can provide both signaling and policy
+management with little added latency and without requiring browsers to store any
+kind of signaling information. However, DANE relies on DNSSEC~\cite{rfc4033},
+and both have a low deployment rate in today's
+Internet,\footnote{\url{http://secspider.verisignlabs.com/stats.html}, retrieved
+1 August 2017} with only 5,885 DANE records for \ac{https} and 1.67M verified
+DNSSEC zones out of more than 329M names overall~\cite{dnib-14-1}. Changing
+these numbers would require significant deployment efforts on the parts of
+domains, including registering domain names through the subset of DNS registrars
+that offer DNSSEC, usually as a paid service.

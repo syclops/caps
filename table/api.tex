@@ -1,0 +1,32 @@
+\begin{tabularx}{\linewidth}{|l|X|}
+  \toprule
+  \textbf{Function} & \textbf{Use}\\
+  \midrule
+  \texttt{submit-entry}
+  & submit a certificate or precertificate (described below) along with a
+  certificate chain to the log for inclusion.\\
+  \midrule
+  \texttt{get-sth}
+  & retrieve a signed and timestamped copy of the latest root hash of the log's
+  Merkle hash tree, called \iac{sth}.\\
+  \midrule
+  \texttt{get-sth-consistency}
+  & retrieve a consistency proof given two \acp{sth} of the log.\\
+  \midrule
+  \texttt{get-proof-by-hash}
+  & retrieve an inclusion proof for a given leaf hash and desired Merkle hash
+  tree size (representing the state of a log at a given point).\\
+  \midrule
+  \texttt{get-all-by-hash}
+  & retrieve an inclusion proof, \ac{sth}, and consistency proof given a leaf
+  hash and desired tree size.\\
+  \midrule
+  \texttt{get-entries}
+  & given a start and end index, retrieve a range of entries (including the
+  certificate and their \acp{sct}) as well as the latest \ac{sth}.\\
+  \midrule
+  \texttt{get-anchors}
+  & retrieve a list of the trust anchors of the log (that is, the set of
+  certificates that all submitted certificate chains must be rooted in).\\
+  \bottomrule
+\end{tabularx}

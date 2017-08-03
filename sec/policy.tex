@@ -7,85 +7,95 @@ their shortcomings as they apply to \ac{name}. We then describe each of the main
 operations of logs in \ac{name}: initial registration, updates, overwriting, and
 proofs.
 
-\subsection{CT Log Background}
+\subsection{\ac{name} Logs}
 
-Public logs in \ac{ct} are responsible for publicizing the certificates that
-\acp{ca} issue. According to the \ac{ct} specification, logs offer the following
-functionality:
+\begin{table}[t]
+  \centering
+  \caption{\ac{name} log API. \steve{TODO: add enumeration and policy retrieval
+  functions.}}
+  \input{table/api}
+  \label{tab:api}
+\end{table}
 
-\begin{compactitem}
-\item \texttt{submit-entry}: submit a certificate or precertificate (described
-  below) along with a certificate chain to the log for inclusion.
-\item \texttt{get-sth}: retrieve a signed and timestamped copy of the
-  latest root hash of the log's Merkle hash tree, called \iac{sth}.
-\item \texttt{get-sth-consistency}: retrieve a consistency proof given two
-  \acp{sth} of the log.
-\item \texttt{get-proof-by-hash}: retrieve an inclusion proof for a given leaf
-  hash and desired Merkle hash tree size (representing the state of a log at a
-  given point).
-\item \texttt{get-all-by-hash}: retrieve an inclusion proof, \ac{sth}, and
-  consistency proof given a leaf hash and desired tree size.
-\item \texttt{get-entries}: given a start and end index, retrieve a range of
-  entries (including the certificate and their \acp{sct}) as well as the latest
-  \ac{sth}.
-\item \texttt{get-anchors}: retrieve a list of the trust anchors of the log
-  (that is, the set of certificates that all submitted certificate chains must
-  be rooted in).
-\end{compactitem}
+Public logs in \ac{name} extend those of \ac{ct}. They thus offer the API shown
+in \autoref{tab:api}.
 
-\ac{tls} clients only need \acp{sct} to deem a certificate valid in \ac{ct}, and
-the number of \acp{sct} required depends on the lifetime duration of the
-certificate \steve{cite CT log plan}. Therefore, for those clients not
-performing monitoring or auditing functions, not even the \ac{sth} is
-necessary. This is because \ac{ct} only cares about the fact that a potentially
-unauthorized certificate was publicized \emph{at some point}, and as long as the
-log is operating correctly (i.e., including the certificate in its Merkls hash
-tree after issuing \iac{sct}), misbehavior \emph{should} be detected at some
-point.
+\draft{Logs maintain a great deal of information: in addition to observed
+  certificates (which they also maintain in \ac{ct}), logs store for each domain
+  name a map of all public keys associated with that domain, along with how many
+  currently valid signatures each has. Logs use this map to create a
+  \emph{policy tree}, a Merkle hash tree whose leaves are lexicographically
+ordered and store the policy (i.e., the number of signatures a client should
+expect).}
 
-\subsection{Logs in \ac{name}}
+%\ac{tls} clients only need \acp{sct} to deem a certificate valid in \ac{ct}, and
+%the number of \acp{sct} required depends on the lifetime duration of the
+%certificate \steve{cite CT log plan}. Therefore, for those clients not
+%performing monitoring or auditing functions, not even the \ac{sth} is
+%necessary. This is because \ac{ct} only cares about the fact that a potentially
+%unauthorized certificate was publicized \emph{at some point}, and as long as the
+%log is operating correctly (i.e., including the certificate in its Merkls hash
+%tree after issuing \iac{sct}), misbehavior \emph{should} be detected at some
+%point.
 
-Logs in \ac{name} maintain a mapping between domains and their policy
-information, in addition to the information they maintain as \ac{ct} logs.
+\subsection{Policy Operations}
 
-\subsection{Initial Policy Registration}
+\draft{When a log receives a new certificate, it checks the domain name and adds
+to the appropriate entry in its map. If the maximum number of signatures on a
+single key for the domain has increased, it updates its policy tree
+accordingly.}
 
-The initial policy registration can be performed when the log has no entry for
-the given domain. A log performs the initial policy registration when its
-receives a certificate whose subject name does not match any domain that the log
-has in its mapping. In this case, the log simply creates a new policy entry for
-that domain and associates the submitted certificate's public key with the
-domain. The policy value is set to be the default value of 1 (indicating that
-a client should expect only a single logged certificate chain from the domain).
+\draft{When a certificate expires, the number for the public key in that
+certificate is decremented. If the certificate is renewed before expiration
+(i.e., the same \ac{ca} issues a new certificate for the same key), then the
+number for that key is not incremented when the renewal certificate is logged,
+and the number is not decremented when the old certificate expires.}
 
-Each new public key or certificate needs to be bound to a policy ID as well as
-to the domain itself. It should be impossible to bind a new key to a policy ID
-without the approval of the policy holder. Thus the domain will need to provide
-some additional information regarding its authorization of the addition or
-removal of any public key or certificate.
+\draft{If a certificate is revoked, the number is also decremented.}
 
-We therefore want the policy ID to be stable or at least linkable given an
-addition or deletion operation. We also want the ID to be used to authenticate
-a signature authorizing the addition or deletion of a key.
+\draft{If a domain wants to change \acp{ca} for a certain key upon expiration or
+  revocation of a certificate containing that key, the domain can either wait
+until expiration or revocation to obtain a new certificate or explicitly signal
+to the new \ac{ca} that it is changing \acp{ca}. The new \ac{ca} can then
+include in its precertificate a dummy extension that directs the log to not
+increment the number for that key.}
 
-\subsection{Policy Updates}
+%The initial policy registration can be performed when the log has no entry for
+%the given domain. A log performs the initial policy registration when its
+%receives a certificate whose subject name does not match any domain that the log
+%has in its mapping. In this case, the log simply creates a new policy entry for
+%that domain and associates the submitted certificate's public key with the
+%domain. The policy value is set to be the default value of 1 (indicating that
+%a client should expect only a single logged certificate chain from the domain).
 
-\steve{Policies can be strengthened (i.e., not updated in terms of content but
-in terms of independent chains) by simply specifying the same policy.}
+%Each new public key or certificate needs to be bound to a policy ID as well as
+%to the domain itself. It should be impossible to bind a new key to a policy ID
+%without the approval of the policy holder. Thus the domain will need to provide
+%some additional information regarding its authorization of the addition or
+%removal of any public key or certificate.
 
-\subsection{Policy Overwriting}
+%We therefore want the policy ID to be stable or at least linkable given an
+%addition or deletion operation. We also want the ID to be used to authenticate
+%a signature authorizing the addition or deletion of a key.
 
-\subsection{Log Policy Proofs}
+%\subsection{Policy Updates}
 
-\steve{The irrelevance of log inclusion or consistency proofs to clients does
-not hold in \ac{name}. This is because clients need to be convinced that a
-policy was logged and that no policy overwrites or updates have taken place
-since (i.e., the client sees the latest version of the policy). (Actually, if
-the policy was logged and is not the latest, that could still prevent many
-\acp{ca} from issuing unauthorized certificates if using the authorized \ac{ca}
-approach. If we use the number of independent chains approach, we could include
-a Bloom filter--like structure that makes it difficult for an adversary to get
-away with fewer certificates even by forging them. How secure are Bloom filters
-to collision attacks, anyway?)}
+%\steve{Policies can be strengthened (i.e., not updated in terms of content but
+%in terms of independent chains) by simply specifying the same policy.}
 
-\subsection{Other Operations}
+%\subsection{Policy Overwriting}
+
+%\subsection{Log Policy Proofs}
+
+%\steve{The irrelevance of log inclusion or consistency proofs to clients does
+%not hold in \ac{name}. This is because clients need to be convinced that a
+%policy was logged and that no policy overwrites or updates have taken place
+%since (i.e., the client sees the latest version of the policy). (Actually, if
+%the policy was logged and is not the latest, that could still prevent many
+%\acp{ca} from issuing unauthorized certificates if using the authorized \ac{ca}
+%approach. If we use the number of independent chains approach, we could include
+%a Bloom filter--like structure that makes it difficult for an adversary to get
+%away with fewer certificates even by forging them. How secure are Bloom filters
+%to collision attacks, anyway?)}
+
+%\subsection{Other Operations}
