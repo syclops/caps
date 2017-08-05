@@ -11,7 +11,7 @@ void usage()
 
 int main(int argc, char* argv[])
 {
-  Graph graph;
+  SignalSet graph;
   if (argc < 2) {
     graph.read_file(std::cin);
   } else if (argc == 2) {
