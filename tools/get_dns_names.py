@@ -14,6 +14,8 @@ def extract_hostnames(infile, logfile, outfile, ip):
     num_error_names = 0
     num_invalid_certs = 0
     num_valid_names = 0
+    num_cert_domains = 0
+    num_valid_domains = 0
     with open(logfile, 'w') as lfile, open(outfile, 'w') as ofile:
         for line in fileinput.input(infile):
             total_names += 1
@@ -27,6 +29,7 @@ def extract_hostnames(infile, logfile, outfile, ip):
                     lfile.write('{}: {}\n'.format(parsed['domain'],
                                                   line.strip()))
                 continue
+            num_cert_domains += 1
             cert = parsed['data']['tls']['server_certificates']['certificate'][
                 'parsed']
             if 'names' not in cert:
@@ -36,10 +39,12 @@ def extract_hostnames(infile, logfile, outfile, ip):
                 else:
                     lfile.write('{}: {}\n'.format(parsed['domain'], cert))
                 continue
+            num_valid_domains += 1
             for name in cert['names']:
                 num_valid_names += 1
                 ofile.write('{}\n'.format(name))
-    return [total_names, num_error_names, num_invalid_certs, num_valid_names]
+    return [total_names, num_error_names, num_invalid_certs, num_valid_names,
+            num_cert_domains, num_valid_domains]
 
 
 def main():
@@ -52,12 +57,15 @@ def main():
                         help='log IP addresses instead of DNS names')
     args = parser.parse_args()
     [total_names, num_error_names, num_invalid_certs,
-     num_valid_names] = extract_hostnames(args.infile, args.logfile,
-                                          args.outfile, args.ip)
-    print('{} out of {} names have valid certificates'.format(num_valid_names,
-                                                              total_names))
-    print('{} TLS connection errors'.format(num_error_names))
-    print('{} certificates without DNS names'.format(num_invalid_certs))
+     num_valid_names, num_cert_domains, num_valid_domains] = extract_hostnames(
+         args.infile, args.logfile, args.outfile, args.ip)
+    print('Out of {} domains...'.format(total_names))
+    print('  {} have certificates'.format(num_cert_domains))
+    print('  {} have certificates with valid DNS names'.format(
+        num_valid_domains))
+    print('  {} valid DNS names are present'.format(num_valid_names))
+    print('  {} had TLS connection errors'.format(num_error_names))
+    print('  {} have certificates without DNS names'.format(num_invalid_certs))
 
 
 if __name__ == '__main__':

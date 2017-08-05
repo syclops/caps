@@ -19,9 +19,9 @@ def get_outfile_obj(outfile):
 def read_file(infile, logfile, outfile):
     for line in fileinput.input(infile):
         try:
-            outfile.write(line.strip().encode('idna').decode('ascii') + '\n')
+            print(line.strip().encode('idna').decode('ascii'), outfile)
         except UnicodeError:
-            logfile.write(line)
+            print(line.strip(), logfile)
 
 
 def main():
@@ -31,7 +31,7 @@ def main():
     parser.add_argument('-l', '--logfile', default=None,
                         help='log file (defaults to stderr)')
     parser.add_argument('-o', '--outfile', default=None,
-                        help='output file (defaults to stdout')
+                        help='output file (defaults to stdout)')
     args = parser.parse_args()
     with get_logfile_obj(args.logfile) as logfile_obj, \
          get_outfile_obj(args.outfile) as outfile_obj:
