@@ -1,22 +1,23 @@
 \section{Discussion}
 \label{sec:discussion}
 
-\steve{\ac{name} relies on the integrity of the data provided by Censys.
-  Therefore, an adversary who controls \iac{ca} could issue unauthorized
-  certificates for domains that do not deploy \ac{https}, causing them to be
-included in the signal set and rendering those sites inaccessible.}
+\textbf{Data Source Integrity.} \ac{name} relies on the integrity of the data
+sources (in our current prototype, Censys, and in the long term, the \ac{ct}
+logs). Therefore, \iac{ca} who issues and publicizes an unauthorized certificate
+for a domain that does not deploy \ac{https} can cause the domain to be included
+in the signal set and thus render the domain inaccessible. This fragility
+effectively allows an adversary to ``poison the well'' that \ac{name} relies on,
+and execute a denial-of-service attack of indefinite duration with just a single
+unauthorized certificate.
 
-\textbf{Failures of a Probabilistic Approach.} While at first it may seem that
-data structures implementing probabilistic membership queries (i.e., Bloom
-filters~\cite{bloom1970space} and their variants) could provide much of the
-benefits of a signaling set with only a small cost, this approach has several
-critical shortcomings. First, Bloom filters allow false positives but no false
-negatives. Therefore, while clients are protected from \ac{mitm} attacks that
-could result from false negatives, clients may be blocked from accessing sites
-that do not deploy \ac{https} because they are false positives in the Bloom
-filter. Second, on average, a Bloom filter with false positive probability
-\bloomfpp requires approximately $-\ln \bloomfpp/(\ln 2)^2$ bits per inserted
-element in the optimal case. Thus for a false positive rate of $p = 0.01$ (which
-would still cause 10,000 sites out of 1M sites deploying \ac{https} to be
-blocked), we would require 9.59 bits per site on average. Thus for our full data
-set, a Bloom filter would require \steve{145 MB}.
+Unfortunately, recovering from such an attack requires immediate action. The
+affected domain could request that the \ac{ca} revoke the certificate if the
+\ac{ca} issued the certificate in error. If the \ac{ca} deliberately misissued
+the certificate, the browser vendor could treat the certificate as revoked
+(though such action is unlikely unless the domain is popular). The affected
+domain could also upgrade to \ac{https}, obtaining enough certificates to
+override the misissued certificate. In the event that the domain wishes to
+remain without \ac{https}, we can allow domains to set a policy flag that
+signals that the domain will communicate over HTTP. The domain, however, must
+still send this policy and proof during connection establishment.
+
