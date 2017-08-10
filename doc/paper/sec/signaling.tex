@@ -6,62 +6,73 @@ in \ac{name}.
 
 \subsection{Data Sources}
 
-The authors of CRLite~\cite{larisch2017crlite} observed that
-Censys~\cite{durumeric2015search} and Google's set of \ac{ct}
-logs\footnote{\url{https://www.certificate-transparency.org/known-logs}} have
-played a critical role in making the set of all currently known \ac{tls}
-certificates easily accessible. While the authors of CRLite used this knowledge
-to space-efficiently store the set of all revoked certificates, in \ac{name} we
-are interested in space-efficiently storing the set of all domains that have
-deployed \ac{https}. We can use the same data sources as CRLite does and simply
-extract the set of domain names appearing in currently valid certificates (as
-subject names or as subject alternative names) to obtain a list of all domains
-deploying \ac{https}.
+In order to signal \ac{https} deployment, we first need to obtain a complete
+view of the set of domains that have deployed \ac{https}. We can leverage
+\ac{ct} for this task: because Chrome requires that all sites must have
+certificates publicly logged in \ac{ct} to be recognized as a valid \ac{https}
+site, we can simply download database snapshots of the \ac{ct} public
+logs\footnote{\url{https://www.certificate-transparency.org/known-logs}} to
+obtain a full set of the sites that deploy \ac{https}.
 
-To this end, Censys provides scans of the entire IPv4 address space on port 443
-(the default port number for \ac{https}) and the resulting \ac{tls} handshake
-attempts. \steve{TODO: Get \ac{ct} log info and domain names from them.} After
-extracting the data from the \steve{May 18, 2017} scan results, we obtained a
-list of \steve{15.1M} domain names that take up a total of \steve{327.7 MB}.
-This set excludes duplicate domain names as well as common names that are
-invalid DNS names (i.e., those with invalid characters or incorrect wildcard
-placement).
+In order to obtain data about the growth of \ac{https} deployment over time, we
+can leverage data sets from Censys~\cite{durumeric2015search}. Among other data
+sets, Censys provides scans of the entire IPv4 address space on port 443 (the
+default port number for \ac{https}) and the resulting \ac{tls} handshake
+attempts. These scans date back to August 2015, allowing us to obtain a picture
+of how \ac{https} deployment has increased in the last several years.
+Furthermore, Censys's partner projects (used in work predating
+Censys~cite{durumeric2013analysis}) provide older scans dating back to June
+2012. While these scans do not guarantee a complete view of sites deploying
+\ac{https} (missing sites that do not serve \ac{https} over port 443), they
+provide insight into how the \ac{https} ecosystem has grown historically.
+
+%To this end, Censys provides scans of the entire IPv4 address space on port 443
+%(the default port number for \ac{https}) and the resulting \ac{tls} handshake
+%attempts. \steve{TODO: Get \ac{ct} log info and domain names from them.} After
+%extracting the data from the \steve{May 18, 2017} scan results, we obtained a
+%list of \steve{15.1M} domain names that take up a total of \steve{327.7 MB}.
+%This set excludes duplicate domain names as well as common names that are
+%invalid DNS names (i.e., those with invalid characters or incorrect wildcard
+%placement).
 
 \steve{Maybe include some interesting stats on the domain names we observed}
 
 \subsection{Design}
 
-\draft{To construct our \ac{dafsa}, we use an established algorithm for
-incrementally constructing and minimizing a \ac{dafsa} from a list of
+To construct our \ac{dafsa}, we use an established algorithm for incrementally
+constructing and minimizing a \ac{dafsa} from a list of
 words~\cite{daciuk2000incremental}. Intuitively, the algorithm works by
 constructing branches of a basic prefix tree and then finding and combining
 equivalent states. In order to limit the branching that occurs early in the
 \ac{dafsa} and to support efficient wildcard name lookups, we construct the
 \ac{dafsa} using reverse DNS names (e.g., \texttt{www.example.com} becomes
-\texttt{com.example.www}).}
+\texttt{com.example.www}).
 
-\draft{Once the \ac{dafsa} has been constructed, we can efficiently represent it
-  using a variety of techniques. Some techniques, such as storing only the state
-  transitions and using variable-length encoding as well as flags for common
-  cases~\cite{daciuk2012smaller}, are established in the finite state methods
-literature.}
+Once the \ac{dafsa} has been constructed, we can efficiently represent it using
+a variety of techniques. Some techniques, such as storing only the state
+transitions and using variable-length encoding as well as flags for common
+cases~\cite{daciuk2012smaller}, are established in the finite state methods
+literature.
 
-\draft{When we construct our \ac{dafsa}, we use single-character state
-transitions. Once we have built the \ac{dafsa}, we can reduce the
-size of the underlying directed acyclic graph by compacting edges as follows:
-for every arc of the graph (a chain of state transitions where each intermediate
-state has one incoming and one outgoing transition), eliminate the intermediate
-states and replace the transitions with a single transition from the start to
-the end of the arc with a label of the concatenation of the arc labels. Due to
-the nature of domain names, this approach can greatly reduce the size of the
-\ac{dafsa}, as shown in \autoref{sec:evaluation}.}
+The standard algorithms for constructing \acp{dafsa} use single-character state
+transitions. However, we can reduce the size of the underlying directed acyclic
+graph by compacting edges as follows: for every arc of the graph (a chain of
+state transitions where each intermediate state has one incoming and one
+outgoing transition), eliminate the intermediate states and replace the
+transitions with a single transition from the start to the end of the arc with a
+label of the concatenation of the arc labels. Due to the nature of domain names,
+this approach can greatly reduce the size of the \ac{dafsa}, as shown in
+\autoref{sec:evaluation}.
 
-\draft{We can further reduce the size of the \ac{dafsa} by similarly replacing
-states with one incoming transition and two outgoing transitions with two
-transitions from the state's direct predecessor to its successors.}
+We can further reduce the size of the \ac{dafsa} by selectively replacing states
+with one incoming transition and $n$ outgoing transitions (alternately, $n$
+incoming transitions and one outgoing transition) with $n$ transitions from the
+states' predecessors to its successors. In some cases, this approach will
+increase the number of unique labels in the \ac{dafsa}, but in all cases
+guarantees to eliminate one state and edge from the graph.
 
-\draft{Finally, we can more succinctly encode the labels and transitions by
-using efficient binary codes. \steve{TODO}}
+Finally, we can more succinctly encode the labels and transitions by using
+efficient binary codes. \steve{TODO}
 
 %\subsection{Approaches}
 
