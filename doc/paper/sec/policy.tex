@@ -7,6 +7,87 @@ their shortcomings as they apply to \ac{name}. We then describe each of the main
 operations of logs in \ac{name}: initial registration, updates, overwriting, and
 proofs.
 
+\subsection{Policy Design}
+
+Simplicity and minimal domain involvement lie at the heart of policies in
+\ac{name}. We observe that systems such as ARPKI~\cite{basin2014arpki} and
+PoliCert~\cite{szalachowski2014policert} \emph{require} domain involvement for
+each policy operation, including initially specifying a certificate policy and
+updating the policy in the future. While these systems (reasonably) assume that
+domains only infrequently change their policies, the need to involve each of
+potentially millions of domains even for its initial steps hinders
+deployability. We thus argue that a deployable solution to the certificate
+policy problem should minimize the number of domains that interact directly with
+the policy infrastructure. At the same time, a domain who has a policy should
+stay protected from one-off \ac{ca} failures in the sense that a single
+misissued certificate is no longer sufficient to enable a \ac{mitm} attack
+against the domain. Our policy design thus aims to transition the existing
+\ac{pki} from weakest-link security towards ``weakest-$n$-links'' security.
+
+The need to minimize domain involvement precludes a generalized policy system.
+Even relatively simple policies, such as those specifying a list of trusted
+\acp{ca}, requires domain involvement for each change in policy because they
+rely on information that only domains can authoritatively provide. In today's
+Web \ac{pki}, domains can communicate information about their public keys
+through only two actions: purchasing certificate from \acp{ca}, and requesting
+that these certificates be revoked. We observe, however, that domains can use
+these two actions (with which all \ac{https}-enabled domains are well familiar)
+to implicitly provide information about their policies. In particular, a domain
+can communicate which public key clients should accept by providing multiple
+certificates for that public key. Then, to assess the trustworthiness of a
+public key associated with a domain, we can consider the number of \acp{ca} that
+would have had to collude to certify that key, and have clients accept only the
+keys for which the most \acp{ca} would have had to misbehave.
+
+This criterion, though simple, is powerful and easy to deploy. A domain can
+defend against \ac{mitm} attacks by any single misbehaving \ac{ca} by simply
+obtaining two independent certificates for its public key. Each domain can tune
+its level of resilience against colluding compromised \acp{ca} by simply
+obtaining more certificates for its key. Moreover, a domain does not need to do
+anything other than obtain multiple certificates for its desired key to increase
+its key's strength. In the event that a domain wants to have multiple public
+keys, it can simply obtain the same number of certificates for each of its
+desired keys. Barring private key compromise, \iac{mitm} attack can only take
+place if the adversary obtains more certificates for an alternate public key,
+which would require concerted effort from multiple \acp{ca}. Therefore, our
+policy design that assigns greater trustworthiness to keys with more
+certificates issued for them provides strong, deployable security against
+misbehaving \acp{ca}.
+
+Formally, our policy design can be stated as follows. Let each member of the set
+$\{\certchain_1, \ldots, \certchain_n\}$ represent a certificate chain, written
+as $\certchain_i = (\pk_i^1, \ldots, \pk_i^{\ell_i})$, where each key in the
+chain certifies the next. Supposing that a public log has the set \rootset as
+its trusted root \ac{ca} keys, we say that a chain is \emph{rooted} in \rootset
+if $\pk_i^1 \in \rootset$, and we say that a set of certificate chains
+$\{\certchain_1, \ldots, \certchain_n\}$ \emph{collectively certifies} a public
+key \pk if for all $i$ such that $1 \le i \le n$, $\pk_i^{\ell_i} = \pk$. We
+then define the \emph{strength} of a set of certificate chains as the number of
+private keys corresponding to a public key in the set of chains that must be
+compromised to collectively certify a different public key $\pk'$. We
+observe that the strength of a set of $n$ certificate chains is at most $n$.
+
+We can compute the strength of a set of certificate chains by transforming the
+set into a graph as follows: the set of vertices consists of a source node $S$
+along with two nodes for each public key $\pk$ where $\pk \in \certchain_i$ for
+some $i$ such that $1 \le i \le n$. For a given $\pk$, we label these nodes as
+$\pk$ and $\pk'$. The set of weighted edges $E$ is defined as follows: $(S,
+\pk_i^1) \in E$ for all $i$ where $1 \le i \le n$, and all such edges have a
+weight of $\infty$. In addition, for all $i$ such that $1 \le i \le n$ and all
+$j$ such that $1 \le j < \ell_i$, $(\pk_i^j, {\pk_i^j}') \in E$ and all such
+edges have a weight of 1. Finally, for all $i$ such that $1 \le i \le n$ and all
+$j$ such that $1 \le j < \ell_i$, $({\pk_i^j}', \pk_i^{j+1}) \in E$ and all such
+edges have a weight of $\infty$. Then, the strength of the set of certificate
+chains is equal to the min-cut of this graph.
+
+Each time a certificate (along with its certificate chain) for a given domain is
+logged at a \ac{name} log, the log examines the strength of the sets of
+certificate chains for each key observed for that domain. The log then assigns
+the policy for the domain as the highest strength of any certificate chain for
+that domain. \ac{name}-compatible clients then expect a minimum of that many
+certificate chains, along with a log proof for that level of strength, from the
+domain during the \ac{tls} handshake.
+
 \subsection{\ac{name} Logs}
 
 \begin{table}[t]
@@ -20,13 +101,14 @@ proofs.
 Public logs in \ac{name} extend those of \ac{ct}. They thus offer the API shown
 in \autoref{tab:api}.
 
-\draft{Logs maintain a great deal of information: in addition to observed
-  certificates (which they also maintain in \ac{ct}), logs store for each domain
-  name a map of all public keys associated with that domain, along with how many
-  currently valid signatures each has. Logs use this map to create a
-  \emph{policy tree}, a Merkle hash tree whose leaves are lexicographically
-ordered and store the policy (i.e., the number of signatures a client should
-expect).}
+\ac{name} logs store certificates they have observed as in \ac{ct}. In addition,
+logs in \ac{name} also store for each domain name a map of all public keys
+associated with that domain, along with the maximum strengths of all sets of
+certificate chains for each public key. Logs use this map to create a
+\emph{policy tree}, a Merkle hash tree whose leaves are lexicographically
+ordered in the reverse domain name (i.e., the domain name with the labels in
+reverse order) and store the policy (i.e., the number of signatures a client
+should expect).
 
 %\ac{tls} clients only need \acp{sct} to deem a certificate valid in \ac{ct}, and
 %the number of \acp{sct} required depends on the lifetime duration of the
@@ -40,10 +122,11 @@ expect).}
 
 \subsection{Policy Operations}
 
-\draft{When a log receives a new certificate, it checks the domain name and adds
-to the appropriate entry in its map. If the maximum number of signatures on a
-single key for the domain has increased, it updates its policy tree
-accordingly.}
+\draft{When a log receives a new certificate chain, it checks the domain name
+  and adds the chain to the set of chains for the appropriate public key in its
+  map, and then recomputes the strength of this new set of certificate chains.
+  If the maximum number strength associated with a public key for the domain has
+increased, it updates its policy tree accordingly.}
 
 \draft{When a certificate expires, the number for the public key in that
 certificate is decremented. If the certificate is renewed before expiration
@@ -55,10 +138,11 @@ and the number is not decremented when the old certificate expires.}
 
 \draft{If a domain wants to change \acp{ca} for a certain key upon expiration or
   revocation of a certificate containing that key, the domain can either wait
-until expiration or revocation to obtain a new certificate or explicitly signal
-to the new \ac{ca} that it is changing \acp{ca}. The new \ac{ca} can then
-include in its precertificate a dummy extension that directs the log to not
-increment the number for that key.}
+  until expiration or revocation to obtain a new certificate or explicitly
+  signal to the new \ac{ca} that it is changing \acp{ca}. The new \ac{ca} can
+then include in its precertificate a dummy extension (i.e., an extension marked
+critical but with no data, so that a client will always reject the certificate)
+that directs the log to not increment the number for that key.}
 
 %The initial policy registration can be performed when the log has no entry for
 %the given domain. A log performs the initial policy registration when its
