@@ -71,6 +71,9 @@ to the tree. A tamper-proof log would periodically sign and broadcast its root
 hash, allowing clients to verify that it is not tampering with previously logged
 data.
 
+\steve{If we keep this subsection, describe in more detail how consistency
+proofs are formed and checked.}
+
 \subsection{Certificate Transparency}
 \label{sec:background:ct}
 
@@ -84,33 +87,35 @@ italics.}
   \label{fig:ct}
 \end{figure}
 
-\acf{ct} is a project by Google focused on enabling widespread detection of
+\acf{ct} is a project by Google focused on widespread publicization of
 certificate issuance~\cite{rfc6962}. As shown in \autoref{fig:ct}, \ac{ct}
 introduces several new roles to the \ac{ca}-based ecosystem. \emph{Certificate
 logs} are entities who record \ac{ca} behavior by maintaining a publicly
-auditable, append-only, tamper-proof database of certificates. \emph{Monitors}
-periodically retrieve these certificates to check for suspicious \ac{ca}
-behavior, such as an obscure \ac{ca} issuing a certificate for Google.
-\emph{Auditors} check for correct log behavior by periodically asking for
-\emph{audit proofs}, which show that one or more certificates are in a log
-database, or \emph{consistency proofs}, which show that the existing database
-has not been tampered with, i.e., that no certificate has been changed, deleted,
-or retroactively added to the log database.
+auditable, append-only, tamper-proof database of certificates implemented using
+Merkle hash trees. \emph{Monitors} periodically retrieve these certificates to
+check for suspicious \ac{ca} behavior, such as an obscure \ac{ca} issuing a
+certificate for Google. \emph{Auditors} check for correct log behavior by
+periodically asking for \emph{audit proofs}, which show that one or more
+certificates are in a log database, or \emph{consistency proofs}, which show
+that the existing database has not been tampered with, i.e., that no certificate
+has been changed, deleted, or retroactively added to the log database.
 
 A log leverages Merkle hash trees to implement its certificate database. As
 explained above, the use of a Merkle hash tree allows a log to provide efficient
 proofs of presence (i.e., audit proofs) and proofs of consistency (i.e.,
 consistency proofs). While anyone may submit a certificate to a log, in current
-practice \acp{ca} usually log certificates during the issuance process, as
-depicted in \autoref{fig:ct}. Because attempting to update the Merkle hash tree
-in real time may delay or block the certificate issuance process, logs define a
+practice \acp{ca} usually log certificates just before issuing them, as depicted
+in \autoref{fig:ct}. Because attempting to update the Merkle hash tree in real
+time may delay or block the certificate issuance process, logs define a
 \emph{\ac{mmd}}, a time period after which a certificate is guaranteed to be
 logged, and instead return a \emph{\ac{sct}}, which is effectively a promise to
 add the certificate within the \ac{mmd}. The \ac{sct} is embedded into the
 \ac{ca}-issued certificate as an X.509 extension and used to signal that a
 domain uses \ac{ct} and that its certificate has been logged. Alternately, the
 domain can send extra information such as \acp{sct} or audit proofs in the
-\ac{tls} handshake using a \ac{tls} protocol extension.
+\ac{tls} handshake using a \ac{tls} protocol extension. Currently, 81.9\% of
+connections that use \ac{ct} include \acp{sct} embedded as X.509 extensions,
+while 18.1\% of connections use \iac{tls} extension.
 
 %\draft{Monitoring and auditing details. Monitors periodically downloads all new
   %entries and verifies consistency proof. Does not need to keep cert entries
@@ -146,7 +151,8 @@ Blockstack simply provides the domain's keys directly. Of these proposals, only
 ARPKI leverages the relationship between \acp{ca} and logs to ease the burden on
 the domain during certificate issuance, but all proposals require the domain to
 specify its policy in detail to prevent \ac{mitm} attacks resulting from
-misbehaving \acp{ca}.
+misbehaving \acp{ca}. \steve{TODO: describe drawbacks in more detail once the
+arguments are more developed}
 
 There has also been some work that takes a heuristic approach, using the past
 behavior of \acp{ca} in order to determine how clients should trust them. For
