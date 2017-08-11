@@ -22,23 +22,38 @@ accidental~\cite{sleevi2015sustaining} and
 intentional~\cite{valsorda2015komodia}.
 
 The failures of \acp{ca} continually remind us of the weakest-link security of
-the Web \ac{pki}: a single misbehaving \ac{ca} can expose a domain to \ac{mitm}
-attacks. Because we cannot prevent \acp{ca} from misissuing certificates,
-protecting clients from these \ac{mitm} attacks entails making the \ac{pki}
-resilient to certificate misissuance by enabling clients to detect and reject
-misissued certificates. However, only domains themselves can with certainty
-identify certificates misissued in their name. Clients therefore need a way to
-determine a domain's \emph{certificate policy} (i.e., criteria for which
-certificates the clients should consider correctly issued).
+the Web \ac{pki}: out of over 1,200 trusted \acp{ca}, a single misbehaving
+\ac{ca} can expose a domain to \ac{mitm} attacks. Because we cannot prevent
+\acp{ca} from misissuing certificates, protecting clients from these \ac{mitm}
+attacks entails ensuring that clients do not accept misissued certificates. In
+order to prevent clients from accepting misissued certificates, domains must
+provide information that clients can use to determine which certificates to
+accept. We can think of this information as a certificate policy of sorts, and
+consider the following problem, which we call \emph{certificate policy
+specification}: how can we use policy information to move away from a
+weakest-link secure \ac{pki}?
 
-So far, proposed systems for communicating policy information to clients have
-not gained traction in practice. These systems introduce additional trusted
-parties~\cite{kim2013accountable} or assume that the entire Web will increase
-its security at once~\cite{basin2014arpki}. These shortcomings motivate the
-problem of designing a simple and deployable policy mechanism that requires
-minimal effort from domains. \steve{The last part isn't motivated well; it would
-  be nice if we could show that most policies are overkill for preventing
-\ac{mitm} attacks that could have resulted from recent \ac{ca} failures.}
+Previous proposals (\autoref{sec:background:policy} have addressed this problem
+by introducing additional trusted parties~\cite{kim2013accountable} or requiring
+all domains to increase their level of security at once~\cite{basin2014arpki},
+both of which require significant work to deploy. Moreover, these proposals all
+provide a general policy framework and thereby involve the domain at each step
+of policy creation and maintenance. Even if the domain specifies a simple
+policy, such as a list of trusted \acp{ca}, it must explicitly provide this
+information. This requirement means that domains need to be closely involved
+even at the initial stages of adoption, thus hindering deployability. In
+considering the certificate policy specification problem, we therefore seek a
+solution that minimizes domain involvement.
+
+%So far, proposed systems for communicating policy information to clients have
+%not gained traction in practice. These systems introduce additional trusted
+%parties~\cite{kim2013accountable} or assume that the entire Web will increase
+%its security at once~\cite{basin2014arpki}. These shortcomings motivate the
+%problem of designing a simple and deployable policy mechanism that requires
+%minimal effort from domains. \steve{The last part isn't motivated well; it would
+  %be nice if we could show that most policies are overkill for preventing
+%\ac{mitm} attacks that could have resulted from recent \ac{ca} failures.}
+
 
 %The Web's \ac{pki} enables client browsers to authenticate the public keys of
 %the domains they communicate with, and together with the \ac{tls}
@@ -92,64 +107,73 @@ minimal effort from domains. \steve{The last part isn't motivated well; it would
 
 Unfortunately, even with such policies, we still fall short of a truly secure
 \ac{pki}. Domains may not only have different policies, but some domains may not
-have policies at all because they do not deploy \ac{https}. Because we
-realistically expect a world of partial deployment in which the set of deploying
-domains increases incrementally over time, we need a mechanism to inform clients
-\emph{when} to expect a certificate policy, not just \emph{what} policy to
-expect. Moreover, this mechanism must be external to the Web \ac{pki} because it
-indicates certification in the Web \ac{pki} itself. We call the problem of
-designing such a mechanism the \emph{signaling} problem.
+have policies at all because they do not deploy \ac{https}. Therefore, an
+adversary can carry out a \emph{\ac{tls} stripping} attack, in which the
+adversary convinces the client and domain to communicate over plain HTTP rather
+than over \ac{https}. Because we realistically expect a world of partial
+deployment in which the set of deploying domains increases incrementally over
+time, in order to prevent \ac{tls} stripping, we need a mechanism to inform
+clients \emph{when} to expect a certificate policy, not just \emph{what} policy
+to expect. We thus consider the following problem, which we call
+\emph{\ac{https} signaling}: how can we communicate to all clients the set of
+domains from which they should expect \iac{tls} certificate and certificate
+policy?
 
-%These policies only exist for domains that actually deploy \ac{https};
-%therefore, an adversary can bypass these protections by convincing the client
-%that the target domain does not deploy \ac{https} at all (e.g., by blocking
-%connections to port 443 over which domains usually serve \ac{https}). We
-%therefore need a \emph{signaling} mechanism that securely indicates whether or
-%not the client should expect the domain to deploy \ac{https}. Some existing
-%approaches are opt-in, meaning that domains must explicitly register for these
-%mechanisms, and thus only provide signaling for some sites (e.g., popular
-%sites). Furthermore, the opt-in process is prone to misconfigurations, such as
-%domains accidentally signaling that a subdomain deploys \ac{https}, thus
-%rendering that part of the site inaccessible to clients. Other approaches
-%require clients to perform online checks, degrading connection latency. Is it
-%possible to improve on these approaches by reducing the action required by
-%domains and by broadening the scope of domains that can signal \ac{https}
-%deployment \emph{without} significantly increasing connection latency?
+Previous proposals (\autoref{sec:background:signaling}) have addressed this
+problem by requiring expensive online checks \steve{Smart HTTPS}, requiring
+domains to deploy DNSSEC~\cite{rfc6698}, or providing an incomplete view of the
+domains signaling \ac{https} deployment \steve{HTTPS Everywhere, HSTS
+preloading}. These approaches incur significant latency, are
+configuration-intensive and error-prone, or have limited scope. Moreover, we
+observe that signaling mechanisms must operate externally to the Web \ac{pki}:
+approaches such as Smart HTTPS or HSTS rely on certification within the Web
+\ac{pki} for a client's first connection to a domain and thus are themselves
+subject to stripping attacks. We therefore seek a solution that captures the set
+of all \ac{https}-enabled domains, incurs minimal additional latency, is simple
+to deploy, and is external to the Web \ac{pki}.
 
-Existing approaches to the signaling problem
-(\autoref{sec:background:signaling}) suffer from critical shortcomings. Some
-require domains to opt in using a process prone to misconfiguration, and render
-the domain inaccessible if misconfiguration occurs. Approaches that store
-deployment information locally only signal \ac{https} deployment in a subset of
-sites due to storage costs, and approaches that rely on external information
-incur significant latency penalties and introduce additional trusted parties. We
-therefore observe the need to address the signaling problem with a solution that
-allows clients to confidently distinguish a site that deploys \ac{https} without
-imposing performance penalties or trust assumptions.
+%Existing approaches to the signaling problem
+%(\autoref{sec:background:signaling}) suffer from critical shortcomings. Some
+%require domains to opt in using a process prone to misconfiguration, and render
+%the domain inaccessible if misconfiguration occurs. Approaches that store
+%deployment information locally only signal \ac{https} deployment in a subset of
+%sites due to storage costs, and approaches that rely on external information
+%incur significant latency penalties and introduce additional trusted parties.
+%We therefore observe the need to address the signaling problem with a solution
+%that allows clients to confidently distinguish a site that deploys \ac{https}
+%without imposing performance penalties or trust assumptions.
 
-To address the problems of managing certificate policies and of signaling
-\ac{https} deployment in a simple and practical manner, we propose \ac{name}, a
-system that \steve{gradually} increases the resilience of the Web \ac{pki}
-against misbehaving \acp{ca}. \ac{name} leverages Google's
-\ac{ct}~\cite{rfc6698} infrastructure, which relies on \emph{public logs} that
-maintain a database of all issued certificates in the Web \ac{pki}.
+To address the problem of moving towards a Web \ac{pki} more resilient to the
+compromise of trusted parties, we thus tackle the certificate policy
+specification and \ac{https} signaling problems. Our solution to these problems
+is a system called \ac{name}, whic gradually increases the resilience of the Web
+\ac{pki} against misbehaving \acp{ca}.
+
+\ac{name} leverages Google's \ac{ct}~\cite{rfc6698} infrastructure
+(\autoref{sec:background:ct}), which relies on \emph{public logs} that maintain
+a database of all issued certificates in the Web \ac{pki}. We observe that these
+databases can be used to signal the set of all domains that deploy \ac{https}.
+By leveraging compression techniques and knowledge of domain name patterns and
+trends, we can communicate a single bit indicating \ac{https} deployment for
+each domain. Furthermore, domains who deploy \ac{https} can be automatically
+detected, because their certificates will be included in these log databases.
+
+Once a client can determine whether or not to expect a certificate policy
+through the use of \ac{name}'s signaling mechanism, we can communicate simple
+policies that require minimal domain involvement while preventing \ac{mitm}
+attacks resulting from most cases of \ac{ca} misbehavior. In particular,
+\ac{name} extends \ac{ct} logs to also maintain certificate policies. We can
+achieve this by allowing domains to send multiple certificate chains for a
+single public key during the \ac{tls} handshake, and then using certificate
+policies to communicate to clients how many chains they should expect. This
+approach allows logs to infer the policy's value based on the certificates that
+are already logged in its database, and also prevents certificate misissuances
+by individual misbehaving \ac{ca} from enabling \ac{mitm} attacks against these
+domains.
+
 %Because all certificates must be publicly logged to be accepted in Chrome
 %browsers starting in October
 %2017,\footnote{\url{https://cabforum.org/2016/10/19/2016-10-19-20-f2f-meeting-39-minutes/}}
-\ac{name} repurposes these logs to also maintain certificate policies. \ac{name}
-also achieves simplicity of policies by only tracking the number of \ac{ca}
-certificates for a given key a client should expect. This simple approach also
-means that for the vast majority of cases, domains do not need to change they
-way they obtain certificates, and in fact only requires domains to occasionally
-fetch information from a public log.
-
-\ac{name} uses data from \ac{ct} logs and from Censys~\cite{durumeric2015search}
-scans of \ac{https} sites to provide a complete view of all sites deploying
-\ac{https}. Using data from these sources also means that domains do not have to
-opt in to signal \ac{https} deployment. By using finite state methods and data
-compression techniques, \ac{name} can also succinctly encode the set of sites
-deploying \ac{https} to achieve fast, local signaling with efficient updates and
-minimal additional connection latency.
 
 In summary, this paper makes the following contributions:
 \begin{compactitem}
@@ -157,9 +181,9 @@ In summary, this paper makes the following contributions:
   mechanism for maintaining and disseminating domain certificate policies.
 \item It leverages finite state automata and data compression to present  a
   succinct design for communicating the set of sites deploying \ac{https}.
-\item It shows through a comparative evaluation that \ac{name} requires only
-  \steve{} extra communication, \steve{} additional storage, and \steve{}
-  additional latency.
+\item It evaluates \ac{name} against existing approaches and shows that
+  \ac{name} outperforms these approaches, requiring only \steve{} extra
+  communication, \steve{} additional storage, and \steve{} additional latency.
 \end{compactitem}
 
 %The Web \ac{pki} has seen several important improvements in recent years.
