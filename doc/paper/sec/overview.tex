@@ -16,11 +16,12 @@ then provide an intuitive explanation for the policy and signaling mechanisms.
 To move towards \iac{pki} with increased resilience to the compromise of trusted
 parties (i.e., \acp{ca}), we need to prevent \iac{ca} that misissues a
 certificate for a domain from exposing that domain to \iac{mitm} attack. We
-observe that \steve{more signatures means more trust}, and therefore we design
-\ac{name} around the idea that domains should be able to obtain and communicate
-the presence of multiple signatures on a certificate. We can then protect
-domains from \ac{mitm} attacks by simply communicating to the client the number
-of signatures to expect. This approach results in simple policies that require
+observe that signatures from multiple independent \acp{ca} on a single public
+key can spur greater trust in the key, and therefore we design \ac{name} around
+the idea that domains should be able to obtain and communicate the presence of
+multiple certificates for a single public key. We can then protect domains from
+\ac{mitm} attacks by simply communicating to the client the number of
+certificates to expect. This approach results in simple policies that require
 domain involvement only in rare cases of deliberate misissuance, and allow
 security-conscious domains to ``ratchet up'' their security to their desired
 level.
@@ -30,12 +31,12 @@ therefore the two systems have similar architectures, as shown in
 \autoref{fig:overview}. \steve{TODO: add Censys data and an external service or
 browser vendor to the overview figure} \ac{name} assumes a full deployment of
 \ac{ct}, that is, all certificates must be logged for clients to accept them as
-valid. Beginning in October 2017, Chrome will begin enforcing this requirement
-for all \ac{https} sites, so this assumption is a reasonable one. For the
-purposes of obtaining \acp{sct}, the logging process works just as it does in
-\ac{ct}. Also as with \ac{ct}, public logs are kept accountable by auditors and
-monitors, and an external party (Google in the case of \ac{ct}) maintains a list
-of known trusted logs.
+valid. \steve{Beginning in October 2017, Chrome will begin enforcing this
+  requirement for all \ac{https} sites, so this assumption is a reasonable one.}
+  For the purposes of obtaining \acp{sct}, the logging process works just as it
+  does in \ac{ct}. Also as with \ac{ct}, public logs are kept accountable by
+  auditors and monitors, and an external party (Google in the case of \ac{ct})
+  maintains a list of known trusted logs.
 
 In \ac{name}, however, logs maintain an additional database of certificate
 policies alongside their database of certificates. The logging process also
@@ -45,23 +46,26 @@ clients during the \ac{tls} handshake. We further describe the details of our
 policy mechanism in \autoref{sec:policy}.
 
 Client browsers locally maintain a \emph{signal set}, which indicate whether or
-not a given domain has deployed \ac{https}. The networking module of the browser
-(which handles the establishment of \ac{https} connections) queries the signal
-set upon requesting a connection to a site in order to determine whether or not
-to expect a certificate. If the signal set indicates that the domain has
-deployed \ac{https} but the server does not provide a certificate, the browser
-aborts the connection and displays an error message.
+not a given domain has deployed \ac{https}. The browser queries the signal set
+before initiating an HTTP or \ac{https} connection to a site 
+in order to determine
+\begin{inparaenum}
+\item whether or not to establish \iac{https} connection, and
+\item if so, how many certificates to expect.
+\end{inparaenum}
+If the signal set indicates that the domain has deployed \ac{https} but the
+server does not provide a certificate, the browser aborts the connection,
+assuming that an adversary is attempting to mount \iac{tls} stripping attack.
 
-The signal set is created by using data from Censys~\cite{durumeric2015search},
-which provides regular scans of the IPv4 address space on port 443, usually
-reserved for \ac{https}. This data is used to construct a list of all DNS names
-for which a \ac{tls} certificate has been observed (either as the main subject
-or as a subject alternative name). This list is then represented using
-\iac{dafsa} that recognizes the DNS names of sites that deploy \ac{https}. By
-using compression techniques, we compact this \ac{dafsa} into a representation
-that requires little storage. Such a compact representation allows us to store
-the \ac{dafsa} in memory, offering performant lookups. We further describe the
-details of our signal set design in \autoref{sec:signaling}.
+The signal set is created by using data from the \ac{ct} logs. This data is used
+to construct a list of all DNS names for which a \ac{tls} certificate has been
+observed (either as the main subject or as a subject alternative name). This
+list is then represented using \iac{dafsa} that recognizes the DNS names of
+sites that deploy \ac{https}. By using compression techniques, we compact this
+\ac{dafsa} into a representation that requires little storage. Such a compact
+representation allows us to store the \ac{dafsa} in memory, offering performant
+lookups. We further describe the details of our signal set design in
+\autoref{sec:signaling}.
 
 %In particular, in \ac{name} we make use of a \emph{signal set},
 %stored locally by client browsers. Browsers query for the presence or absence of
