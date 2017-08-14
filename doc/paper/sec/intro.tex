@@ -11,6 +11,95 @@
   %security and agility?
 %\end{compactitem}
 
+%  Proposed Outline
+%
+%  - HTTPS fundamental for secure web communication (cite pervasiveness stats)
+%    - TLS creates a channel with secrecy and integrity
+%    - But it relies on CAs to bind keys to identities and hence provide authentication
+%
+%  - Current PKI is fragile
+%    - Trusts over 1200 CAs    //, which creates a lot of options for weakest link
+%    - A failure of any weakest link (i.e., one CA) can threaten the security of all clients and all domains
+%    - Unfortunately, being human endeavours, CAs fail at their jobs with depressing regularity 
+%      // these CAs are demonstrably unreliable
+%
+%  - As we discuss in Section 2, prior work is insufficient
+%    - Either 
+%      - Settles for detecting, rather than preventing harm
+%      - Or requires flag-day upgrade, increased latency, new trusted parties, 
+%        new complex infrastructure, or unincentivized behavior from existing parties
+%
+%  - In contrast, we propose a modest roadmap for bootstraping a more resilient PKI,
+%    where the failure of a single trusted entity cannot subvert secure communication
+%    - Summary here
+%      - Use a single bit to convey TLS deployment
+%      - Use info embedded in the TLS handshake to convey how many cert chains 
+%        should be used to authenticate a domain's public key
+%      - Leverage strongly authenticated keys to authorize richer policies
+%
+%  - First, we observe that few changes to the PKI (including any we propose) are likely to be universally adopted overnight.  
+%  - The PKI serves a diverse set of domains with a correspondingly diverse set of security needs
+%  => We need a _signaling_ mechanism to indicate, for a given domain, what security enhancements
+%     it has adopted
+%     - Such a signaling mechanism must inherently be extrinsic to the PKI itself
+%       - b/c within the PKI, a client can't distinguish a domain that hasn't opted in
+%         from an attacker subverting a connection to a domain that has
+%
+%  - With \name, we show that a single bit suffices to bootstrap resiliency
+%    - We need one bit to signal whether a domain employs TLS
+%    - Without that bit, client is subject either to TLS stripping, or to the latency
+%      of an interactive query to an external service
+%      - Browser vendors are unlikely to impose such latency on all HTTP sites,
+%        even for the sake of improved security
+%    - With that bit, we can convey all remaining policy information during the TLS handshake
+%
+%    - While DNS and DNSSEC seem appealing, due to limitations we discuss in Section 2,
+%      we opt to signal via browser vendors
+%      - We design succinct data structures to allow browser vendors to embed and update
+%        this knowledge in their clients
+%
+%  - Having established that a domain deploys TLS, how do we provide increased resilience?
+%    - Rather than immediately pushing a rich (baroque?) policy language,
+%      we explore a modest and yet effective step:
+%      - The core of our proposal is simple: A domain obtains multiple independent certificate
+%        chains for its public key and presents them to the client during the TLS handshake
+%        - Rise of services like Let's Encrypt make it feasible to acquire multiple certs
+%      - Only the simultaneous failure of K CAs can subvert this arrangement
+%        - This has never(?) happened, despite X individual failures in Y years
+%
+%  - We will leverage the imminent ubiquity of CT to convey to clients how many chains to expect
+%    - Chrome will imminently require the use of CT for TLS-enabled websites
+%    - Explain CT and what it means for it to be required
+%
+%  - We leverage ubiquitous CT in two ways:
+%    - First, it creates a definitive catalog of domains that deploy TLS
+%    - Second, we augment the CT logs with functionality to track how many 
+%      independent chains they see for a domain.  This count is then embedded
+%      in CT proofs provided to domains and hence to clients
+%
+%    - Hence, when a domain obtains one cert chain, it is automatically protected from TLS stripping
+%    - When it obtains and deploys a second independent chain, CT logs observe this,
+%      and convey to clients that they should only authenticate the domain when they see two indepdent chains
+%      - Hence domain is now protected from the failure of any one CA
+%      - Further increases possible for sites with more security concerns
+%    - Section 3 delves into the subtleties of how to cope with cert renewal,
+%      cert revocation, key compromise, and domains that change to a new CA
+%        
+%  - Once a domain has a public key authenticated with multiple independent 
+%    certificate chains, it can use the corresponding private key to sign more complex
+%    policies that can live in the CT logs, a la PoliCert, ARPKey, etc.
+%
+%  - From a deployment standpoint, simplicity is a virtue
+%    - Existing mechanisms for obtaining a certificate remain the same
+%    - Server code offering certs and client code validating it remains (almost?) the same
+%    - By default, domains need make no changes and yet can already benefit from anti-TLS stripping
+%      - Non-TLS make no changes and suffer no performance penalties
+%    - Motivated domains can increase their level of resilience to whatever level they desire
+%    - Bulk of the changes concentrated on handful of browser vendors and handful of CT logs
+%
+%  - Summarize evaluation results
+%
+
 \acs{https}, built on \ac{tls}~\cite{rfc5246} and the Web \ac{pki}, lies at the
 heart of secure end-to-end communication on the Web. \Acp{ca}, who vouch for the
 binding between a domain's name and its public key, play a critical role in the
