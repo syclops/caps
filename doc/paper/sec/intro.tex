@@ -36,6 +36,13 @@
 %      - Use info embedded in the TLS handshake to convey how many cert chains 
 %        should be used to authenticate a domain's public key
 %      - Leverage strongly authenticated keys to authorize richer policies
+%    - Or maybe high-level goals?
+%      - A design that focuses the necessary changes on a small handful of motivated participants
+%      - A design where domains need only take action if they want to opt into a more resilient PKI
+%      - A design that imposes minimal latency, and only on those domains that opt in
+%      - Ultimately allows the Internet to slowly ratchet up security to an appropriate level,
+%        increasing security while simplifying deployment
+%      - \name accomplishes these goals by harnessing several key observations
 %
 %  - First, we observe that few changes to the PKI (including any we propose) are likely to be universally adopted overnight.  
 %  - The PKI serves a diverse set of domains with a correspondingly diverse set of security needs
