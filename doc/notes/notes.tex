@@ -1,0 +1,173 @@
+\documentclass{article}
+
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{xspace}
+
+\newcommand{\emxs}[1]{\ensuremath{#1}\xspace}
+
+\newcommand{\alphabet}{\emxs{\Sigma}}
+\newcommand{\edges}{\emxs{E}}
+\newcommand{\immutlabels}{\emxs{L_I}}
+\newcommand{\labelfunc}{\emxs{L}}
+\newcommand{\nats}{\emxs{\mathbb{N}}}
+\newcommand{\vertices}{\emxs{V}}
+\newcommand{\strings}{\emxs{\alphabet^*}}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\title{A Formulation of the\\DAWG Node Compaction Decision Problem}
+\author{Steve Matsumoto}
+
+\begin{document}
+
+\maketitle
+
+In this document, I will provide a formulation of the problem of compacting
+nodes (and their labels) in a directed acyclic word graph (DAWG), a finite state
+automaton that can recognize a lexicon of words (domain names in our
+application).
+
+We begin by defining a DAWG:
+
+\begin{definition}
+  Let \alphabet be an alphabet of symbols. A \emph{directed acyclic word graph}
+  is a triple $(\vertices, \edges, \labelfunc)$ where \vertices is a set, \edges
+  is a multiset of elements in $\vertices^2$ (i.e., ordered pairs of vertices),
+  and $\labelfunc: \edges \to \strings$ is a function. We call \vertices the set
+  of \emph{vertices} of the DAWG, \edges the set of \emph{edges}, and \labelfunc
+  is the \emph{label function}.
+  \label{def:dawg}
+\end{definition}
+
+As a side note, we assume that the edges in \edges are distinguishable, that is,
+that multiple occurrences of a pair of vertices are treated as though they were
+unique elements. (This can easily be done by identifying edges as elements of
+the set $\vertices \times \vertices \times \nats$, where the natural number
+component is used to identify a specific edge between a pair of vertices.)
+
+For the purposes of formulating the problem, we first provide some useful
+definitions based on that of our DAWG:
+
+\begin{definition}
+  Let $(\vertices, \edges, \labelfunc)$ be a DAWG, and let $v$ be a vertex in
+  \vertices. The set of \emph{in-edges} of $v$ is defined as the set
+  \[
+    \edges_i(v) = \left\{ (x, v) \in \edges: x \in \vertices \right\},
+  \]
+  and the set of \emph{out-edges} of $v$ is defined as the set
+  \[
+    \edges_o(v) = \left\{ (v, x) \in \edges: x \in \vertices \right\}.
+  \]
+  The \emph{in-degree} of $v$ is defined as the quantity $d_i(v) =
+  |\edges_i(v)|$, and the \emph{out-degree} of $v$ is defined as $d_o(v) =
+  |\edges_o(v)|$.
+\end{definition}
+
+\begin{definition}
+  Let $(\vertices, \edges, \labelfunc)$ be a DAWG, and let $v$ be a vertex in
+  \vertices. For $n \ge 2$, we say that $v$ is \emph{$n$-compactable} if either
+  $d_i(v) = 1$ and $1 < d_o(v) \le n$, or $1 < d_i(v) \le n$ and $d_o(v) = 1$.
+
+  We define $\vertices_n$ as the set of all vertices in \vertices that are
+  $n$-compactable.
+\end{definition}
+
+\begin{definition}
+  Let $(\vertices, \edges, \labelfunc)$ be a DAWG, and let $S$ be a set of
+  vertices such that $S \subseteq \vertices$. The set of \emph{incident edges to
+  $S$} is defined as the set
+  \[
+    \edges_S = \left\{ (x, y) \in \edges: x \in S \lor y \in S \right\}.
+  \]
+\end{definition}
+
+\begin{definition}
+  Let $(\vertices, \edges, \labelfunc)$ be a DAWG, and let $F$ be a multiset of
+  edges such that $F \subseteq \edges$. The set of \emph{labels of $F$} is
+  defined as the set
+  \[
+    \labelfunc(F) = \left\{ s \in \strings: \exists f \in F\ |\ \labelfunc(f) = s
+    \right\}.
+  \]
+\end{definition}
+
+When we carry out node compaction, edges incident to the compacted node will be
+eliminated, and each incoming edge's label will be concatenated with each
+outgoing edge's label. Therefore, we can consider for each possible node to
+compact the labels that may be eliminated or introduced as a result of the
+compaction. However, when we consider this, we note that for all edges not
+incident on an $n$-compactable node, their labels cannot be eliminated (because
+that edge cannot be eliminated), and their labels cannot be introduced (since
+they are already in the DAWG by definition). Therefore, we can define the
+following:
+
+\begin{definition}
+  Let $(\vertices, \edges, \labelfunc)$ be a DAWG, and let
+  $\edges_{\vertices_n}$ be the set of all edges incident on $n$-compactable
+  vertices in the DAWG (as specified by previous definitions). We define the set
+  of \emph{immutable labels} as the set $\immutlabels = \labelfunc(\edges
+  \setminus \edges_{\vertices_n})$.
+\end{definition}
+
+With this definition in place, we see that the labels that could possibly be
+completely eliminated from the DAWG by compacting a subset of $n$-compactable
+nodes is simply $\labelfunc(\edges_{\vertices_n}) \setminus \immutlabels$.
+To consider the labels that might be introduced, we need to construct
+concatenations of labels as mentioned above. Therefore, we define the following:
+
+\begin{definition}
+  Let $(\vertices, \edges, \labelfunc)$ be a DAWG, and let $S \subseteq
+  \vertices$. The set of
+  \emph{compaction-generated labels} is given as the set
+  \[
+    P_S = \left\{ s \in \strings: \exists v \in S, e_i \in \edges_i(v), e_o \in
+    \edges_o(v)\ |\  \labelfunc(e_i) \| \labelfunc(e_o) = s \right\}
+  \]
+  where $\|$ denotes string concatenation.
+\end{definition}
+
+Again, the set of labels that might be introduced is actually $P_{\vertices_n}
+\setminus \immutlabels$. Also note that there may still be overlap between
+$\labelfunc(\edges_{\vertices_n}) \setminus \immutlabels$ and $P_{\vertices_n}
+\setminus \immutlabels$.
+
+To formulate our problem, we construct a bipartite graph where edges are between
+the sets $\vertices_n$ and $\labelfunc_n = (\labelfunc(\edges_{\vertices_n})
+\setminus \immutlabels) \cup (P_{\vertices_n} \setminus \immutlabels)$. We
+partition the edges into two sets, $\edges_a$ and $\edges_r$, representing the
+set of labels that may possibly be introduced or removed from the DAWG. Thus
+$(x, y) \in \edges_a$ if there exist edges $e_i \in \edges_i(x)$ and $e_o \in
+\edges_o(x)$ such that $\labelfunc(e_i) \| \labelfunc(e_o) = y$, and $(x, y) \in
+\edges_r$ if $y \in \edges_i(x) \cup \edges_o(x)$.
+
+Before we provide the formal problem statement, we define the following:
+
+\begin{definition}
+  Let $E$ be a set of edges in the bipartite graph above, and let $S$ be a
+  subset of $\vertices_n$ or of $\labelfunc_n$. We define the set $N_E(S)$ to be
+  the set of \emph{neighbors} of vertices in $S$ in the graph.
+\end{definition}
+
+The problem is then to select a subset $S \subseteq \vertices_n$ in order to
+minimize the following quantity:
+\[
+  -2|S| + |N_{\edges_a}(S) \setminus \labelfunc(\edges)| - \left|\left\{
+    \ell \in N_{\edges_r}(S) \setminus N_{\edges_a}(S): N_{\edges_r}(\{\ell\})
+    \subseteq S \right\}\right|
+\]
+The first term in this quantity is derived from the fact that compacting a
+vertex saves one vertex and one edge. The second term captures the number of new
+labels introduced to the DAWG as a result of compaction (hence the set
+difference from labels that are removed, since that means they are already in
+the DAWG). Note here that the set difference takes into account labels removed
+by \emph{any} vertex, even those not in $S$, to capture the fact that any label
+removed is already in the DAWG. Finally, the third term captures the number of
+labels eliminated from the DAWG, again taking the set difference with labels
+introduced by compacting nodes in $S$, since such an introduction would mean
+that not all instances of the label can be eliminated. The conditional criterion
+in the third term simply captures the fact that compacting the nodes in set $S$
+would eliminated all instances of the label.
+
+\end{document}
