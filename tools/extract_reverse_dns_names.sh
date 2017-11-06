@@ -20,14 +20,15 @@ fi
 
 # Set the Python executable to pypy3 or python3 depending on availability.
 # otherwise.
-if command -v pypy3 > /dev/null; then
-  PYTHONEXEC=pypy3
-elif command -v python3 > /dev/null; then
-  PYTHONEXEC=python3
-else
-  echo "You must have python3 or pypy3 installed."
-  exit 1
-fi
+#if command -v pypy3 > /dev/null; then
+  #PYTHONEXEC=pypy3
+#elif command -v python3 > /dev/null; then
+  #PYTHONEXEC=python3
+#else
+  #echo "You must have python3 or pypy3 installed."
+  #exit 1
+#fi
+PYTHONEXEC=python3
 
 # Set the appropriate file names.
 TOOLS_DIR=$(dirname $0)
@@ -48,8 +49,4 @@ DATAFILE=$BASENAME.dns.rev.sorted.txt
 lz4 $1
 
 # Extract the domain names.
-$PYTHONEXEC $TOOLS_DIR/get_dns_names.py --ip $1 $LOGFILE $OUTFILE
-
-# Deduplicate, reverse, and sort the extracted names into the output data file.
-LC_ALL=C sort $OUTFILE | uniq | $PYTHONEXEC $TOOLS_DIR/reverse_names.py \
-  | LC_ALL=C sort > $DATAFILE
+$PYTHONEXEC $TOOLS_DIR/get_dns_names.py --ip $BASENAME $LOGFILE $OUTFILE
