@@ -105,15 +105,15 @@ following:
 
 \begin{definition}
   Let $(\vertices, \edges, \labelfunc)$ be a DAWG, and let
-  $\edges_{\vertices_n}$ be the set of all edges incident on $n$-compactable
+  $\out_edges_{\vertices_n}$ be the set of all edges incident on $n$-compactable
   vertices in the DAWG (as specified by previous definitions). We define the set
   of \emph{immutable labels} as the set $\immutlabels = \labelfunc(\edges
-  \setminus \edges_{\vertices_n})$.
+  \setminus \out_edges_{\vertices_n})$.
 \end{definition}
 
 With this definition in place, we see that the labels that could possibly be
 completely eliminated from the DAWG by compacting a subset of $n$-compactable
-nodes is simply $\labelfunc(\edges_{\vertices_n}) \setminus \immutlabels$.
+nodes is simply $\labelfunc(\out_edges_{\vertices_n}) \setminus \immutlabels$.
 To consider the labels that might be introduced, we need to construct
 concatenations of labels as mentioned above. Therefore, we define the following:
 
@@ -130,11 +130,11 @@ concatenations of labels as mentioned above. Therefore, we define the following:
 
 Again, the set of labels that might be introduced is actually $P_{\vertices_n}
 \setminus \immutlabels$. Also note that there may still be overlap between
-$\labelfunc(\edges_{\vertices_n}) \setminus \immutlabels$ and $P_{\vertices_n}
+$\labelfunc(\out_edges_{\vertices_n}) \setminus \immutlabels$ and $P_{\vertices_n}
 \setminus \immutlabels$.
 
 To formulate our problem, we construct a bipartite graph where edges are between
-the sets $\vertices_n$ and $\labelfunc_n = (\labelfunc(\edges_{\vertices_n})
+the sets $\vertices_n$ and $\labelfunc_n = (\labelfunc(\out_edges_{\vertices_n})
 \setminus \immutlabels) \cup (P_{\vertices_n} \setminus \immutlabels)$. We
 partition the edges into two sets, $\edges_a$ and $\edges_r$, representing the
 set of labels that may possibly be introduced or removed from the DAWG. Thus
