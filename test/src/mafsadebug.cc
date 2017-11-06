@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "../../src/cpp/signal_authority/huffman.h"
+#include "../../src/cpp/encoding/huffman.h"
 
 void DAFSADebug::get_in_degrees(std::unordered_map<Node*, size_t>& map) const
 {
@@ -512,6 +512,19 @@ std::unordered_map<Node*, size_t> DAFSADebug::get_node_bit_indices(
     }
   }
   return bit_indices;
+}
+
+std::vector<std::unordered_set<Node*>> DAFSADebug::get_contiguous_regions() const
+{
+  std::vector<std::unordered_set<Node*>> sets;
+  std::unordered_map<Node*, std::unordered_set<Node*>> node_to_set_map;
+  std::vector<Node*> topological_order = get_nodes_topological_order();
+  for (size_t i = topological_order.size(); i > 0; --i) {
+    if (topological_order[i]->get_in_degree() == 1
+        || topological_order[i]->get_out_degree() == 1) {
+
+    }
+  }
 }
 
 std::ostream& operator<<(std::ostream& out_stream, std::vector<bool>& bitstream)

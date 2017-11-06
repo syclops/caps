@@ -1,33 +1,24 @@
 
-#include "graphbase.h"
-#include <iostream>
-#include <queue>
-#include <stack>
-#include <unordered_map>
+// Include header.
+#include "graph.h"
+
+// Include C++ standard libraries.
 #include <unordered_set>
-#include "node.h"
 
-void GraphVisitor::process_node(const std::shared_ptr<Node>& node)
-{
-  // Nothing to do here.
-}
-
-void GraphVisitor::process_label(const std::string& label)
-{
-  // Nothing to do here.
-}
+// Include other headers from this project.
+#include "../common/contains.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 ////////////////////////////////////////////////////////////////////////////////
 
-GraphBase::GraphBase()
+LabeledGraph::LabeledGraph()
   : root_{new Node}, num_accept_{0}, num_edges_{0}, compacted_{false}, nodes_{}
 {
   nodes_.insert(root_);
 }
 
-GraphBase::GraphBase(const GraphBase& orig)
+LabeledGraph::LabeledGraph(const LabeledGraph& orig)
   : root_{new Node}, num_accept_{0}, num_edges_{0}, compacted_{false}, nodes_{}
 {
   // Create a translation table of node pointers from the original graph.
@@ -36,7 +27,7 @@ GraphBase::GraphBase(const GraphBase& orig)
     node_table.emplace(orig_node_ptr, add_unattached_node());
   }
   // Add the edges to the graph.
-  for (auto orig_node_ptr: orig.get_nodes()) {
+  for (const auto& orig_node_ptr: orig.get_nodes()) {
     node_table.at(orig_node_ptr)->set_accept(orig_node_ptr->get_accept());
     for (auto out_edge_itr: orig_node_ptr->get_out_edges()) {
       add_edge(orig_node_ptr, out_edge_itr.second, out_edge_itr.first);
@@ -44,38 +35,38 @@ GraphBase::GraphBase(const GraphBase& orig)
   }
 }
 
-int GraphBase::get_num_nodes() const
+int LabeledGraph::get_num_nodes() const
 {
   return static_cast<int>(nodes_.size());
 }
 
-int GraphBase::get_num_edges() const
+int LabeledGraph::get_num_edges() const
 {
   return num_edges_;
 }
 
-int GraphBase::get_num_accept() const
+int LabeledGraph::get_num_accept() const
 {
   return num_accept_;
 }
 
-bool GraphBase::get_compacted() const
+bool LabeledGraph::get_compacted() const
 {
   return compacted_;
 }
 
-std::shared_ptr<Node> GraphBase::get_root() const
+std::shared_ptr<Node> LabeledGraph::get_root() const
 {
   return root_;
 }
 
-std::shared_ptr<Node> GraphBase::add_node(std::shared_ptr<Node> source,
+std::shared_ptr<Node> LabeledGraph::add_node(std::shared_ptr<Node> source,
                                           std::string label)
 {
-  return add_edge(source, label);
+  return add_edge(std::move(source), std::move(label));
 }
 
-void GraphBase::remove_node(std::shared_ptr<Node> node)
+void LabeledGraph::remove_node(std::shared_ptr<Node> node)
 {
   // Because removing in-edges and out-edges as we iterate through them would
   // invalidate the relevant iterators, we copy the relevant information into a
@@ -99,24 +90,29 @@ void GraphBase::remove_node(std::shared_ptr<Node> node)
   nodes_.erase(node);
 }
 
-void GraphBase::add_edge(std::shared_ptr<Node> source,
+void LabeledGraph::add_edge(std::shared_ptr<Node> source,
                          std::shared_ptr<Node> destination, std::string label)
 {
+  // If the outgoing label exists at the source, remove it to ensure that the
+  // destination of that edge is updated correctly.
+  if (source->has_out_label(label)) {
+    remove_edge(source, label);
+  }
   source->add_out_edge(label, destination);
   destination->add_in_edge(label, std::weak_ptr<Node>(source));
   // Update the number of edges, since it has to be done manually.
   ++num_edges_;
 }
 
-std::shared_ptr<Node> GraphBase::add_edge(std::shared_ptr<Node> source,
+std::shared_ptr<Node> LabeledGraph::add_edge(std::shared_ptr<Node> source,
                                           std::string label)
 {
   auto new_node = add_unattached_node();
-  add_edge(source, new_node, label);
+  add_edge(std::move(source), new_node, std::move(label));
   return new_node;
 }
 
-void GraphBase::remove_edge(std::shared_ptr<Node> source, std::string label)
+void LabeledGraph::remove_edge(std::shared_ptr<Node> source, std::string label)
 {
   // Remove the edge from both incident nodes' edge maps.
   auto dest_ptr = source->follow_out_edge(label);
@@ -130,47 +126,12 @@ void GraphBase::remove_edge(std::shared_ptr<Node> source, std::string label)
   --num_edges_;
 }
 
-GraphBase::NodeIterable::NodeIterable(const nodes_t& nodes)
-  : nodes_{nodes}
-{
-  // Nothing to do here.
-}
-
-GraphBase::NodeIterable::nodes_t::const_iterator
-GraphBase::NodeIterable::begin() const
-{
-  return nodes_.cbegin();
-}
-
-GraphBase::NodeIterable::nodes_t::const_iterator
-GraphBase::NodeIterable::end() const
-{
-  return nodes_.cend();
-}
-
-GraphBase::NodeIterable GraphBase::get_nodes() const
-{
-  return NodeIterable{nodes_};
-}
-
-void GraphBase::visit_dfs(GraphVisitor& visitor) const
-{
-  std::stack<std::pair<GraphVisitor, std::shared_ptr<Node>>> stack;
-  stack.emplace(std::make_pair(visitor, root_));
-  while (!stack.empty()) {
-    auto pair = stack.top();
-    stack.pop();
-    GraphVisitor node_copy{visitor};
-    node_copy.process_node(pair.second);
-    for (const auto &out_edge_itr: pair.second->get_reverse_out_edges()) {
-      GraphVisitor label_copy{node_copy};
-      label_copy.process_label(out_edge_itr.first);
-      stack.emplace(std::make_pair(label_copy, out_edge_itr.second));
-    }
+  const std::set<std::shared_ptr<Node>>& LabeledGraph::get_nodes() const
+  {
+    return nodes_;
   }
-}
 
-//GraphBase::GraphBase(const GraphBase& orig)
+//LabeledGraph::LabeledGraph(const LabeledGraph& orig)
 //  : num_strings_(orig.num_strings_), num_bytes_(orig.num_bytes_),
 //    num_nodes_(orig.num_nodes_), num_accept_(orig.num_accept_),
 //    num_edges_(orig.num_edges_), compacted_(orig.compacted_)
@@ -192,20 +153,20 @@ void GraphBase::visit_dfs(GraphVisitor& visitor) const
 //  }
 //}
 //
-//GraphBase::GraphBase(GraphBase&& orig) noexcept
-//  : GraphBase()
+//LabeledGraph::LabeledGraph(LabeledGraph&& orig) noexcept
+//  : LabeledGraph()
 //{
 //  swap(*this, orig);
 //}
 //
-//GraphBase::~GraphBase()
+//LabeledGraph::~LabeledGraph()
 //{
 //  for (Node* node_ptr: nodes_) {
 //    delete node_ptr;
 //  }
 //}
 //
-//void swap(GraphBase& first, GraphBase& second)
+//void swap(LabeledGraph& first, LabeledGraph& second)
 //{
 //  using std::swap;
 //  swap(first.root_, second.root_);
@@ -218,7 +179,7 @@ void GraphBase::visit_dfs(GraphVisitor& visitor) const
 //  swap(first.nodes_, second.nodes_);
 //}
 //
-//void GraphBase::read_file(std::istream& in_stream)
+//void LabeledGraph::read_file(std::istream& in_stream)
 //{
 //  std::string line;
 //  while (std::getline(in_stream, line)) {
@@ -226,35 +187,35 @@ void GraphBase::visit_dfs(GraphVisitor& visitor) const
 //  }
 //}
 //
-//std::string GraphBase::dump_dictionary() const
+//std::string LabeledGraph::dump_dictionary() const
 //{
 //  std::ostringstream out_stream;
 //  dump_dictionary(out_stream);
 //  return out_stream.str();
 //}
 //
-//std::string GraphBase::graph_stats() const
+//std::string LabeledGraph::graph_stats() const
 //{
 //    std::ostringstream out_stream;
 //    graph_stats(out_stream);
 //    return out_stream.str();
 //  }
 //
-//void GraphBase::graph_stats(std::ostream& out_stream) const
+//void LabeledGraph::graph_stats(std::ostream& out_stream) const
 //{
 //  out_stream << num_strings_ << " strings (" << num_bytes_ << " bytes) read"
 //             << std::endl;
 //  out_stream << num_nodes_ << " nodes, " << num_edges_ << " edges" << std::endl;
 //}
 //
-//std::string GraphBase::dump_dot() const
+//std::string LabeledGraph::dump_dot() const
 //{
 //  std::ostringstream out_stream;
 //  dump_dot(out_stream);
 //  return out_stream.str();
 //}
 //
-//void GraphBase::dump_dot(std::ostream& out_stream) const
+//void LabeledGraph::dump_dot(std::ostream& out_stream) const
 //{
 //  out_stream << "digraph g {" << std::endl;
 //  std::unordered_map<Node*, unsigned int> vertex_num;
@@ -274,7 +235,7 @@ void GraphBase::visit_dfs(GraphVisitor& visitor) const
 //  out_stream << '}';
 //}
 //
-//void GraphBase::dump_txt(std::ostream& out_stream) const
+//void LabeledGraph::dump_txt(std::ostream& out_stream) const
 //{
 //  out_stream << num_nodes_ << " " << num_accept_ << " " << num_edges_
 //             << std::endl;
@@ -303,7 +264,7 @@ void GraphBase::visit_dfs(GraphVisitor& visitor) const
 //  }
 //}
 //
-//void GraphBase::load_txt(std::istream& in_stream)
+//void LabeledGraph::load_txt(std::istream& in_stream)
 //{
 //  size_t nodes, accept, edges;
 //  std::unordered_map<size_t, Node*> num_to_node;
@@ -330,14 +291,14 @@ void GraphBase::visit_dfs(GraphVisitor& visitor) const
 //  }
 //}
 //
-//std::string GraphBase::dump_target_counts() const
+//std::string LabeledGraph::dump_target_counts() const
 //{
 //  std::ostringstream out_stream;
 //  dump_target_counts(out_stream);
 //  return out_stream.str();
 //}
 //
-//void GraphBase::dump_target_counts(std::ostream& out_stream) const
+//void LabeledGraph::dump_target_counts(std::ostream& out_stream) const
 //{
 //  std::unordered_map<Node*, size_t> counts = get_target_counts();
 //  for (auto it: counts) {
@@ -345,19 +306,19 @@ void GraphBase::visit_dfs(GraphVisitor& visitor) const
 //  }
 //}
 //
-//bool GraphBase::in_set(const std::string str) const
+//bool LabeledGraph::in_set(const std::string str) const
 //{
 //  return false;
 //}
 //
-//std::string GraphBase::dump_bin() const
+//std::string LabeledGraph::dump_bin() const
 //{
 //  std::ostringstream out_stream;
 //  dump_bin(out_stream);
 //  return out_stream.str();
 //}
 //
-//void GraphBase::compact_edges()
+//void LabeledGraph::compact_edges()
 //{
 //  std::set<Node*> visited;
 //  std::queue<Node*> node_queue;
@@ -378,33 +339,33 @@ void GraphBase::visit_dfs(GraphVisitor& visitor) const
 //  compacted_ = true;
 //}
 //
-//void GraphBase::uncompact_edges()
+//void LabeledGraph::uncompact_edges()
 //{
 //  //TODO
 //  compacted_ = false;
 //}
 //
-//size_t GraphBase::get_num_strings() const
+//size_t LabeledGraph::get_num_strings() const
 //{
 //  return num_strings_;
 //}
 //
-//size_t GraphBase::get_num_bytes() const
+//size_t LabeledGraph::get_num_bytes() const
 //{
 //  return num_bytes_;
 //}
 //
-//size_t GraphBase::get_num_nodes() const
+//size_t LabeledGraph::get_num_nodes() const
 //{
 //  return num_nodes_;
 //}
 //
-//size_t GraphBase::get_num_edges() const
+//size_t LabeledGraph::get_num_edges() const
 //{
 //  return num_edges_;
 //}
 //
-//std::unordered_map<std::string, size_t> GraphBase::get_label_counts() const
+//std::unordered_map<std::string, size_t> LabeledGraph::get_label_counts() const
 //{
 //  std::unordered_map<std::string, size_t> label_counts;
 //  for (Node* node: nodes_) {
@@ -422,7 +383,7 @@ void GraphBase::visit_dfs(GraphVisitor& visitor) const
 //// PROTECTED METHODS
 //////////////////////////////////////////////////////////////////////////////////
 //
-//Node* GraphBase::add_node()
+//Node* LabeledGraph::add_node()
 //{
 //  Node* new_node = new Node;
 //  nodes_.insert(new_node);
@@ -430,7 +391,7 @@ void GraphBase::visit_dfs(GraphVisitor& visitor) const
 //  return new_node;
 //}
 //
-//void GraphBase::remove_node(Node* node)
+//void LabeledGraph::remove_node(Node* node)
 //{
 //  if (nodes_.find(node) == nodes_.end()) {
 //    return;
@@ -457,7 +418,7 @@ void GraphBase::visit_dfs(GraphVisitor& visitor) const
 //  }
 //}
 //
-//void GraphBase::add_edge(Node* source, Node* target, const std::string label)
+//void LabeledGraph::add_edge(Node* source, Node* target, const std::string label)
 //{
 //  if (source->follow_edge(label)) {
 //    remove_edge(source, label);
@@ -467,7 +428,7 @@ void GraphBase::visit_dfs(GraphVisitor& visitor) const
 //  ++num_edges_;
 //}
 //
-//void GraphBase::remove_edge(Node* source, const std::string label)
+//void LabeledGraph::remove_edge(Node* source, const std::string label)
 //{
 //  Node* target = source->follow_edge(label);
 //  if (!target) {
@@ -481,7 +442,7 @@ void GraphBase::visit_dfs(GraphVisitor& visitor) const
 //  --num_edges_;
 //}
 //
-//void GraphBase::set_node_accept(Node* node)
+//void LabeledGraph::set_node_accept(Node* node)
 //{
 //  if (node->get_accept()) {
 //    return;
@@ -490,7 +451,7 @@ void GraphBase::visit_dfs(GraphVisitor& visitor) const
 //  ++num_accept_;
 //}
 //
-//void GraphBase::compact_edge(Node* node, const std::string label)
+//void LabeledGraph::compact_edge(Node* node, const std::string label)
 //{
 //  std::string current_label(label);
 //  Node* current_target = node->follow_edge(label);
@@ -506,7 +467,7 @@ void GraphBase::visit_dfs(GraphVisitor& visitor) const
 //  }
 //}
 //
-//std::unordered_map<Node*, size_t> GraphBase::get_target_counts() const
+//std::unordered_map<Node*, size_t> LabeledGraph::get_target_counts() const
 //{
 //  std::unordered_map<Node*, size_t> counts;
 //  for (Node* node: nodes_) {
@@ -520,14 +481,14 @@ void GraphBase::visit_dfs(GraphVisitor& visitor) const
 //  return counts;
 //}
 
-std::shared_ptr<Node> GraphBase::add_unattached_node()
+std::shared_ptr<Node> LabeledGraph::add_unattached_node()
 {
   std::shared_ptr<Node> node_ptr(new Node);
   nodes_.insert(node_ptr);
   return node_ptr;
 }
 
-bool operator==(const GraphBase& lhs, const GraphBase& rhs)
+bool operator==(const LabeledGraph& lhs, const LabeledGraph& rhs)
 {
   if (lhs.get_num_nodes() != rhs.get_num_nodes()
       || lhs.get_num_accept() != rhs.get_num_accept()
@@ -549,7 +510,7 @@ bool operator==(const GraphBase& lhs, const GraphBase& rhs)
          lhs_edge_itr != current_pair.first->get_out_edges().end()
            && rhs_edge_itr != current_pair.second->get_out_edges().end();
          ++lhs_edge_itr, ++rhs_edge_itr) {
-      if (node_table.find(lhs_edge_itr->second) == node_table.end()) {
+      if (contains(node_table, lhs_edge_itr->second)) {
         node_table.emplace(lhs_edge_itr->second, rhs_edge_itr->second);
         queue.emplace(lhs_edge_itr->second, rhs_edge_itr->second);
       }
@@ -562,7 +523,7 @@ bool operator==(const GraphBase& lhs, const GraphBase& rhs)
   return true;
 }
 
-bool operator!=(const GraphBase& lhs, const GraphBase& rhs)
+bool operator!=(const LabeledGraph& lhs, const LabeledGraph& rhs)
 {
   return !operator==(lhs, rhs);
 }

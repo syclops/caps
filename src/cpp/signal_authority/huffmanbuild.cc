@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "huffman.h"
+#include "../encoding/huffman.h"
 
 void usage()
 {

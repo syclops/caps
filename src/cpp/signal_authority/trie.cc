@@ -21,7 +21,7 @@ Trie& Trie::operator=(Trie rhs)
 void swap(Trie& first, Trie& second)
 {
   using std::swap;
-  swap(static_cast<GraphBase&>(first), static_cast<GraphBase&>(second));
+  swap(static_cast<LabeledGraph&>(first), static_cast<LabeledGraph&>(second));
 }
 
 void Trie::add_string(const std::string str)

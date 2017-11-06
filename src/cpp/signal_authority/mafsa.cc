@@ -6,14 +6,14 @@
 #include <unordered_map>
 #include <utility>
 #include <queue>
-#include "huffman.h"
+#include "../encoding/huffman.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 ////////////////////////////////////////////////////////////////////////////////
 
 DAFSA::DAFSA(const DAFSA& orig)
-  : GraphBase(orig)
+  : LabeledGraph(orig)
 {
   // TODO
 }
@@ -35,13 +35,13 @@ DAFSA& DAFSA::operator=(DAFSA rhs)
 void swap(DAFSA& first, DAFSA& second)
 {
   using std::swap;
-  swap(static_cast<GraphBase&>(first), static_cast<GraphBase&>(second));
+  swap(static_cast<LabeledGraph&>(first), static_cast<LabeledGraph&>(second));
   swap(first.register_, second.register_);
 }
 
 void DAFSA::read_file(std::istream& in_stream)
 {
-  GraphBase::read_file(in_stream);
+  LabeledGraph::read_file(in_stream);
   replace_or_register(root_);
 }
 

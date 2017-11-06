@@ -3,10 +3,10 @@
 
 #include <iostream>
 #include <string>
-#include "graphbase.h"
-#include "node.h"
+#include "../graph/graph.h"
+#include "../graph/node.h"
 
-class Trie: public GraphBase
+class Trie: public LabeledGraph
 {
  public:
 

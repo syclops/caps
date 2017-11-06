@@ -4,10 +4,10 @@
 #include <iostream>
 #include <string>
 #include <unordered_set>
-#include "graphbase.h"
-#include "node.h"
+#include "../graph/graph.h"
+#include "../graph/node.h"
 
-class DAFSA: public GraphBase
+class DAFSA: public LabeledGraph
 {
  public:
 

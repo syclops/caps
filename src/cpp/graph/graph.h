@@ -7,25 +7,19 @@
 #include <stack>
 #include <string>
 #include <unordered_map>
+#include <queue>
 
 // Include other header files from this project.
-#include "../signal_authority/edge.h"
 #include "node.h"
+#include "visitor.h"
 
-class GraphVisitor
-{
- public:
-  virtual void process_node(const std::shared_ptr<Node>& node);
-  virtual void process_label(const std::string& label);
-};
-
-class GraphBase
+class LabeledGraph
 {
  public:
 
-  GraphBase();
+  LabeledGraph();
 
-  GraphBase(const GraphBase& orig);
+  LabeledGraph(const LabeledGraph& orig);
 
   int get_num_nodes() const;
 
@@ -50,28 +44,9 @@ class GraphBase
 
   void remove_edge(std::shared_ptr<Node> source, std::string label);
 
-  /**
-   * Give others access to an immutable iterable of the graph nodes.
-   */
-  class NodeIterable
-  {
-    typedef std::set<std::shared_ptr<Node>> nodes_t;
+  const std::set<std::shared_ptr<Node>>& get_nodes() const;
 
-   public:
-
-    explicit NodeIterable(const nodes_t& nodes);
-
-    nodes_t::const_iterator begin() const;
-
-    nodes_t::const_iterator end() const;
-
-   private:
-    const nodes_t& nodes_;
-  };
-
-  NodeIterable get_nodes() const;
-
-//void GraphBase::dump_dictionary(std::ostream& out_stream) const
+//void LabeledGraph::dump_dictionary(std::ostream& out_stream) const
 //{
 //  std::stack<std::pair<std::string, Node*> > pair_stack;
 //  pair_stack.push(std::make_pair("", root_));
@@ -92,8 +67,6 @@ class GraphBase
 //}
 //
 
-  void visit_dfs(GraphVisitor& visitor) const;
-
  private:
   std::shared_ptr<Node> root_;
   int num_accept_;
@@ -104,12 +77,12 @@ class GraphBase
   std::shared_ptr<Node> add_unattached_node();
 
 //  /**
-//   * Swap two GraphBase instances.
+//   * Swap two LabeledGraph instances.
 //   *
-//   * @param first - The first GraphBase instance to swap.
-//   * @param second - The second GraphBase instance to swap.
+//   * @param first - The first LabeledGraph instance to swap.
+//   * @param second - The second LabeledGraph instance to swap.
 //   */
-//  friend void swap(GraphBase& first, GraphBase& second);
+//  friend void swap(LabeledGraph& first, LabeledGraph& second);
 //
 //  /**
 //   * Read a set of strings from a file to add to the dictionary.
@@ -162,9 +135,9 @@ class GraphBase
 //
 // protected:
 //
-//  GraphBase(const GraphBase& orig);
-//  GraphBase(GraphBase&& orig) noexcept;
-//  virtual ~GraphBase();
+//  LabeledGraph(const LabeledGraph& orig);
+//  LabeledGraph(LabeledGraph&& orig) noexcept;
+//  virtual ~LabeledGraph();
 //
 //  virtual void add_string(std::string str) = 0;
 //
@@ -180,7 +153,7 @@ class GraphBase
 
 };
 
-bool operator==(const GraphBase& lhs, const GraphBase& rhs);
-bool operator!=(const GraphBase& lhs, const GraphBase& rhs);
+bool operator==(const LabeledGraph& lhs, const LabeledGraph& rhs);
+bool operator!=(const LabeledGraph& lhs, const LabeledGraph& rhs);
 
 #endif  // CAPS_SUCCINCT_TRIE_H_

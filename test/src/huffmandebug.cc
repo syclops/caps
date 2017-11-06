@@ -10,7 +10,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "../../src/cpp/signal_authority/huffman.h"
+#include "../../src/cpp/encoding/huffman.h"
 
 HuffmanDebug::HuffmanDebug(const std::map<std::string, size_t>& counts)
   : HuffmanTree(counts)

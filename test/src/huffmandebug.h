@@ -5,7 +5,7 @@
 #ifndef CAPS_HUFFMAN_TESTER_H
 #define CAPS_HUFFMAN_TESTER_H
 
-#include "../../src/cpp/signal_authority/huffman.h"
+#include "../../src/cpp/encoding/huffman.h"
 
 class HuffmanDebug: public HuffmanTree
 {
