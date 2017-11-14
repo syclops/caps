@@ -44,8 +44,8 @@ class ConnectedComponent
 
   const std::set<std::shared_ptr<Node>> downstream_nodes() const;
 
-  std::vector<std::tuple<std::shared_ptr<Node>, std::shared_ptr<Node>,
-                         std::string>> transitive_paths() const;
+//  std::vector<std::tuple<std::shared_ptr<Node>, std::shared_ptr<Node>,
+//                         std::string>> transitive_paths() const;
 
  private:
 
@@ -63,14 +63,14 @@ class TransitivePathVisitor: public CloneableVisitor<TransitivePathVisitor,
 {
  public:
   TransitivePathVisitor(
-    std::shared_ptr<Node> source,
-    const std::set<std::shared_ptr<Node>>& downstream_nodes);
+    std::shared_ptr<Node> source, const ConnectedComponent& component);
 
   void process_node(const std::shared_ptr<Node>& node) override;
 
   void process_label(const std::string& label) override;
 
-  bool should_proceed(const std::shared_ptr<Node>& node,
+  bool should_proceed(const std::shared_ptr<Node>& source_node,
+                      const std::shared_ptr<Node>& dest_node,
                       const std::string& label) const override;
 
   static std::vector<std::tuple<std::shared_ptr<Node>, std::shared_ptr<Node>,
@@ -81,12 +81,16 @@ class TransitivePathVisitor: public CloneableVisitor<TransitivePathVisitor,
  private:
   std::shared_ptr<Node> source_;
   std::string label_;
-  const std::set<std::shared_ptr<Node>>& downstream_nodes_;
+  const ConnectedComponent& component_;
   static std::vector<std::tuple<std::shared_ptr<Node>, std::shared_ptr<Node>,
                                 std::string>> paths_;
 };
 
 std::vector<ConnectedComponent> make_connected_components(
   std::set<std::shared_ptr<Node>> nodes);
+
+std::vector<std::tuple<std::shared_ptr<Node>, std::shared_ptr<Node>,
+                       std::string>> get_transitive_paths(
+  const ConnectedComponent& component);
 
 #endif //CAPS_CONNECTED_COMPONENT_H

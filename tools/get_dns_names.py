@@ -1,111 +1,119 @@
 """
-Given a json file from Censys's Alexa Top 1 Million TLS data data set,
+Given a json file from Censys's Alexa Top 1 Million TLS Handshakes data set,
 extract a list of hostnames.
 """
 
 import argparse
 import fileinput
 import json
-import multiprocessing as mp
-import sortedcontainers as sc
 import sys
 
-import tlds
 
+class DNSInfoParser:
+    """
+    Class that parses DNS information from JSON TLS handshake data.
+    """
 
-class LockSet(object):
+    def __init__(self, lfilename, ofilename='', ip=False, reverse=True,
+                 tlds='tlds-alpha-by-domain.txt'):
+        self.lfilename = lfilename
+        self.ofilename = ofilename
+        self.names = set()
+        self.ip = 'ip' if ip else 'domain'
+        self.reverse = reverse
+        self.total_names = 0
+        self.certificates = 0
+        self.error_names = 0
+        self.added_names = 0
+        self.nameless_certs = 0
+        self.tlds = set()
+        for line in fileinput.input(tlds):
+            if line.strip()[0] != '#':
+                self.tlds.add(line.strip().lower())
 
-    def __init__(self):
-        self.set = sc.SortedSet()
-        self.lock = mp.Lock()
+    def __enter__(self):
+        self.lfile = open(self.lfilename, 'wt')
+        if self.ofilename != '':
+            self.ofile = open(self.ofilename, 'wt')
+        else:
+            self.ofile = sys.stdout
+        return self
 
-    def add(self, item):
-        with self.lock:
-            self.set.add(item)
+    def __exit__(self, exception_type, exception_value, traceback):
+        self.lfile.close()
+        self.lfile = None
+        self.ofile.close()
+        self.ofile = None
 
+    def output_names(self):
+        for name in sorted(self.names):
+            self.ofile.write('{}\n'.format(name))
 
-class LockFile(object):
+    def validate_name(self, name):
+        """
+        Ensure that a name conforms to
+        :param name:
+        :return:
+        """
+        return ('.' in name and name.split('.')[-1] in self.tlds
+                and '*' not in name[1:] and '/' not in name
+                and '@' not in name)
 
-    def __init__(self, file_):
-        self.file = file_
-        self.lock = mp.Lock()
+    def add_name(self, name):
+        if not self.validate_name(name):
+            return
+        self.added_names += 1
+        if self.reverse:
+            self.names.add('.'.join(name.split('.')[::-1]))
+        else:
+            self.names.add(name)
 
-    def write(self, string):
-        with self.lock:
-            self.file.write(string)
+    def log_error(self, line, error):
+        self.lfile.write('{}: {}\n'.format(line[self.ip], error))
 
-    def close(self):
-        self.file.close()
+    def add_json(self, ifilename):
+        for line in fileinput.input(ifilename):
+            self.total_names += 1
+            try:
+                json_dict = json.loads(line.strip())
+            except:
+                print(line.strip())
+                raise
+            try:
+                self.parse_json_dict(json_dict)
+            except KeyError as e:
+                self.log_error(json_dict, e.args[0])
+            except:
+                raise
 
+    def parse_json_dict(self, json_dict):
+        if 'error' in json_dict:
+            self.log_error(json_dict, json_dict['error'])
+            self.error_names += 1
+        else:
+            self.parse_cert(json_dict['data']['tls']['server_certificates'][
+                'certificate']['parsed'])
+            self.certificates += 1
 
-def read_data(data_queue, infile, jobs):
-    for line in fileinput.input(infile):
-        data_queue.put(line.strip())
-    for _ in range(jobs):
-        data_queue.put('DONE')
-
-
-def parse_data(data_queue, names, lfile, ip):
-    while True:
-        data = data_queue.get()
-        if data == 'DONE':
-            break
-        json_dict = json.loads(data)
+    def parse_cert(self, cert):
         try:
-            if 'error' in json_dict:
-                log_error(lfile, json_dict[ip], json_dict['error'])
+            if 'names' in cert:
+                for name in cert['names']:
+                    self.add_name(name.encode('idna').decode('utf-8').lower())
             else:
-                cert = json_dict['data']['tls']['server_certificates'][
-                    'certificate']['parsed']
-                try:
-                    if 'names' in cert:
-                        for name in cert['names']:
-                            validate_and_add_name(
-                                names, name.encode('idna').decode('utf-8'))
-                    else:
-                        for name in cert['subject']['common_name']:
-                            validate_and_add_name(
-                                names, name.encode('idna').decode('utf-8'))
-                        for name in cert['extension']['subject_alt_name'][
+                for name in cert['subject']['common_name']:
+                    self.add_name(name.encode('idna').decode('utf-8').lower())
+                if ('extensions' in cert
+                    and 'subject_alt_name' in cert['extensions']):
+                    for name in cert['extensions']['subject_alt_name'][
                             'dns_names']:
-                            validate_and_add_name(
-                                names, name.encode('idna').decode('utf-8'))
-                except:
-                    pass
-        except KeyError as e:
-            log_error(lfile, json_dict[ip], e.args[0])
-        except:
+                        self.add_name(
+                            name.encode('idna').decode('utf-8').lower())
+        except UnicodeError:
+            self.nameless_certs += 1
+        except KeyError:
+            self.nameless_certs += 1
             raise
-
-
-def log_error(lfile, line, error):
-    lfile.write('{}: {}\n'.format(line, error))
-
-
-def validate_and_add_name(name_set, name):
-    if '.' in name and name.split('.')[-1] in tlds.TLDS:
-        name_set.add('.'.join(name.split('.')[::-1]))
-
-
-def process_file(infile, logfile, outfile, ip, jobs, max_queue_size):
-    queue = mp.Queue(max_queue_size)
-    names = LockSet()
-    lfile = LockFile(open(logfile, 'wt'))
-    read_process = mp.Process(target=read_data, args=(queue, infile, jobs))
-    parse_processes = [mp.Process(target=parse_data, args=(queue, names, lfile,
-                                                           ip))
-                       for _ in range(jobs)]
-    read_process.start()
-    for parser in parse_processes:
-        parser.start()
-    read_process.join()
-    for parser in parse_processes:
-        parser.join()
-    lfile.close()
-    # write_process.join()
-    with open(outfile, 'wt') as ofile:
-        for name in names.set:
-            ofile.write(name + '\n')
 
 
 def main():
@@ -116,28 +124,23 @@ def main():
     parser.add_argument('outfile', help='output file (txt)')
     parser.add_argument('--ip', action='store_true',
                         help='log IP addresses instead of DNS names')
-    parser.add_argument('-j', '--jobs', type=int, default=1,
-                        help='number of jobs')
-    parser.add_argument('-q', '--max-queue-size', type=int, default=20000,
-                        help='maximum queue size for I/O')
+    parser.add_argument('--reverse', action='store_true',
+                        help='store DNS names in reverse label order')
     args = parser.parse_args()
-    ip = 'ip' if args.ip else 'domain'
-    process_file(args.infile, args.logfile, args.outfile, ip, args.jobs,
-                 args.max_queue_size)
-    # with DNSInfoParser(args.logfile, args.outfile, args.ip,
-                       # args.reverse) as dns_parser:
-        # dns_parser.add_json(args.infile)
-        # print('Out of {} domains...'.format(dns_parser.total_names))
-        # print('  {} have certificates'.format(dns_parser.certificates))
-        # print('  {} have certificates with valid DNS names'.format(
-            # dns_parser.certificates))
-        # print('  {} unique, valid DNS names are present'.format(
-            # len(dns_parser.names)))
-        # print('  {} had TLS connection errors'.format(dns_parser.error_names))
-        # print('  {} have certificates without DNS names'.format(
-            # dns_parser.nameless_certs))
-        # print('Sorting and printing unique names...')
-        # dns_parser.output_names()
+    with DNSInfoParser(args.logfile, args.outfile, args.ip,
+                       args.reverse) as dns_parser:
+        dns_parser.add_json(args.infile)
+        print('Out of {} domains...'.format(dns_parser.total_names))
+        print('  {} have certificates'.format(dns_parser.certificates))
+        print('  {} have certificates with valid DNS names'.format(
+            dns_parser.certificates))
+        print('  {} unique, valid DNS names are present'.format(
+            len(dns_parser.names)))
+        print('  {} had TLS connection errors'.format(dns_parser.error_names))
+        print('  {} have certificates without DNS names'.format(
+            dns_parser.nameless_certs))
+        print('Sorting and printing unique names...')
+        dns_parser.output_names()
 
 
 if __name__ == '__main__':

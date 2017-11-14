@@ -32,10 +32,10 @@ PYTHONEXEC=python3
 
 # Set the appropriate file names.
 TOOLS_DIR=$(dirname $0)
-BASENAME=$(dirname $1)/$(basename $1 .lz4)
+BASE_DIR=$(dirname $1)
+BASENAME=$BASE_DIR/$(basename $1 .lz4)
 LOGFILE=$BASENAME.dns.log
-OUTFILE=$BASENAME.dns.txt
-DATAFILE=$BASENAME.dns.rev.sorted.txt
+OUTFILE=$BASENAME.dns.rev.sorted.txt
 
 # Print all variable names for debugging purposes.
 #echo $PYTHONEXEC
@@ -46,7 +46,14 @@ DATAFILE=$BASENAME.dns.rev.sorted.txt
 #echo $DATAFILE
 
 # Extract the Censys lz4 file.
-lz4 $1
+if [[ ! -f $BASENAME ]]; then
+  echo "Decompressing lz4 file."
+  lz4 $1
+else
+  echo "$BASENAME already exists. Skipping lz4 decompression."
+fi
 
 # Extract the domain names.
-$PYTHONEXEC $TOOLS_DIR/get_dns_names.py --ip $BASENAME $LOGFILE $OUTFILE
+echo "Extracting DNS names from $BASENAME"
+time $PYTHONEXEC $TOOLS_DIR/get_dns_names.py --ip --reverse $BASENAME $LOGFILE $OUTFILE
+rm -f $BASENAME

@@ -14,6 +14,7 @@
 #include "../graph/node.h"
 #include "../graph/graph.h"
 #include "../graph/visitor.h"
+#include "../common/contains.h"
 
 /**
  * Functor to calculate the hash of a node.
@@ -39,7 +40,15 @@ class FSALexicon: public Lexicon
 {
  public:
 
+  //////////////////////////////////////////////////////////////////////////////
+  // Constructors and rule of five
+  //////////////////////////////////////////////////////////////////////////////
+
   FSALexicon();
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Operations
+  //////////////////////////////////////////////////////////////////////////////
 
   void add_file(std::istream& instream) override;
 
@@ -51,13 +60,21 @@ class FSALexicon: public Lexicon
 
   void dump(std::ostream& outstream) const override;
 
-  void finalize();
+  void compact();
+
+  void compact_long_edges();
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Accessors
+  //////////////////////////////////////////////////////////////////////////////
 
   std::set<std::string> dump_strings() const override;
 
-  void compact();
+  int register_size() const;
 
   std::string debug() const;
+
+  const LabeledGraph& get_graph() const;
 
  private:
 
@@ -68,8 +85,10 @@ class FSALexicon: public Lexicon
   template <typename NodeFuncType>
   void edit_node(std::shared_ptr<Node> node, NodeFuncType function)
   {
-    bool registered = register_.find(node) != register_.end();
+    bool registered = contains(register_, node)
+                      && (*register_.find(node) == node);
     if (registered) {
+      std::cerr << "Registered " << node << std::endl;
       register_.erase(node);
     }
     function(node);
@@ -94,6 +113,8 @@ class AcceptStringVisitor: public CloneableVisitor<AcceptStringVisitor,
   void process_label(const std::string& label) override;
 
   std::set<std::string> get_string_dump() const;
+
+  static void reset_strings();
 
  private:
 
@@ -151,15 +172,17 @@ class OrderVisitor: public CloneableVisitor<OrderVisitor, GraphVisitor>,
   std::unordered_map<std::shared_ptr<Node>, int> node_map_;
 };
 
+/**
+ * Select a set of nodes based on a function.
+ */
 class SelectionVisitor: public CloneableVisitor<SelectionVisitor, GraphVisitor>,
                         public std::enable_shared_from_this<SelectionVisitor>
 {
  public:
 
-  SelectionVisitor();
-
   explicit SelectionVisitor(
-    std::function<bool(const std::shared_ptr<Node>&)> selector);
+    std::function<bool(std::shared_ptr<Node>)> selector
+                       = [](std::shared_ptr<Node>) { return true; });
 
   std::shared_ptr<SelectionVisitor> clone();
 
@@ -171,8 +194,66 @@ class SelectionVisitor: public CloneableVisitor<SelectionVisitor, GraphVisitor>,
 
  private:
 
-  const std::function<bool(std::shared_ptr<Node>)>& selector_;
+  std::function<bool(std::shared_ptr<Node>)> selector_;
   std::set<std::shared_ptr<Node>> selection_;
+};
+
+template <typename ValueType>
+class NodeMapVisitor: public CloneableVisitor<NodeMapVisitor<ValueType>,
+                                              GraphVisitor>
+{
+ public:
+
+  explicit NodeMapVisitor(
+    std::function<ValueType(std::shared_ptr<Node>)> node_func)
+    : node_func_(node_func), map_{}
+  {
+    // Nothing to do here.
+  }
+
+  void process_node(const std::shared_ptr<Node>& node) override
+  {
+    map_[node] = node_func_(node);
+  }
+
+  std::map<std::shared_ptr<Node>, ValueType> get_map() const
+  {
+    return map_;
+  };
+
+ private:
+
+  std::function<ValueType(std::shared_ptr<Node>)> node_func_;
+  std::map<std::shared_ptr<Node>, ValueType> map_;
+};
+
+template <typename ValueType>
+class LabelMapVisitor: public CloneableVisitor<LabelMapVisitor<ValueType>,
+                                              GraphVisitor>
+{
+ public:
+
+  explicit LabelMapVisitor(
+    std::function<ValueType(std::string)> label_func)
+    : label_func_(label_func), map_{}
+  {
+    // Nothing to do here.
+  }
+
+  void process_label(const std::string& label) override
+  {
+    map_[label] = label_func_(label);
+  }
+
+  std::map<std::shared_ptr<Node>, ValueType> get_map() const
+  {
+    return map_;
+  };
+
+ private:
+
+  std::function<ValueType(std::string)> label_func_;
+  std::map<std::shared_ptr<Node>, ValueType> map_;
 };
 
 class CompactionVisitor: public CloneableVisitor<CompactionVisitor, GraphVisitor>,

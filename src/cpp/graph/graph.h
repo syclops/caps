@@ -17,19 +17,29 @@ class LabeledGraph
 {
  public:
 
+  // Constructors and rule of five
+
   LabeledGraph();
 
   LabeledGraph(const LabeledGraph& orig);
+
+  // Accessors
+
+  std::shared_ptr<Node> get_root() const;
+
+  int get_num_accept() const;
 
   int get_num_nodes() const;
 
   int get_num_edges() const;
 
-  int get_num_accept() const;
-
   bool get_compacted() const;
 
-  std::shared_ptr<Node> get_root() const;
+  const std::set<std::shared_ptr<Node>>& get_nodes() const;
+
+  // Operations
+
+  void set_accept(std::shared_ptr<Node> node, bool accept);
 
   std::shared_ptr<Node> add_node(std::shared_ptr<Node> source,
                                  std::string label);
@@ -43,8 +53,6 @@ class LabeledGraph
                                  std::string label);
 
   void remove_edge(std::shared_ptr<Node> source, std::string label);
-
-  const std::set<std::shared_ptr<Node>>& get_nodes() const;
 
 //void LabeledGraph::dump_dictionary(std::ostream& out_stream) const
 //{

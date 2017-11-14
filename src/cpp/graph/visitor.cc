@@ -26,7 +26,8 @@ void GraphVisitor::process_label(const std::string& label)
   // Nothing to do here.
 }
 
-bool GraphVisitor::should_proceed(const std::shared_ptr<Node>& node,
+bool GraphVisitor::should_proceed(const std::shared_ptr<Node>& source_node,
+                                  const std::shared_ptr<Node>& dest_node,
                                   const std::string& label) const
 {
   return true;

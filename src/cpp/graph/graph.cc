@@ -35,6 +35,16 @@ LabeledGraph::LabeledGraph(const LabeledGraph& orig)
   }
 }
 
+std::shared_ptr<Node> LabeledGraph::get_root() const
+{
+  return root_;
+}
+
+int LabeledGraph::get_num_accept() const
+{
+  return num_accept_;
+}
+
 int LabeledGraph::get_num_nodes() const
 {
   return static_cast<int>(nodes_.size());
@@ -45,19 +55,24 @@ int LabeledGraph::get_num_edges() const
   return num_edges_;
 }
 
-int LabeledGraph::get_num_accept() const
-{
-  return num_accept_;
-}
-
 bool LabeledGraph::get_compacted() const
 {
   return compacted_;
 }
 
-std::shared_ptr<Node> LabeledGraph::get_root() const
+const std::set<std::shared_ptr<Node>>& LabeledGraph::get_nodes() const
 {
-  return root_;
+  return nodes_;
+}
+
+void LabeledGraph::set_accept(std::shared_ptr<Node> node, bool accept)
+{
+  node->set_accept(accept);
+  if (!node->get_accept() && accept) {
+    ++num_accept_;
+  } else if (node->get_accept() && !accept) {
+    --num_accept_;
+  }
 }
 
 std::shared_ptr<Node> LabeledGraph::add_node(std::shared_ptr<Node> source,
@@ -68,6 +83,11 @@ std::shared_ptr<Node> LabeledGraph::add_node(std::shared_ptr<Node> source,
 
 void LabeledGraph::remove_node(std::shared_ptr<Node> node)
 {
+//  std::cerr << "(GRAPH) Removing " << node << std::endl;
+  // Only remove a node if it is in the graph.
+  if (!contains(nodes_, node)) {
+    return;
+  }
   // Because removing in-edges and out-edges as we iterate through them would
   // invalidate the relevant iterators, we copy the relevant information into a
   // vector before removing the edges.
@@ -125,11 +145,6 @@ void LabeledGraph::remove_edge(std::shared_ptr<Node> source, std::string label)
   // Update the number of edges, since it has to be done manually.
   --num_edges_;
 }
-
-  const std::set<std::shared_ptr<Node>>& LabeledGraph::get_nodes() const
-  {
-    return nodes_;
-  }
 
 //LabeledGraph::LabeledGraph(const LabeledGraph& orig)
 //  : num_strings_(orig.num_strings_), num_bytes_(orig.num_bytes_),

@@ -12,7 +12,6 @@ int main() {
   lexicon.add_string("bac");
   lexicon.add_string("baeb");
   lexicon.add_string("bdcb");
-  lexicon.finalize();
   lexicon.compact();
   return 0;
 }

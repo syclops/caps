@@ -7,12 +7,100 @@
 // Include C standard libraries.
 
 // Include C++ standard libraries.
+#include <sstream>
 
 // Include other headers from this project.
 #include "../../src/cpp/lexicon/fsa_lexicon.h"
 
 // Include header from other projects.
 #include "gtest/gtest.h"
+
+
+class FSALexiconAdd: public testing::TestWithParam<std::set<std::string>>
+{
+ public:
+
+  virtual void SetUp()
+  {
+    strings_ = GetParam();
+    std::stringstream stream;
+    for (auto str: strings_) {
+      stream << str << std::endl;
+    }
+    lexicon_.add_file(stream);
+  }
+
+ protected:
+  std::set<std::string> strings_;
+  FSALexicon lexicon_;
+};
+
+TEST_P(FSALexiconAdd, AddsCorrectStrings)
+{
+  EXPECT_EQ(strings_.size(), lexicon_.size());
+  EXPECT_TRUE(std::equal(strings_.begin(), strings_.end(),
+                         lexicon_.dump_strings().begin()));
+}
+
+const std::set<std::string> kMonthsLong =  {"january", "february", "march",
+                                            "april", "may", "june", "july",
+                                            "august", "september", "october",
+                                            "november", "december"};
+
+const std::set<std::string> kMonthsAbbrev =  {"jan", "feb", "mar", "apr", "may",
+                                              "jun", "jul", "aug", "sep", "oct",
+                                              "nov", "dec"};
+
+const std::set<std::string> kGoogleDomains = {"ca.google.www", "ch.google.mail",
+                                              "ch.google.www", "com.google",
+                                              "com.google.mail",
+                                              "com.google.www",
+                                              "uk.co.google.www"};
+
+const std::set<std::string> kGoogleDomainsRepr = {"cbi", "cde", "cdhi", "cf",
+                                                  "cfae", "cfahi", "gi"};
+
+const std::set<std::string> kCompactionExample =  {"abdcb", "abfhgb", "acgb",
+                                                   "bac", "baeb", "bdcb"};
+
+TEST(FSALexiconCompact, Compaction)
+{
+  FSALexicon lexicon;
+  std::stringstream stream;
+  for (auto str: kMonthsLong) {
+    stream << str << std::endl;
+  }
+  lexicon.add_file(stream);
+  lexicon.compact();
+}
+
+
+INSTANTIATE_TEST_CASE_P(TestAddFile, FSALexiconAdd,
+                        testing::Values(kMonthsLong, kMonthsAbbrev,
+                                        kGoogleDomains, kGoogleDomainsRepr,
+                                        kCompactionExample));
+
+class FSALexiconCompact: public FSALexiconAdd
+{
+ public:
+  virtual void SetUp()
+  {
+    FSALexiconAdd::SetUp();
+    lexicon_.compact_long_edges();
+  }
+};
+
+TEST_P(FSALexiconCompact, AddsCorrectStrings)
+{
+  EXPECT_EQ(strings_.size(), lexicon_.size());
+  EXPECT_TRUE(std::equal(strings_.begin(), strings_.end(),
+                         lexicon_.dump_strings().begin()));
+}
+
+INSTANTIATE_TEST_CASE_P(TestAddFile, FSALexiconCompact,
+                        testing::Values(kMonthsLong, kMonthsAbbrev,
+                                        kGoogleDomains, kGoogleDomainsRepr,
+                                        kCompactionExample));
 
 TEST(FSALexicon, DefaultConstructor)
 {
@@ -29,38 +117,6 @@ TEST(FSALexicon, AddString)
   auto dump = lexicon.dump_strings();
   ASSERT_FALSE(dump.find("abc") == dump.end());
 //  EXPECT_EQ(2, lexicon.compact().size());
-}
-
-TEST(FSALexicon, Compact)
-{
-  FSALexicon lexicon;
-  lexicon.add_string("abdcb");
-  lexicon.add_string("abfhgb");
-  lexicon.add_string("acgb");
-  lexicon.add_string("bac");
-  lexicon.add_string("baeb");
-  lexicon.add_string("bdcb");
-  lexicon.finalize();
-  lexicon.compact();
-//  std::cerr << lexicon.debug();
-//  for (auto node: set) {
-//    std::cerr << node << ": " << node->get_in_degree() << " " << node->get_out_degree() << std::endl;
-//  }
-//  EXPECT_EQ(8, set.size());
-}
-
-TEST(FSALexicon, Compact2)
-{
-  FSALexicon lexicon;
-  lexicon.add_string("ca.google.www");
-  lexicon.add_string("ch.google.mail");
-  lexicon.add_string("ch.google.www");
-  lexicon.add_string("com.google.mail");
-  lexicon.add_string("com.google.www");
-  lexicon.add_string("uk.co.google.www");
-  lexicon.finalize();
-  lexicon.compact();
-//  EXPECT_EQ(29, lexicon.compact().size());
 }
 
 class NodeHashTest: public testing::Test

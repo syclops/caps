@@ -143,19 +143,6 @@ ConnectedComponent::downstream_nodes() const
   return downstream_nodes_;
 }
 
-std::vector<std::tuple<std::shared_ptr<Node>, std::shared_ptr<Node>,
-                       std::string>>
-ConnectedComponent::transitive_paths() const
-{
-  TransitivePathVisitor::reset_paths();
-  for (const auto& node: upstream_nodes_) {
-    auto visitor = std::make_shared<TransitivePathVisitor>(node,
-                                                           downstream_nodes_);
-    visit_dfs(visitor, node);
-  }
-  return TransitivePathVisitor::get_paths();
-}
-
 void ConnectedComponent::count_labels()
 {
   for (const auto& node: nodes_) {
@@ -180,16 +167,15 @@ void ConnectedComponent::count_labels()
 }
 
 TransitivePathVisitor::TransitivePathVisitor(
-  std::shared_ptr<Node> source,
-  const std::set<std::shared_ptr<Node>>& downstream_nodes)
-  : source_{std::move(source)}, label_{}, downstream_nodes_{downstream_nodes}
+  std::shared_ptr<Node> source, const ConnectedComponent& component)
+  : source_{std::move(source)}, component_{component}
 {
   // Nothing to do here.
 }
 
 void TransitivePathVisitor::process_node(const std::shared_ptr<Node>& node)
 {
-  if (contains(downstream_nodes_, node)) {
+  if (contains(component_.downstream_nodes(), node)) {
     paths_.emplace_back(source_, node, label_);
   }
 }
@@ -199,10 +185,12 @@ void TransitivePathVisitor::process_label(const std::string& label)
   label_ += label;
 }
 
-bool TransitivePathVisitor::should_proceed(const std::shared_ptr<Node>& node,
-                                           const std::string& label) const
+bool TransitivePathVisitor::should_proceed(
+  const std::shared_ptr<Node>& source_node,
+  const std::shared_ptr<Node>& dest_node, const std::string& label) const
 {
-  return !contains(downstream_nodes_, node);
+  return contains(component_.nodes(), dest_node)
+         || contains(component_.downstream_nodes(), dest_node);
 }
 
 std::vector<std::tuple<std::shared_ptr<Node>, std::shared_ptr<Node>,
@@ -224,6 +212,10 @@ make_connected_components(std::set<std::shared_ptr<Node>> nodes)
 {
   std::vector<ConnectedComponent> connected_components;
   while (!nodes.empty()) {
+    if ((*nodes.begin())->get_accept()) {
+      nodes.erase(*nodes.begin());
+      continue;
+    }
     std::set<std::shared_ptr<Node>> component, upstream, downstream;
     std::queue<std::shared_ptr<Node>> queue;
     queue.push(*nodes.begin());
@@ -240,7 +232,8 @@ make_connected_components(std::set<std::shared_ptr<Node>> nodes)
           continue;
         }
         // Add the source node to the appropriate set of nodes.
-        if (!contains(nodes, in_edge.second.lock())) {
+        if (in_edge.second.lock()->get_accept()
+            || !contains(nodes, in_edge.second.lock())) {
           upstream.insert(in_edge.second.lock());
         } else {
           component.insert(in_edge.second.lock());
@@ -253,7 +246,8 @@ make_connected_components(std::set<std::shared_ptr<Node>> nodes)
           continue;
         }
         // Add the destination node to the appropriate set of nodes.
-        if (!contains(nodes, out_edge.second)) {
+        if (out_edge.second->get_accept()
+            || !contains(nodes, out_edge.second)) {
           downstream.insert(out_edge.second);
         } else {
           component.insert(out_edge.second);
@@ -267,4 +261,16 @@ make_connected_components(std::set<std::shared_ptr<Node>> nodes)
     connected_components.emplace_back(component, upstream, downstream);
   }
   return connected_components;
+}
+
+std::vector<std::tuple<std::shared_ptr<Node>, std::shared_ptr<Node>,
+                       std::string>>
+get_transitive_paths(const ConnectedComponent& component)
+{
+  TransitivePathVisitor::reset_paths();
+  for (const auto& node: component.upstream_nodes()) {
+    auto visitor = std::make_shared<TransitivePathVisitor>(node, component);
+    visit_dfs(visitor, node);
+  }
+  return TransitivePathVisitor::get_paths();
 }

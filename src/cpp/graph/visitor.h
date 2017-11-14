@@ -23,7 +23,8 @@ class GraphVisitor
 
   virtual void process_label(const std::string& label);
 
-  virtual bool should_proceed(const std::shared_ptr<Node>& node,
+  virtual bool should_proceed(const std::shared_ptr<Node>& source_node,
+                              const std::shared_ptr<Node>& dest_node,
                               const std::string& label) const;
 
  private:

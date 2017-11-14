@@ -14,6 +14,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <utility>
 
 // Include other headers from this project.
 #include "../common/contains.h"
@@ -44,6 +45,10 @@ bool NodePred::operator()(const std::shared_ptr<Node>& lhs,
                         rhs->get_out_edges().begin()));
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// FSALexicon methods
+////////////////////////////////////////////////////////////////////////////////
+
 FSALexicon::FSALexicon()
   : graph_{}, register_{}
 {
@@ -58,21 +63,27 @@ void FSALexicon::add_file(std::istream& instream)
 
 void FSALexicon::add_string(std::string str)
 {
+//  std::cerr << "BLAH" << std::endl;
   if (has_string(str)) {
     return;
   }
   auto current_node = graph_.get_root();
   for (auto c: str) {
     if (!current_node->has_out_label(std::string{c})) {
+//      std::cerr << "Outgoing label " << c << " not found. Branching from node "
+//                << current_node << std::endl;
       if (current_node->get_out_degree() > 0) {
         replace_or_register(current_node);
       }
+//      std::cerr << "edit_add " << current_node << " " << c << std::endl;
       edit_node(current_node, [this, c](std::shared_ptr<Node> node){
         graph_.add_edge(node, std::string{c});
       });
     }
     current_node = current_node->follow_out_edge(std::string{c});
+//    std::cerr << "Advancing to node " << current_node << std::endl;
   }
+//  std::cerr << "set " << current_node << " true" << std::endl;
   set_accept(current_node, true);
   ++size_;
 }
@@ -111,19 +122,15 @@ void FSALexicon::load(std::istream& instream)
 
 void FSALexicon::dump(std::ostream& outstream) const
 {
-  // TODO: edit this
   for (const auto& str: dump_strings()) {
     outstream << str << "\n";
   }
-}
-
-void FSALexicon::finalize()
-{
-  replace_or_register(graph_.get_root());
+//  outstream << "test" << std::endl;
 }
 
 std::set<std::string> FSALexicon::dump_strings() const
 {
+  AcceptStringVisitor::reset_strings();
   auto visitor = std::make_shared<AcceptStringVisitor>();
   visit_dfs(visitor, graph_.get_root());
   return visitor->get_string_dump();
@@ -133,89 +140,160 @@ void FSALexicon::compact()
 {
   // Select all nodes that have an in-degree or out-degree of 1 and are not the
   // source or sink node.
-//  auto candidate_visitor = std::make_shared<SelectionVisitor>(
-//    [](const std::shared_ptr<Node>& node) {
+  std::cerr << "Getting compaction candidates..." << std::flush;
+  auto candidate_visitor = std::make_shared<SelectionVisitor>(
+    [](std::shared_ptr<Node> node) {
 //      return node->get_in_degree() > 0 && node->get_out_degree() > 0
 //             && node->get_in_degree() == 1 || node->get_out_degree() == 1;
-//    });
-  std::cerr << "Getting compaction candidates..." << std::flush;
-  auto candidate_visitor = std::make_shared<CompactionVisitor>();
-  visit_dfs(candidate_visitor, graph_.get_root());
-  auto compaction_candidates = candidate_visitor->get_selection();
-  candidate_visitor.reset();
-  std::cerr << "done! (" << compaction_candidates.size() << " nodes)"
-            << std::endl;
-  // Collect a set of all of the labels in the graph.
-  std::cerr << "Getting current graph stats..." << std::flush;
-  auto label_visitor = std::make_shared<LabelCountVisitor>();
-  visit_dfs(label_visitor, graph_.get_root());
-  auto label_counts = label_visitor->get_counts();
-  long uncompacted_size = size_estimate(static_cast<int>(label_counts.size()),
-                                        graph_.get_num_edges());
-  std::cerr << "done!" << std::endl;
-  // For each set in powerset, apply connected components and analyze paths.
-  std::set<std::shared_ptr<Node>> min_set;
-  long min_size = LONG_MAX;
-  long num = 0;
-  for (const auto& set: powerset(compaction_candidates)) {
-    std::cerr << "Checking set " << num << " (" << set.size() << " elements)" << std::endl;
-    std::unordered_map<std::string, int> set_label_counts;
-    std::set<std::string> new_labels;
-    auto set_edge_count = 0;
-//    std::cerr << "This set has " << x.size() << " connected components" << std::endl;
-    for (const auto& component: make_connected_components(set)) {
-//      std::cerr << "Analyzing component of " << component.size() << " nodes..." << std::endl;
-      for (auto pair: component.label_counts()) {
-        if (!contains(set_label_counts, pair.first)) {
-          set_label_counts.emplace(pair.first, 0);
+      return node->get_in_degree() == 1 && node->get_out_degree() == 1;
+    }
+  );
+  visit_unordered(candidate_visitor, graph_);
+  std::cerr << "Selected " << candidate_visitor->get_selection().size()
+            << " nodes" << std::endl;
+  auto label_count_visitor = std::make_shared<LabelCountVisitor>();
+  visit_unordered(label_count_visitor, graph_);
+  auto label_counts = label_count_visitor->get_counts();
+  std::unordered_map<int, int> score_counts;
+  for (const auto& candidate: candidate_visitor->get_selection()) {
+    int count = 0;
+    for (auto in_edge_itr: candidate->get_in_edges()) {
+      if (contains(label_counts, in_edge_itr.first)
+          && label_counts.at(in_edge_itr.first) == 1) {
+        ++count;
+      }
+      for (auto out_edge_itr: candidate->get_out_edges()) {
+        if (!contains(label_counts, in_edge_itr.first + out_edge_itr.first)) {
+          --count;
         }
-        set_label_counts[pair.first] += pair.second;
-        set_edge_count += pair.second;
-      }
-      for (auto triple: component.transitive_paths()) {
-        new_labels.insert(std::get<2>(triple));
-      }
-      std::cerr << "done!" << std::endl;
-    }
-    // Calculate the net effect on the size of the FSA.
-//    std::cerr << "Finding new compacted size..." << std::flush;
-    int removed_labels = 0;
-    for (auto pair: set_label_counts) {
-      if (label_counts.at(pair.first) == pair.second) {
-        ++removed_labels;
       }
     }
-    auto compacted_size = static_cast<long>(label_counts.size() - removed_labels
-                                            + new_labels.size());
-    if (compacted_size < min_size) {
-//      std::cerr << "replacing minimum size..." << std::flush;
-      min_size = compacted_size;
-      min_set = set;
+    for (auto out_edge_itr: candidate->get_out_edges()) {
+      if (contains(label_counts, out_edge_itr.first)
+          && label_counts.at(out_edge_itr.first) == 1) {
+        ++count;
+      }
     }
-//    std::cerr << "done!" << std::endl;
-    ++num;
+    if (!contains(score_counts, count)) {
+      score_counts[count] = 0;
+    }
+    ++score_counts[count];
   }
-  std::cerr << "Starting size: " << uncompacted_size << " bits" << std::endl;
-  std::cerr << "Minimum size: " << min_size << " bits" << std::endl;
-  auto order_visitor = std::make_shared<OrderVisitor>();
-  visit_dfs(order_visitor, graph_.get_root());
-  auto order_map = order_visitor->get_order();
-  std::cerr << "Original graph: " << std::endl;
-  auto debug_visitor = std::make_shared<DebugVisitor>();
-  visit_dfs(debug_visitor, graph_.get_root());
-  std::cerr << debug_visitor->get_debug_string();
-  std::cerr << "Optimal compaction set: {";
-  for (const auto& node: min_set) {
-    std::cerr << order_map[node] << " ";
+  for (auto score_count: score_counts) {
+    std::cerr << score_count.first << " " << score_count.second << std::endl;
   }
-  std::cerr << "\b}" << std::endl;
+
+//  candidate_visitor.reset();
+//  std::cerr << "done! (" << compaction_candidates.size() << " nodes)"
+//            << std::endl;
+//  // Collect a set of all of the labels in the graph.
+//  std::cerr << "Getting current graph stats..." << std::flush;
+//  auto label_visitor = std::make_shared<LabelCountVisitor>();
+//  visit_dfs(label_visitor, graph_.get_root());
+//  auto label_counts = label_visitor->get_counts();
+//  long uncompacted_size = size_estimate(static_cast<int>(label_counts.size()),
+//                                        graph_.get_num_edges());
+//  std::cerr << "done!" << std::endl;
+//  // For each set in powerset, apply connected components and analyze paths.
+//  std::set<std::shared_ptr<Node>> min_set;
+//  long min_size = LONG_MAX;
+//  long num = 0;
+//  for (const auto& set: powerset(compaction_candidates)) {
+//    std::cerr << "Checking set " << num << " (" << set.size() << " elements)" << std::endl;
+//    std::unordered_map<std::string, int> set_label_counts;
+//    std::set<std::string> new_labels;
+//    auto set_edge_count = 0;
+////    std::cerr << "This set has " << x.size() << " connected components" << std::endl;
+//    for (const auto& component: make_connected_components(set)) {
+////      std::cerr << "Analyzing component of " << component.size() << " nodes..." << std::endl;
+//      for (auto pair: component.label_counts()) {
+//        if (!contains(set_label_counts, pair.first)) {
+//          set_label_counts.emplace(pair.first, 0);
+//        }
+//        set_label_counts[pair.first] += pair.second;
+//        set_edge_count += pair.second;
+//      }
+//      for (auto triple: component.transitive_paths()) {
+//        new_labels.insert(std::get<2>(triple));
+//      }
+//      std::cerr << "done!" << std::endl;
+//    }
+//    // Calculate the net effect on the size of the FSA.
+////    std::cerr << "Finding new compacted size..." << std::flush;
+//    int removed_labels = 0;
+//    for (auto pair: set_label_counts) {
+//      if (label_counts.at(pair.first) == pair.second) {
+//        ++removed_labels;
+//      }
+//    }
+//    auto compacted_size = static_cast<long>(label_counts.size() - removed_labels
+//                                            + new_labels.size());
+//    if (compacted_size < min_size) {
+////      std::cerr << "replacing minimum size..." << std::flush;
+//      min_size = compacted_size;
+//      min_set = set;
+//    }
+////    std::cerr << "done!" << std::endl;
+//    ++num;
+//  }
+//  std::cerr << "Starting size: " << uncompacted_size << " bits" << std::endl;
+//  std::cerr << "Minimum size: " << min_size << " bits" << std::endl;
+//  auto order_visitor = std::make_shared<OrderVisitor>();
+//  visit_dfs(order_visitor, graph_.get_root());
+//  auto order_map = order_visitor->get_order();
+//  std::cerr << "Original graph: " << std::endl;
+//  auto debug_visitor = std::make_shared<DebugVisitor>();
+//  visit_dfs(debug_visitor, graph_.get_root());
+//  std::cerr << debug_visitor->get_debug_string();
+//  std::cerr << "Optimal compaction set: {";
+//  for (const auto& node: min_set) {
+//    std::cerr << order_map[node] << " ";
+//  }
+//  std::cerr << "\b}" << std::endl;
+}
+
+void FSALexicon::compact_long_edges()
+{
+  auto candidate_visitor = std::make_shared<SelectionVisitor>(
+    [](std::shared_ptr<Node> node) {
+      return node->get_in_degree() == 1 && node->get_out_degree() == 1;
+    }
+  );
+  visit_unordered(candidate_visitor, graph_);
+  for (const auto& component: make_connected_components(
+    candidate_visitor->get_selection())) {
+    for (auto triple: get_transitive_paths(component)) {
+      graph_.add_edge(std::get<0>(triple), std::get<1>(triple),
+                      std::get<2>(triple));
+    }
+    for (const auto& node: component.nodes()) {
+      graph_.remove_node(node);
+    }
+  }
+}
+
+int FSALexicon::register_size() const
+{
+  return static_cast<int>(register_.size());
 }
 
 std::string FSALexicon::debug() const
 {
-  auto visitor = std::make_shared<DebugVisitor>();
-  visit_dfs(visitor, graph_.get_root());
-  return visitor->get_debug_string();
+//  auto visitor = std::make_shared<DebugVisitor>();
+//  visit_dfs(visitor, graph_.get_root());
+//  return visitor->get_debug_string();
+  std::stringstream debug_string;
+  debug_string << graph_.get_num_nodes() << " nodes" << std::endl;
+  debug_string << graph_.get_num_accept() << " accept" << std::endl;
+  debug_string << graph_.get_num_edges() << " edges" << std::endl;
+  debug_string << std::boolalpha;
+  debug_string << "Compacted: " << graph_.get_compacted() << std::endl;
+  return debug_string.str();
+}
+
+const LabeledGraph& FSALexicon::get_graph() const
+{
+  return graph_;
 }
 
 void FSALexicon::set_accept(std::shared_ptr<Node> node, bool accept)
@@ -223,33 +301,46 @@ void FSALexicon::set_accept(std::shared_ptr<Node> node, bool accept)
   if (node->get_accept() == accept) {
     return;
   }
-  if (contains(register_, node)) {
-    register_.erase(node);
-  }
-  node->set_accept(accept);
-
+  edit_node(node, [accept](std::shared_ptr<Node> node_) { node_->set_accept(accept); });
 }
 
 void FSALexicon::replace_or_register(std::shared_ptr<Node> node)
 {
+//  std::cerr << "RR " << node << std::endl;
   auto last_child_itr = node->get_reverse_out_edges().begin();
   auto child_label = last_child_itr->first;
   auto child_node = last_child_itr->second;
   if (child_node->get_out_degree() > 0) {
     replace_or_register(child_node);
   }
+//  for (auto out_edge_itr: child_node->get_out_edges()) {
+//    std::cerr << "  " << out_edge_itr.second << " " << out_edge_itr.first << std::endl;
+//  }
   auto registered_node = register_.find(child_node);
-  if (registered_node != register_.end()) {
+  if (registered_node != register_.end() && child_node != *registered_node) {
+//    std::cerr << "replace " << child_node << " " << *registered_node << std::endl;
+//    std::cerr << "add " << node << " " << *registered_node << " " << child_label << std::endl;
     edit_node(node,
               [this, registered_node, child_label](
                 std::shared_ptr<Node> source_node) {
                 graph_.add_edge(source_node, *registered_node, child_label);
               });
+//    std::cerr << "delete " << child_node << std::endl;
     graph_.remove_node(child_node);
   } else {
+//    std::cerr << "register " << child_node << std::endl;
     register_.insert(child_node);
+//    std::cerr << "Register: ";
+//    for (auto x: register_) {
+//      std::cerr << x << " ";
+//    }
+//    std::cerr << std::endl;
   }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// AcceptStringVisitor methods
+////////////////////////////////////////////////////////////////////////////////
 
 AcceptStringVisitor::AcceptStringVisitor()
     : label_accumulator_{}
@@ -276,7 +367,16 @@ std::set<std::string> AcceptStringVisitor::get_string_dump() const
   return string_dump_;
 }
 
+void AcceptStringVisitor::reset_strings()
+{
+  string_dump_.clear();
+}
+
 std::set<std::string> AcceptStringVisitor::string_dump_ = {};
+
+////////////////////////////////////////////////////////////////////////////////
+// DebugVisitor methods
+////////////////////////////////////////////////////////////////////////////////
 
 DebugVisitor::DebugVisitor()
   : debug_string_{}, node_map_{}
@@ -301,7 +401,11 @@ void DebugVisitor::process_node(const std::shared_ptr<Node>& node)
     std::stringstream debug_stream;
     debug_stream << debug_string_;
     debug_stream << node_map_.at(node) << " " << node_map_.at(edge_itr.second)
-                 << " " << edge_itr.first << std::endl;
+                 << " " << edge_itr.first;
+    if (edge_itr.second->get_accept()) {
+      debug_stream << "*";
+    }
+    debug_stream << std::endl;
     debug_string_ = debug_stream.str();
   }
 }
@@ -310,6 +414,10 @@ std::string DebugVisitor::get_debug_string() const
 {
   return debug_string_;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// LabelCountVisitor methods
+////////////////////////////////////////////////////////////////////////////////
 
 LabelCountVisitor::LabelCountVisitor()
   : label_counts_{}
@@ -335,6 +443,10 @@ std::unordered_map<std::string, int> LabelCountVisitor::get_counts() const
   return label_counts_;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// OrderVisitor methods
+////////////////////////////////////////////////////////////////////////////////
+
 OrderVisitor::OrderVisitor()
   : node_map_{}
 {
@@ -359,14 +471,13 @@ OrderVisitor::get_order() const
   return node_map_;
 };
 
-SelectionVisitor::SelectionVisitor()
-  : selector_{0}, selection_{}
-{
-}
+////////////////////////////////////////////////////////////////////////////////
+// SelectionVisitor methods
+////////////////////////////////////////////////////////////////////////////////
 
 SelectionVisitor::SelectionVisitor(
-  std::function<bool(const std::shared_ptr<Node>&)> selector)
-  : selector_{selector}, selection_{}
+  std::function<bool(std::shared_ptr<Node>)> selector)
+  : selector_{std::move(selector)}, selection_{}
 {
   // Nothing to do here.
 }
@@ -379,10 +490,7 @@ std::shared_ptr<SelectionVisitor> SelectionVisitor::clone()
 void SelectionVisitor::process_node(const std::shared_ptr<Node>& node)
 {
   if (selector_ == 0) {
-    if (node->get_in_degree() > 0 && node->get_out_degree() > 0
-        && (node->get_in_degree() == 1 || node->get_out_degree() == 1)) {
-      selection_.insert(node);
-    }
+    selection_.insert(node);
   } else if (selector_(node)) {
     selection_.insert(node);
   }
@@ -397,6 +505,10 @@ std::set<std::shared_ptr<Node>> SelectionVisitor::get_selection() const
 {
   return selection_;
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// CompactionVisitor methods
+////////////////////////////////////////////////////////////////////////////////
 
 CompactionVisitor::CompactionVisitor()
   : selection_{}
