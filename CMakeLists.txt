@@ -1,5 +1,5 @@
 # Standard project metadata
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.5)
 project(caps)
 
 # Set the output directory
@@ -10,27 +10,37 @@ set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 # Use C++11 and set desired compile flags
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wextra -pedantic -g")
-set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -pedantic -Ofast")
+set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -pedantic -pg -Ofast")
 
 # Use Boost
 # Note: you need to change the Boost_INCLUDE_DIR variable to wherever your local
 #       Boost library is located.
-find_package(Boost)
-if(Boost_FOUND)
-  include_directories(${Boost_INCLUDE_DIR})
-else()
-  message(FATAL_ERROR "Boost not found")
-endif()
+#find_package(Boost)
+#if(Boost_FOUND)
+#  include_directories(${Boost_INCLUDE_DIR})
+#else()
+#  message(FATAL_ERROR "Boost not found")
+#endif()
 
 # Use crascit's DownloadProject framework to build external libraries.
 include(DownloadProject.cmake)
 
 # Integrate GoogleTest for unit tests
 download_project(PROJ googletest
-  GIT_REPOSITORY      https://github.com/google/googletest.git
+    GIT_REPOSITORY      https://github.com/google/googletest.git
+    GIT_TAG             master
+    ${UPDATE_DISCONNECTED_IF_AVAILABLE}
+    )
+
+add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
+
+download_project(PROJ cxxopts
+  GIT_REPOSITORY      https://github.com/jarro2783/cxxopts.git
   GIT_TAG             master
   ${UPDATE_DISCONNECTED_IF_AVAILABLE}
 )
+
+add_subdirectory(${cxxopts_SOURCE_DIR} ${cxxopts_BINARY_DIR})
 
 # Use SDSL-Lite for succinct data structures
 #download_project(PROJ sdsl-lite
@@ -43,9 +53,20 @@ download_project(PROJ googletest
 # when building with Visual Studio
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
-
 # Declare executables and their dependencies
+
+add_executable(fsa_lexicon tools/cpp/fsa_lexicon_tool.cc
+    src/cpp/graph/node.h src/cpp/graph/node.cc
+    src/cpp/graph/visitor.h src/cpp/graph/visitor.cc
+    src/cpp/graph/graph.h src/cpp/graph/graph.cc
+    src/cpp/lexicon/fsa_lexicon.h src/cpp/lexicon/fsa_lexicon.cc
+    src/cpp/lexicon/lexicon.h src/cpp/lexicon/lexicon.cc
+    src/cpp/graph/visitor.cc src/cpp/graph/visitor.h
+    src/cpp/graph/connected_component.cc src/cpp/graph/connected_component.h
+    src/cpp/common/iterable.h src/cpp/common/contains.h
+    src/cpp/graph/graph_search.h src/cpp/common/powerset.h)
+target_include_directories(fsa_lexicon INTERFACE ${cxxopts_SOURCE_DIR})
+
 add_executable(nodetest
         src/cpp/graph/node.h
         src/cpp/graph/node.cc
@@ -74,7 +95,7 @@ add_executable(fsa_lexicon_test
     src/cpp/graph/graph.h src/cpp/graph/graph.cc
     src/cpp/lexicon/lexicon.h src/cpp/lexicon/lexicon.cc
     src/cpp/lexicon/fsa_lexicon.h src/cpp/lexicon/fsa_lexicon.cc
-    test/src/fsa_lexicon_test.cc src/cpp/graph/visitor.cc src/cpp/graph/visitor.h src/cpp/graph/connected_component.cc src/cpp/graph/connected_component.h src/cpp/common/iterable.h src/cpp/common/contains.h src/cpp/graph/graph_search.h src/cpp/common/powerset.h)
+    test/fsa_lexicon/fsa_lexicon_test.cc src/cpp/graph/visitor.cc src/cpp/graph/visitor.h src/cpp/graph/connected_component.cc src/cpp/graph/connected_component.h src/cpp/common/iterable.h src/cpp/common/contains.h src/cpp/graph/graph_search.h src/cpp/common/powerset.h test/fsa_lexicon/test_helper.h)
 target_link_libraries(fsa_lexicon_test gtest gtest_main)
 
 add_executable(lexicon_test
@@ -89,6 +110,7 @@ target_link_libraries(lexicon_test gtest gtest_main)
 
 add_executable(connected_component_test
     src/cpp/graph/node.cc src/cpp/graph/node.h
+    src/cpp/graph/graph.cc src/cpp/graph/graph.h
     src/cpp/graph/visitor.cc src/cpp/graph/visitor.h
     src/cpp/graph/connected_component.cc src/cpp/graph/connected_component.h
     test/src/connected_component_test.cc src/cpp/common/iterable.h src/cpp/common/contains.h)
