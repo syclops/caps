@@ -70,11 +70,23 @@ class FSALexicon: public Lexicon
 
   std::set<std::string> dump_strings() const override;
 
+  const LabeledGraph& get_graph() const;
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Debugging
+  //////////////////////////////////////////////////////////////////////////////
+
   int register_size() const;
 
   std::string debug() const;
 
-  const LabeledGraph& get_graph() const;
+  std::unordered_map<std::shared_ptr<Node>, int> dest_counts() const;
+
+  std::unordered_map<std::string, int> label_counts() const;
+
+  void dump_label_huffman(std::ostream& outstream) const;
+
+  int binary_size() const;
 
  private:
 
@@ -137,6 +149,23 @@ class DebugVisitor: public CloneableVisitor<DebugVisitor, GraphVisitor>,
  private:
   std::string debug_string_;
   std::unordered_map<std::shared_ptr<Node>, int> node_map_;
+};
+
+class DestinationCountVisitor
+  : public CloneableVisitor<DestinationCountVisitor, GraphVisitor>,
+    public std::enable_shared_from_this<DestinationCountVisitor>
+{
+ public:
+  DestinationCountVisitor();
+
+  std::shared_ptr<DestinationCountVisitor> clone();
+
+  void process_node(const std::shared_ptr<Node>& node) override;
+
+  std::unordered_map<std::shared_ptr<Node>, int> get_counts() const;
+
+ private:
+  std::unordered_map<std::shared_ptr<Node>, int> destination_counts_;
 };
 
 class LabelCountVisitor: public CloneableVisitor<LabelCountVisitor,

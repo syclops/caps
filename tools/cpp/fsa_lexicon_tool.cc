@@ -8,45 +8,29 @@
 #include <utility>
 
 #include "../../src/cpp/lexicon/fsa_lexicon.h"
+#include "../../src/cpp/common/io_option.h"
+#include "../../src/cpp/common/measure_time.h"
 
-#include "../../build/cxxopts-src/include/cxxopts.hpp"
+#include <cxxopts.hpp>
 
-template <typename VoidFuncType, typename... Args>
-double measure_time(VoidFuncType function, Args&&... args)
-{
-  namespace chr = std::chrono;
-  auto start_time = chr::high_resolution_clock::now();
-  function(std::forward<Args>(args)...);
-  return chr::duration_cast<chr::duration<double>>(
-    chr::high_resolution_clock::now() - start_time).count();
-}
-
-FSALexicon make_lexicon(const std::string& infile_name, bool load)
+FSALexicon make_lexicon(std::istream& in_stream)
 {
   FSALexicon lexicon;
-  std::ifstream infile(infile_name);
-  double time;
-  if (load) {
-    std::cout << "Loading lexicon from " << infile_name << "..." << std::flush;
-    time = measure_time([=](FSALexicon& l, std::ifstream& f) { l.load(f); },
-                        lexicon, infile);
-  } else {
-    std::cout << "Making lexicon from " << infile_name << "..." << std::flush;
-    time = measure_time([](FSALexicon& l, std::ifstream& f) { l.add_file(f); },
-                        lexicon, infile);
-  }
-  std::cout << "done! (took " << time << " seconds)" << std::endl;
+  lexicon.add_file(in_stream);
   return lexicon;
 }
 
-void write_lexicon(const FSALexicon& lexicon, const std::string& outfile_name)
+FSALexicon load_lexicon(std::istream& in_stream)
 {
-  std::ofstream outfile(outfile_name);
-  std::cout << "Writing lexicon to " << outfile_name << "..." << std::flush;
-  auto time = measure_time([&lexicon](std::ofstream& of) {
-    lexicon.dump(of);
-  }, outfile);
-  std::cout << "done! (took " << time << "seconds)" << std::endl;
+  FSALexicon lexicon;
+  lexicon.load(in_stream);
+  return lexicon;
+}
+
+void write_lexicon(std::ostream& out_stream, const FSALexicon& lexicon)
+{
+//  lexicon.dump(out_stream);
+  lexicon.dump_label_huffman(out_stream);
 }
 
 int main(int argc, char* argv[])
@@ -55,34 +39,57 @@ int main(int argc, char* argv[])
     cxxopts::Options options(argv[0], "FSA-based lexicon utility");
     bool load = false;
     options.add_options()
-      ("i,infile", "Input file", cxxopts::value<std::string>())
-      ("l,load", "Load a representation", cxxopts::value(load))
-      ("o,outfile", "Output file", cxxopts::value<std::string>());
-    options.parse(argc, argv);
-    std::cout << "Infile: " << options["infile"].as<std::string>() << std::endl;
-    std::cout << "Outfile: " << options["outfile"].as<std::string>() << std::endl;
-    std::cout << std::boolalpha;
-    std::cout << "Load: " << options["load"].as<bool>() << std::endl;
+      ("i,infile", "Input file",
+       cxxopts::value<std::string>()->default_value(""))
+      ("l,load", "Load a representation", cxxopts::value<bool>(load))
+      ("h,help", "Display this help message")
+      ("o,outfile", "Output file",
+       cxxopts::value<std::string>()->default_value(""));
+    auto result = options.parse(argc, argv);
 
-    auto lexicon = make_lexicon(options["infile"].as<std::string>(),
-                                options["load"].as<bool>());
+    if (result.count("help") > 0) {
+      std::cout << options.help({""}) << std::endl;
+      return 0;
+    }
 
-    std::cout << "Compacting long edges..." << std::flush;
-    auto time = measure_time([](FSALexicon& l) { l.compact_long_edges(); }, lexicon);
-    std::cout << "done! (took " << time << " seconds)" << std::endl;
+    const auto infile = result["infile"].as<std::string>();
+    const auto outfile = result["outfile"].as<std::string>();
 
-    lexicon.compact();
+    // Make or load an FSALexicon from standard input or an input file.
+    FunctionTimer<FSALexicon, std::string, bool> in_timer([](std::string infile,
+                                                             bool load) {
+      return input_option(load ? load_lexicon: make_lexicon, infile);
+    });
+    std::cout << (load ? "Loading" : "Making") << " lexicon from "
+              << (infile.empty() ? "standard input" : infile)
+              << "..." << std::flush;
+    auto lexicon = in_timer.run(infile, load);
+    std::cout << "done! (took " << in_timer.time() << " seconds)" << std::endl;
 
-//    std::cout << lexicon.debug();
+    // Compact long edges.
+    FunctionTimer<void, FSALexicon&> compact_timer([](FSALexicon& lexicon) {
+      lexicon.compact_long_edges();
+    });
+    std::cout << "Compacting lexicon..." << std::flush;
+    compact_timer.run(lexicon);
+    std::cout << "done! (took " << compact_timer.time() << " seconds)" << std::endl;
 
-//    write_lexicon(lexicon, options["outfile"].as<std::string>());
+    // Write the compacted lexicon to file.
+    FunctionTimer<void, std::string, FSALexicon&> out_timer([](
+      std::string outfile, FSALexicon& lexicon) {
+      output_option(write_lexicon, outfile, lexicon);
+    });
+    std::cout << "Writing lexicon to "
+              << (outfile.empty() ? "standard output" : outfile)
+              << "..." << std::flush;
+    out_timer.run(outfile, lexicon);
+    std::cout << "done! (took " << compact_timer.time() << " seconds)" << std::endl;
 
-//    std::cout << "Lexicon size: " << lexicon.size() << std::endl;
-//    std::cout << "Dump size: " << lexicon.dump_strings().size() << std::endl;
+//    std::cout << "Lexicon has " << lexicon.get_graph().get_num_nodes()
+//              << " nodes, " << lexicon.get_graph().get_num_edges()
+//              << " edges, and " << lexicon.get_graph().get_num_accept()
+//              << " accepting states" << std::endl;
 //    std::cout << "Debug: " << lexicon.debug() << std::endl;
-//    for (auto s: lexicon.dump_strings()) {
-//      std::cout << s << std::endl;
-//    }
   } catch (const cxxopts::OptionException& e) {
     std::cout << "Error parsing options: " << e.what() << std::endl;
     exit(1);

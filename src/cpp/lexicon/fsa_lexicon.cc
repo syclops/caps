@@ -19,6 +19,7 @@
 // Include other headers from this project.
 #include "../common/contains.h"
 #include "../common/powerset.h"
+#include "../encoding/huffman.h"
 #include "../graph/connected_component.h"
 #include "../graph/graph_search.h"
 
@@ -44,6 +45,7 @@ bool NodePred::operator()(const std::shared_ptr<Node>& lhs,
                         lhs->get_out_edges().end(),
                         rhs->get_out_edges().begin()));
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // FSALexicon methods
@@ -279,16 +281,30 @@ int FSALexicon::register_size() const
 
 std::string FSALexicon::debug() const
 {
-//  auto visitor = std::make_shared<DebugVisitor>();
-//  visit_dfs(visitor, graph_.get_root());
-//  return visitor->get_debug_string();
-  std::stringstream debug_string;
-  debug_string << graph_.get_num_nodes() << " nodes" << std::endl;
-  debug_string << graph_.get_num_accept() << " accept" << std::endl;
-  debug_string << graph_.get_num_edges() << " edges" << std::endl;
-  debug_string << std::boolalpha;
-  debug_string << "Compacted: " << graph_.get_compacted() << std::endl;
-  return debug_string.str();
+  auto visitor = std::make_shared<DebugVisitor>();
+  visit_dfs(visitor, graph_.get_root());
+  return visitor->get_debug_string();
+//  std::stringstream debug_string;
+//  debug_string << graph_.get_num_nodes() << " nodes" << std::endl;
+//  debug_string << graph_.get_num_accept() << " accept" << std::endl;
+//  debug_string << graph_.get_num_edges() << " edges" << std::endl;
+//  debug_string << std::boolalpha;
+//  debug_string << "Compacted: " << graph_.get_compacted() << std::endl;
+//  return debug_string.str();
+}
+
+std::unordered_map<std::shared_ptr<Node>, int> FSALexicon::dest_counts() const
+{
+  auto visitor = std::make_shared<DestinationCountVisitor>();
+  visit_unordered(visitor, graph_);
+  return visitor->get_counts();
+}
+
+std::unordered_map<std::string, int> FSALexicon::label_counts() const
+{
+  auto visitor = std::make_shared<LabelCountVisitor>();
+  visit_unordered(visitor, graph_);
+  return visitor->get_counts();
 }
 
 const LabeledGraph& FSALexicon::get_graph() const
@@ -296,12 +312,81 @@ const LabeledGraph& FSALexicon::get_graph() const
   return graph_;
 }
 
+void FSALexicon::dump_label_huffman(std::ostream& outstream) const
+{
+  auto label_count_visitor = std::make_shared<LabelCountVisitor>();
+  visit_unordered(label_count_visitor, graph_);
+  HuffmanCoder<std::string> coder(label_count_visitor->get_counts());
+  auto codebook = coder.decoding_map();
+  for (const auto& symbol: std::get<0>(codebook)) {
+    outstream << symbol << std::endl;
+  }
+  for (auto index: std::get<1>(codebook)) {
+    outstream << index << " ";
+  }
+  outstream << std::endl;
+  for (auto code: std::get<2>(codebook)) {
+    outstream << code << " ";
+  }
+  outstream << std::endl;
+}
+
+int FSALexicon::binary_size() const
+{
+  auto size = 0;
+  auto struct_size = 2 * graph_.get_num_edges();
+
+  auto label_count_map = label_counts();
+  HuffmanCoder<std::string> label_coder(label_count_map);
+  for (auto pair: label_count_map) {
+    struct_size += pair.second * label_coder.encode({pair.first}).size();
+    size += 8 * pair.first.length();
+  }
+
+  auto dest_count_map = dest_counts();
+  HuffmanCoder<std::shared_ptr<Node>> dest_coder(dest_count_map);
+  for (auto pair: dest_count_map) {
+    struct_size += pair.second * dest_coder.encode({pair.first}).size();
+  }
+  size += ceil(log2(struct_size)) * dest_count_map.size();
+
+  size += struct_size;
+
+  auto label_codebook = label_coder.decoding_map();
+  size += std::get<1>(label_codebook).size()
+            * ceil(log2(*std::get<1>(label_codebook).rbegin()));
+  if (size % 8 != 0) {
+    size += 8 - (size % 8);
+  }
+  size += std::get<2>(label_codebook).size()
+          * ceil(log2(*std::get<2>(label_codebook).rbegin()));
+  if (size % 8 != 0) {
+    size += 8 - (size % 8);
+  }
+
+  auto dest_codebook = dest_coder.decoding_map();
+  size += std::get<1>(dest_codebook).size()
+            * ceil(log2(*std::get<1>(dest_codebook).rbegin()));
+  if (size % 8 != 0) {
+    size += 8 - (size % 8);
+  }
+  size +=  std::get<2>(dest_codebook).size()
+           * ceil(log2(*std::get<2>(dest_codebook).rbegin()));
+  if (size % 8 != 0) {
+    size += 8 - (size % 8);
+  }
+
+  return size;
+}
+
 void FSALexicon::set_accept(std::shared_ptr<Node> node, bool accept)
 {
   if (node->get_accept() == accept) {
     return;
   }
-  edit_node(node, [accept](std::shared_ptr<Node> node_) { node_->set_accept(accept); });
+  edit_node(node, [this, accept](std::shared_ptr<Node> node_) {
+    graph_.set_accept(node_, accept);
+  });
 }
 
 void FSALexicon::replace_or_register(std::shared_ptr<Node> node)
@@ -338,6 +423,7 @@ void FSALexicon::replace_or_register(std::shared_ptr<Node> node)
   }
 }
 
+
 ////////////////////////////////////////////////////////////////////////////////
 // AcceptStringVisitor methods
 ////////////////////////////////////////////////////////////////////////////////
@@ -373,6 +459,7 @@ void AcceptStringVisitor::reset_strings()
 }
 
 std::set<std::string> AcceptStringVisitor::string_dump_ = {};
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // DebugVisitor methods
@@ -414,6 +501,39 @@ std::string DebugVisitor::get_debug_string() const
 {
   return debug_string_;
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+// DestinationCountVisitor methods
+////////////////////////////////////////////////////////////////////////////////
+
+DestinationCountVisitor::DestinationCountVisitor()
+  : destination_counts_{}
+{
+  // Nothing to do here.
+}
+
+std::shared_ptr<DestinationCountVisitor> DestinationCountVisitor::clone()
+{
+  return shared_from_this();
+}
+
+void DestinationCountVisitor::process_node(const std::shared_ptr<Node>& node)
+{
+  for (auto itr: node->get_out_edges()) {
+    if (!contains(destination_counts_, itr.second)) {
+      destination_counts_.emplace(itr.second, 0);
+    }
+    ++destination_counts_[itr.second];
+  }
+}
+
+std::unordered_map<std::shared_ptr<Node>, int>
+DestinationCountVisitor::get_counts() const
+{
+  return destination_counts_;
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // LabelCountVisitor methods
@@ -469,7 +589,8 @@ const std::unordered_map<std::shared_ptr<Node>, int>&
 OrderVisitor::get_order() const
 {
   return node_map_;
-};
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // SelectionVisitor methods
@@ -505,6 +626,7 @@ std::set<std::shared_ptr<Node>> SelectionVisitor::get_selection() const
 {
   return selection_;
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // CompactionVisitor methods

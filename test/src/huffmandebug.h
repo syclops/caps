@@ -7,7 +7,7 @@
 
 #include "../../src/cpp/encoding/huffman.h"
 
-class HuffmanDebug: public HuffmanTree
+class HuffmanDebug: public HuffmanCoder
 {
  public:
   /**

@@ -110,7 +110,7 @@ int ConnectedComponent::num_edges() const
 std::unordered_map<std::string, int> ConnectedComponent::label_counts() const
 {
   return label_counts_;
-};
+}
 
 bool ConnectedComponent::has_node(std::shared_ptr<Node> node) const
 {

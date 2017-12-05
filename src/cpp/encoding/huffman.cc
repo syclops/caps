@@ -1,4 +1,5 @@
 #include "huffman.h"
+#include <algorithm>
 #include <cstdlib>
 #include <iostream>
 #include <queue>
@@ -9,37 +10,19 @@
 #include <vector>
 #include <boost/bimap.hpp>
 
-HuffmanTree::HuffmanTree(const std::map<std::string, size_t>& counts)
-  : codebook_(), codebook_size_(0)
+HuffmanCoder::HuffmanCoder(const std::map<std::string, size_t>& counts)
+  : encoding_map_{}, decoding_symbols_{}, decoding_indices_{}, decoding_codes_{}
 {
   create_codebook_generic(counts);
 }
 
-HuffmanTree::HuffmanTree(const std::unordered_map<std::string, size_t>& counts)
-  : codebook_(), codebook_size_(0)
+HuffmanCoder::HuffmanCoder(const std::unordered_map<std::string, size_t>& counts)
+  : encoding_map_{}, decoding_symbols_{}, decoding_indices_{}, decoding_codes_{}
 {
   create_codebook_generic(counts);
 }
 
-HuffmanTree::HuffmanTree(HuffmanTree &&orig) noexcept
-{
-  swap(*this, orig);
-}
-
-HuffmanTree& HuffmanTree::operator=(HuffmanTree rhs)
-{
-  swap(*this, rhs);
-  return *this;
-}
-
-void swap(HuffmanTree& first, HuffmanTree& second)
-{
-  using std::swap;
-  swap(first.codebook_, second.codebook_);
-  swap(first.codebook_size_, second.codebook_size_);
-}
-
-std::unordered_map<std::string, std::vector<bool>> HuffmanTree::dump_codebook(
+std::unordered_map<std::string, std::vector<bool>> HuffmanCoder::dump_codebook(
   ) const
 {
   std::unordered_map<std::string, std::vector<bool>> codebook;
@@ -49,7 +32,7 @@ std::unordered_map<std::string, std::vector<bool>> HuffmanTree::dump_codebook(
   return codebook;
 }
 
-std::unordered_map<std::string, size_t> HuffmanTree::get_encoding_lengths(
+std::unordered_map<std::string, size_t> HuffmanCoder::get_encoding_lengths(
   ) const
 {
   std::unordered_map<std::string, size_t> size_map;
@@ -59,17 +42,18 @@ std::unordered_map<std::string, size_t> HuffmanTree::get_encoding_lengths(
   return size_map;
 }
 
-std::vector<bool> HuffmanTree::encode(const std::string str) const
+std::vector<bool> HuffmanCoder::encode(const std::string str) const
 {
-  return codebook_.left.at(str);
+  return encoding_map_.at(str);
 }
 
-std::string HuffmanTree::decode(const std::vector<bool>& codeword) const
+std::string HuffmanCoder::decode(const std::vector<bool>& codeword) const
 {
-  return codebook_.right.at(codeword);
+  // TODO
+  return "";
 }
 
-std::vector<bool> HuffmanTree::dump_codebook_bin() const
+std::vector<bool> HuffmanCoder::dump_codebook_bin() const
 {
   std::vector<bool> bitstream;
   for (auto it: codebook_.left) {
@@ -83,78 +67,47 @@ std::vector<bool> HuffmanTree::dump_codebook_bin() const
   return bitstream;
 }
 
-void HuffmanTree::dump_codebook_ascii(std::ostream& out_stream) const
-{
-  size_t length = 0;
-  for (auto pair: sorted_codebook_lengths()) {
-    out_stream << pair.first;
-    if (length != pair.second) {
-      out_stream << " " << pair.second;
-    }
-    out_stream << std::endl;
-  }
-}
+//void HuffmanCoder::dump_codebook_ascii(std::ostream& out_stream) const
+//{
+//  size_t length = 0;
+//  for (auto pair: sorted_codebook_lengths()) {
+//    out_stream << pair.first;
+//    if (length != pair.second) {
+//      out_stream << " " << pair.second;
+//    }
+//    out_stream << std::endl;
+//  }
+//}
 
-void HuffmanTree::write_char(char c, std::vector<bool>& bitstream) const
+void HuffmanCoder::write_char(char c, std::vector<bool>& bitstream) const
 {
   for (size_t i = 8; i > 0; --i) {
     bitstream.push_back(((c >> (i - 1)) & 0x1) != 0);
   }
 }
 
-size_t HuffmanTree::size() const
+size_t HuffmanCoder::size() const
 {
   return codebook_size_;
 }
 
-HuffmanTree::HuffmanNode::HuffmanNode(std::string str, size_t count)
-  : symbol(str), count(count), size(1), zero(nullptr), one(nullptr)
+HuffmanCoder::HuffmanNode::HuffmanNode(std::string str, int count)
+  : symbol{std::move(str)}, count{count}, size{1}, zero{}, one{}
 {
   // Nothing to do here.
 }
 
-HuffmanTree::HuffmanNode::HuffmanNode(HuffmanNode* zero, HuffmanNode* one)
-  : symbol(""), count(zero->count + one->count), size(zero->size + one->size),
-    zero(zero), one(one)
+HuffmanCoder::HuffmanNode::HuffmanNode(std::shared_ptr<HuffmanNode> zero,
+                                      std::shared_ptr<HuffmanNode> one)
+  : symbol{}, count{zero->count + one->count}, size{zero->size + one->size},
+    zero{zero}, one{one}
 {
   // Nothing to do here.
 }
 
-HuffmanTree::HuffmanNode::HuffmanNode(const HuffmanNode& orig)
-  : symbol(orig.symbol), count(orig.count)
-{
-  zero = new HuffmanNode(*orig.zero);
-  one = new HuffmanNode(*orig.one);
-}
-
-HuffmanTree::HuffmanNode::HuffmanNode(HuffmanNode&& orig) noexcept
-{
-  swap(*this, orig);
-}
-
-typename HuffmanTree::HuffmanNode& HuffmanTree::HuffmanNode::operator=(HuffmanNode rhs)
-{
-  swap(*this, rhs);
-  return *this;
-}
-
-HuffmanTree::HuffmanNode::~HuffmanNode()
-{
-  delete zero;
-  delete one;
-}
-
-void swap(HuffmanTree::HuffmanNode &first, HuffmanTree::HuffmanNode &second)
-{
-  using std::swap;
-  swap(first.symbol, second.symbol);
-  swap(first.count, second.count);
-  swap(first.zero, second.zero);
-  swap(first.one, second.one);
-}
-
-bool HuffmanTree::HuffmanNodeComp::operator()(const HuffmanNode *lhs,
-                                              const HuffmanNode *rhs) const
+bool HuffmanCoder::HuffmanNodeComp::operator()(
+  const std::shared_ptr<HuffmanNode> lhs,
+  const std::shared_ptr<HuffmanNode> rhs) const
 {
   if (lhs->count == rhs->count) {
     if (lhs->size == rhs->size) {
@@ -168,9 +121,9 @@ bool HuffmanTree::HuffmanNodeComp::operator()(const HuffmanNode *lhs,
   return lhs->count > rhs->count;
 }
 
-bool HuffmanTree::CodebookComp::operator()(
-  const std::pair<std::string, size_t> lhs,
-  const std::pair<std::string, size_t> rhs) const
+bool HuffmanCoder::CodebookComp::operator()(
+  const std::pair<std::string, int> lhs,
+  const std::pair<std::string, int> rhs) const
 {
   if (lhs.second == rhs.second) {
     return lhs.first > rhs.first;
@@ -178,14 +131,14 @@ bool HuffmanTree::CodebookComp::operator()(
   return lhs.second > rhs.second;
 }
 
-std::unordered_map<std::string, size_t> HuffmanTree::get_code_lengths(
-  HuffmanNode* root) const
+std::unordered_map<std::string, int> HuffmanCoder::get_code_lengths(
+  std::shared_ptr<HuffmanNode> root) const
 {
-  std::unordered_map<std::string, size_t> code_lengths;
-  std::queue<std::pair<HuffmanNode*, size_t>> bfs_queue;
+  std::unordered_map<std::string, int> code_lengths;
+  std::queue<std::pair<std::shared_ptr<HuffmanNode>, int>> bfs_queue;
   bfs_queue.push(std::make_pair(root, 0));
   while (!bfs_queue.empty()) {
-    std::pair<HuffmanNode*, size_t> current_node = bfs_queue.front();
+    std::pair<std::shared_ptr<HuffmanNode>, int> current_node = bfs_queue.front();
     bfs_queue.pop();
     if (current_node.first->symbol.empty()) {
       bfs_queue.push(std::make_pair(current_node.first->zero,
@@ -196,41 +149,15 @@ std::unordered_map<std::string, size_t> HuffmanTree::get_code_lengths(
       code_lengths[current_node.first->symbol] = current_node.second;
     }
   }
-  delete root;
   return code_lengths;
 }
 
-std::vector<std::pair<std::string, size_t>> HuffmanTree::sorted_lengths(
-  const std::unordered_map<std::string, size_t>& code_lengths) const
+std::vector<std::pair<std::string, int>> HuffmanCoder::sorted_lengths(
+  const std::unordered_map<std::string, int>& code_lengths) const
 {
-  std::priority_queue<std::pair<std::string, size_t>,
-    std::vector<std::pair<std::string, size_t>>,
-    CodebookComp> heap;
-  for (auto it: code_lengths) {
-    heap.push(it);
-  }
-  std::vector<std::pair<std::string, size_t>> codebook_vector;
-  while (!heap.empty()) {
-    codebook_vector.push_back(heap.top());
-    heap.pop();
-  }
-  return codebook_vector;
-}
-
-std::vector<std::pair<std::string, size_t>>
-  HuffmanTree::sorted_codebook_lengths() const
-{
-  std::priority_queue<std::pair<std::string, size_t>,
-                      std::vector<std::pair<std::string, size_t>>,
-                      CodebookComp> heap;
-  for (auto it: codebook_.left) {
-    heap.push(std::make_pair(it.first, it.second.size()));
-  }
-  std::vector<std::pair<std::string, size_t>> codebook_vector;
-  while (!heap.empty()) {
-    codebook_vector.push_back(heap.top());
-    heap.pop();
-  }
+  std::vector<std::pair<std::string, int>> codebook_vector{code_lengths.begin(),
+                                                           code_lengths.end()};
+  std::sort(codebook_vector.begin(), codebook_vector.end(), CodebookComp);
   return codebook_vector;
 }
 

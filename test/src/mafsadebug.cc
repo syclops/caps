@@ -75,7 +75,7 @@ void DAFSADebug::print_debug(std::ostream& out_stream) const
   std::unordered_map<Node*, size_t> topo_order = make_order_map(
     get_nodes_topological_order());
   std::unordered_map<std::string, size_t> label_counts = get_label_counts();
-  HuffmanTree label_code(label_counts);
+  HuffmanCoder label_code(label_counts);
   std::map<std::string, std::string> label_encoding;
 //  label_code.dump_codebook(label_encoding);
   for (Node* source: nodes_) {
@@ -108,7 +108,7 @@ size_t DAFSADebug::accept_count() const
 //{
   //Node* final_node = get_final_node();
   //std::unordered_map<std::string, size_t> counts_map = get_label_counts();
-  //HuffmanTree label_tree(counts_map);
+  //HuffmanCoder label_tree(counts_map);
   //std::unordered_map<std::string, size_t> counts_codebook
     //= label_tree.get_encoding_lengths();
   //size_t size = label_tree.size();
@@ -236,7 +236,7 @@ void DAFSADebug::dump_bin(std::ostream& out_stream) const
   std::unordered_map<Node*, size_t> node_to_index = make_order_map(dfs_order);
   // Create the Huffman codebook.
   std::unordered_map<std::string, size_t> counts_map = get_label_counts();
-  HuffmanTree label_tree(counts_map);
+  HuffmanCoder label_tree(counts_map);
   // Write the canonical Huffman codebook to the stream.
   label_tree.dump_codebook_ascii(out_stream);
   // Write the number of bits used for the destination index to the stream.
@@ -474,7 +474,7 @@ bool DAFSADebug::all_children_visited(Node* node,
 }
 
 size_t DAFSADebug::get_num_destination_bits(const std::vector<Node*>& dfs_order,
-                                            const HuffmanTree& label_encoding,
+                                            const HuffmanCoder& label_encoding,
                                             const Node* final_node) const
 {
   size_t total_bits = 0;
@@ -496,7 +496,7 @@ size_t DAFSADebug::get_num_destination_bits(const std::vector<Node*>& dfs_order,
 }
 
 std::unordered_map<Node*, size_t> DAFSADebug::get_node_bit_indices(
-  const std::vector<Node*>& dfs_order, const HuffmanTree& label_encoding,
+  const std::vector<Node*>& dfs_order, const HuffmanCoder& label_encoding,
   const Node* final_node, const size_t num_destination_bits) const
 {
   size_t num_bits = 0;

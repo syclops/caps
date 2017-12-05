@@ -67,12 +67,12 @@ const std::set<std::shared_ptr<Node>>& LabeledGraph::get_nodes() const
 
 void LabeledGraph::set_accept(std::shared_ptr<Node> node, bool accept)
 {
-  node->set_accept(accept);
   if (!node->get_accept() && accept) {
     ++num_accept_;
   } else if (node->get_accept() && !accept) {
     --num_accept_;
   }
+  node->set_accept(accept);
 }
 
 std::shared_ptr<Node> LabeledGraph::add_node(std::shared_ptr<Node> source,
@@ -104,6 +104,9 @@ void LabeledGraph::remove_node(std::shared_ptr<Node> node)
   }
   for (const auto& label: out_labels) {
     remove_edge(node, label);
+  }
+  if (node->get_accept()) {
+    --num_accept_;
   }
   // Once the node's incident edges have been safely deleted, remove the node
   // from the nodes list.

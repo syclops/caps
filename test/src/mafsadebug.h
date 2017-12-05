@@ -341,11 +341,11 @@ class DAFSADebug: public DAFSA
                             std::unordered_set<Node*>& visited) const;
 
   size_t get_num_destination_bits(const std::vector<Node*>& dfs_order,
-                                  const HuffmanTree& label_encoding,
+                                  const HuffmanCoder& label_encoding,
                                   const Node* final_node) const;
 
   std::unordered_map<Node*, size_t> get_node_bit_indices(
-    const std::vector<Node*>& dfs_order, const HuffmanTree& label_encoding,
+    const std::vector<Node*>& dfs_order, const HuffmanCoder& label_encoding,
     const Node* final_node, const size_t num_destination_bits) const;
 
   std::vector<std::unordered_set<Node*>> get_contiguous_regions() const;

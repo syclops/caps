@@ -13,14 +13,14 @@
 #include "../../src/cpp/encoding/huffman.h"
 
 HuffmanDebug::HuffmanDebug(const std::map<std::string, size_t>& counts)
-  : HuffmanTree(counts)
+  : HuffmanCoder(counts)
 {
   // Nothing to do here.
 }
 
 HuffmanDebug::HuffmanDebug(
   const std::unordered_map<std::string, size_t>& counts)
-  : HuffmanTree(counts)
+  : HuffmanCoder(counts)
 {
   // Nothing to do here.
 }
