@@ -90,8 +90,8 @@ into the \ac{tls} handshake as an extension. Because existing solutions for
 indicating \ac{https} deployment require the client to trust its first
 connection to the domain, they have lagged in deployment~\cite{rfc4033,
 rfc6698}, and add significant storage
-overhead\footnote{\url{https://www.eff.org/https-everywhere}} or connection
-latency.\footnote{\url{https://mybrowseraddon.com/smart-https.html}} Instead, we
+overhead\endnote{\url{https://www.eff.org/https-everywhere}} or connection
+latency.\endnote{\url{https://mybrowseraddon.com/smart-https.html}} Instead, we
 use data compression techniques and compact data structures to locally store at
 each client the \emph{entire} set of domains that deploy \ac{https} in just
 \steve{TODO}.
@@ -145,7 +145,7 @@ lost or compromised.
 \ac{name} is also attractive from a deployment standpoint. In particular, the
 burden of deployment for domains is limited to the cost of additional
 certificates, which can be no cost at all with the use of free certificate services
-like Let's Encrypt.\footnote{\url{https://letsencrypt.org/}} Furthermore,
+like Let's Encrypt.\endnote{\url{https://letsencrypt.org/}} Furthermore,
 \ac{name} is an opt-in system, meaning that only domains who choose to obtain
 additional certificates incur a cost. \ac{name} also protects all domains from
 \ac{tls} stripping from its initial deployment, even non-deploying domains, and
@@ -157,7 +157,7 @@ In summary, we make the following contributions:
 %\item We conduct a study of the existing Web \ac{pki} to assess the current
   %state of \ac{https} among domains and the expected growth of \ac{https}
   %deployment.
-\item We propose a design for \ac{caps}, a system that enables the smooth
+\item We propose a design for \ac{name}, a system that enables the smooth
   deployment and bootstrapping of improvements to the Web \ac{pki}.
 \item We leverage techniques from data compression and compact data structures
   to present a design for clients to locally store the entire set of

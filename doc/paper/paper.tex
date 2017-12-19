@@ -1,52 +1,47 @@
-\documentclass[conference]{IEEEtran}
+\documentclass[letterpaper,twocolumn,10pt]{article}
+
+% USENIX: packages used in the template
+\usepackage{usenix}
+\usepackage{epsfig}
+\usepackage{endnotes}
 
 \input{setup/main}
 
 \begin{document}
 
+% USENIX: don't use date
+\date{}
+
 \title{
-  CAPS: A Modest Proposal for\\Bootstrapping a More Resilient PKI
+  CAPS: A Modest Proposal for Bootstrapping a More Resilient PKI
 }
 \author{
   Authors
 }
 
-%\author{\IEEEauthorblockN{Michael Shell}
-%\IEEEauthorblockA{Georgia Institute of Technology\\
-%someemail@somedomain.com}
-%\and
-%\IEEEauthorblockN{Homer Simpson}
-%\IEEEauthorblockA{Twentieth Century Fox\\
-%homer@thesimpsons.com}
-%\and
-%\IEEEauthorblockN{James Kirk\\ and Montgomery Scott}
-%\IEEEauthorblockA{Starfleet Academy\\
-%someemail@somedomain.com}}
-
 \maketitle
 
-%\begingroup
-%\let\thefootnote\relax\footnotetext{This paper is an extended version of any
-%conference or journal publication of this work, and is intended for internal
-%use. As such, it contains many details not necessary to understand the core idea
-%of the work.}
-%\endgroup
+% USENIX: Use the following at camera-ready time to suppress page numbers.
+% Comment it out when you first submit the paper for review.
+\thispagestyle{empty}
 
-\begin{abstract}
-  \input{abstract}
-\end{abstract}
+% USENIX: treat abstract as an unnumbered subsection
+\subsection*{Abstract}
+\input{abstract}
 
 \input{sec/intro}
 
 \input{sec/background}
 
-\input{sec/overview}
+\input{sec/design}
 
-\input{sec/signaling}
+%\input{sec/signaling}
 
-\input{sec/policy}
+%\input{sec/policy}
 
 %\input{sec/ra}
+
+\input{sec/analysis}
 
 \input{sec/evaluation}
 
@@ -54,7 +49,12 @@
 
 \input{sec/conclusion}
 
-\bibliographystyle{IEEEtranS}
+% USENIX: use footnote-sized, ACM-style bibliography
+\footnotesize
+\bibliographystyle{acm}
 \bibliography{bib}
+
+% USENIX: include the endnotes
+\theendnotes
 
 \end{document}

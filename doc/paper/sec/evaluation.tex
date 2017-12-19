@@ -1,34 +1,63 @@
 \section{Evaluation}
 \label{sec:evaluation}
 
-\subsection{Policy Mechanism}
+In this section, we evaluate the performance and overhead of \ac{name}. In
+particular, we examine the performance and overhead of our implementations of
+the clien, signaling authority, and the log aggregator, respectively.
 
-\draft{We implemented a log that tracks policies. Our code is in \steve{TODO}.
-We measured its performance and storage requirements given realistic rates of
-new certificates.}
+\subsection{Client}
 
-\subsection{Signaling Mechanism}
+We prototyped the client software as a Mozilla Firefox plugin.
 
-We implemented our signal set construction in C++.
+\begin{compactitem}
+\item Update sizes
+\item Memory usage
+\item Disk storage size
+\item Connection latency
+\end{compactitem}
 
-\draft{We compare our approach to simple compression of the list of deploying
-domains, and to succinct encodings of a prefix tree (trie). We measure the
-compressed size, memory footprint, and added connection latency.}
+\subsection{Signaling Authority}
 
-\steve{TODO: Add projections on how the metrics will change if there are $n$
-deploying domains.}
+\begin{compactitem}
+\item Changes to the signaling set (what domains change and overall growth)
+\item Time to create/update set
+\end{compactitem}
 
-\textbf{Failures of a Probabilistic Approach.} While at first it may seem that
-data structures implementing probabilistic membership queries (i.e., Bloom
-filters~\cite{bloom1970space} and their variants) could provide much of the
-benefits of a signaling set with only a small cost, this approach has several
-critical shortcomings. First, Bloom filters allow false positives but no false
-negatives. Therefore, while clients are protected from \ac{mitm} attacks that
-could result from false negatives, clients may be blocked from accessing sites
-that do not deploy \ac{https} because they are false positives in the Bloom
-filter. Second, on average, a Bloom filter with false positive probability
-\bloomfpp requires approximately $-\ln \bloomfpp/(\ln 2)^2$ bits per inserted
-element in the optimal case. Thus for a false positive rate of $p = 0.01$ (which
-would still cause 10,000 sites out of 1M sites deploying \ac{https} to be
-blocked), we would require 9.59 bits per site on average. Thus for our full data
-set, a Bloom filter would require \steve{145 MB}.
+\subsection{Log Aggregator}
+
+\begin{compactitem}
+\item Size of aggregated log data over time (shows storage overhead and growth)
+\item Mapping size vs. number of certificates
+\end{compactitem}
+
+%\subsection{Policy Mechanism}
+
+%\draft{We implemented a log that tracks policies. Our code is in \steve{TODO}.
+%We measured its performance and storage requirements given realistic rates of
+%new certificates.}
+
+%\subsection{Signaling Mechanism}
+
+%We implemented our signal set construction in C++.
+
+%\draft{We compare our approach to simple compression of the list of deploying
+%domains, and to succinct encodings of a prefix tree (trie). We measure the
+%compressed size, memory footprint, and added connection latency.}
+
+%\steve{TODO: Add projections on how the metrics will change if there are $n$
+%deploying domains.}
+
+%\textbf{Failures of a Probabilistic Approach.} While at first it may seem that
+%data structures implementing probabilistic membership queries (i.e., Bloom
+%filters~\cite{bloom1970space} and their variants) could provide much of the
+%benefits of a signaling set with only a small cost, this approach has several
+%critical shortcomings. First, Bloom filters allow false positives but no false
+%negatives. Therefore, while clients are protected from \ac{mitm} attacks that
+%could result from false negatives, clients may be blocked from accessing sites
+%that do not deploy \ac{https} because they are false positives in the Bloom
+%filter. Second, on average, a Bloom filter with false positive probability
+%\bloomfpp requires approximately $-\ln \bloomfpp/(\ln 2)^2$ bits per inserted
+%element in the optimal case. Thus for a false positive rate of $p = 0.01$ (which
+%would still cause 10,000 sites out of 1M sites deploying \ac{https} to be
+%blocked), we would require 9.59 bits per site on average. Thus for our full data
+%set, a Bloom filter would require \steve{145 MB}.
