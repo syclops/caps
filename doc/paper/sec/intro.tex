@@ -41,36 +41,37 @@ misbehaving \acp{ca} issued unauthorized certificates, both
 accidentally~\cite{sleevi2015sustaining} and
 intentionally~\cite{valsorda2015komodia}.
 
-While previous work has resulted in systems that aim to make the \ac{pki} more
-resilient to the effects of misbehaving \acp{ca}, these advances have been
-insufficient to make the Web \ac{pki} more resilient to certificate
-misissuances. Systems like Google's \ac{ct} project~\cite{rfc6962} only allow
+Previous work has been insufficient to make the Web \ac{pki} resilient to
+certificate misissuances (see Section~\ref{sec:related}). 
+Systems like Google's \ac{ct} project~\cite{rfc6962} only allow
 for detection, not prevention, of unauthorized certificate issuance. Systems
 that do prevent unauthorized certificate issuance add new trusted
 parties~\cite{kim2013accountable}, require domains to deploy complex new
 infrastructure~\cite{rfc6698, szalachowski2014policert}, drastically increase
-latency and communication~\cite{yu2016dtki}, or require a flag day deployment
-where all domains increase their security level at once~\cite{basin2014arpki}.
-Many of these systems also require the tens of millions of domains that exist
-today to put significant effort into creating complex policies, hindering
-deployment. For example, Google plans to remove support for public-key pinning
-due to its limited and error-prone usage in practice~\cite{palmer2017intent}.
+latency and communication~\cite{yu2016dtki}, or require 
+all domains to increase their security level at once~\cite{basin2014arpki}.
+Many of these systems also require tens of millions of domains 
+to put significant effort into creating complex policies, hindering
+deployment.  In practice, for example, public-key pinning~\cite{pkpinning} proved to
+be error-prone, contributing to its limited deployment;
+as a result, Google recently decided to remove support for it~\cite{palmer2017intent}.
 
 To address these shortcomings, we propose \acs{name}, a system that provides a
 modest roadmap to transition to a more resilient Web \ac{pki}. Specifically,
-\ac{name} prevents unauthorized certificates issued by individual misbehaving
-\acp{ca} from being accepted by clients, and allows this improvement to the Web
+\ac{name} prevents clients from accepting
+unauthorized certificates issued by individual misbehaving
+\acp{ca}, and allows this improvement to the Web
 \ac{pki} to coexist with the current \ac{pki}. By enabling this overlap and by
 preventing downgrade attacks (i.e., by preventing the existing \ac{pki} from
 being used between a client and domain who both support the improvement),
 \ac{name} allows domains to decide when they are ready to deploy the \ac{pki}
-improvement, avoiding performance penalties for non-deployers while providing
-stronger security guarantees to even the earliest adopters. \ac{name} also
+improvement.  \ac{name} also avoids performance penalties for non-deployers while providing
+stronger security guarantees to even the earliest adopters. \ac{name} 
 focuses its major changes on a small handful of participants, namely browser
 vendors and public logs, who are better equipped to make these changes than the
 millions of domains that currently deploy \ac{https}. Domains do not need to
 change the way they interact with \acp{ca}, avoiding the perils of
-misconfiguration that these domains have faced with previously proposed
+misconfiguration that these domains have plagued previously proposed
 improvements~\cite{palmer2017intent}.
 
 \ac{name} achieves the above properties through several important observations.
@@ -93,22 +94,23 @@ rfc6698}, and add significant storage
 overhead\endnote{\url{https://www.eff.org/https-everywhere}} or connection
 latency.\endnote{\url{https://mybrowseraddon.com/smart-https.html}} Instead, we
 use data compression techniques and compact data structures to locally store at
-each client the \emph{entire} set of domains that deploy \ac{https} in just
-\steve{TODO}.
+each client a succinct summary of the \emph{entire} set of domains that deploy
+\ac{https}; with our techniques, it requires just \steve{TODO}.
 
 We also observe that all known instances of \ac{ca} misbehavior up to this point
-have involved a single misbehaving \ac{ca}. We prevent this weakness by allowing
-domains to authenticate public keys using multiple certificate chains.
-Specifically, if a domain obtains $n$ independent certificate chains and
-communicating to the client that it should expect at least $n$ chains, then the
-simultaneous failure of $n-1$ \acp{ca} cannot enable \iac{mitm} attack.
-Signaling a number of certificate chains to expect instead of a list of
-authorized \acp{ca} also results in a useful practical property:
+have involved a single misbehaving \ac{ca}.  Hence, \ac{name} allows
+a domain to authenticate its public key using multiple independent certificate chains
+(we quantify the impact this has on connection latency and bandwidth in Section~\ref{sec:eval:client}).
+\ac{name}-enabled clients know how many chains to expect for each domain,
+and hence, the simultaneous failure of $n-1$ \acp{ca} cannot enable \iac{mitm} attack
+on a domain with $n$ chains.
+Note that \ac{name} signals to clients
+the \emph{number} of certificate chains to expect, rather than the list of
+authorized \acp{ca}.  This results in a useful practical property:
 misconfiguration or private key loss cannot render a domain inaccessible, since
 the domain can simply obtain the requisite number of certificates for a new
-public key. If the domain's private key is compromised or the adversary manages
-to gain additional certificates, the domain can get these certificates revoked
-through the existing certificate revocation process (i.e., contacting the
+public key, and revoke the old certificates 
+through the standard certificate revocation process (i.e., contacting the
 issuing \ac{ca}).
 
 %Moreover, this process must prevent misconfiguration or private key loss from
@@ -121,16 +123,15 @@ issuing \ac{ca}).
 %from misconfiguration or private key loss by simply obtaining certificates on a
 %new public key.
 
-Even with the above multi-certificate-chain system, the number of certificate
-chains that a client should expect to receive must be vouched for by some
-entity. Having domains specify this number, however, would risk the practical
-pitfalls we strive to avoid in \ac{name}. Therefore, we use a publicly auditable
+To vouch for the number of certificate
+chains that a client should expect to receive, 
+\ac{name} uses a publicly auditable
 authenticated database service based on a global view of all certificates in the
 Web \ac{pki}, which allows us \emph{automatically} infer the number of
 certificate chains for each domain. In today's Web, we can obtain this global
 view through Google's \ac{ct} system~\cite{rfc6962}, which is included in all
 Chrome browsers and as of April 2018 will be required for all \ac{https}-enabled
-sites that are treated as secure in Chrome.
+sites that wish to be treated as secure by Chrome~\cite{citation-needed}.
 
 Finally, we observe that once we can establish a strongly authenticated,
 authoritative public key for a domain, we can use this key to secure richer
@@ -138,7 +139,7 @@ policies as proposed in prior work~\cite{basin2014arpki,
 szalachowski2014policert}. \ac{name} can thus simplify the policy authentication
 mechanisms of these proposed systems, which rely on convoluted coordination
 among domains, \acp{ca}, and public logs to certify these policies. \ac{name}
-also enhances the recoverability of these systems, which as originally proposed
+also enhances the recoverability of these systems, which, as originally proposed,
 require waiting for days to replace a policy if the corresponding private key is
 lost or compromised.
 
@@ -147,9 +148,10 @@ burden of deployment for domains is limited to the cost of additional
 certificates, which can be no cost at all with the use of free certificate services
 like Let's Encrypt.\endnote{\url{https://letsencrypt.org/}} Furthermore,
 \ac{name} is an opt-in system, meaning that only domains who choose to obtain
-additional certificates incur a cost. \ac{name} also protects all domains from
-\ac{tls} stripping from its initial deployment, even non-deploying domains, and
-allows non-deploying domains to coexist with deploying domains without enabling
+additional certificates incur a cost. 
+From its initial deployment, \ac{name} protects all domains from
+\ac{tls} stripping, and
+it allows non-deploying domains to coexist with deploying domains without enabling
 downgrade attacks.
 
 In summary, we make the following contributions:
@@ -158,14 +160,15 @@ In summary, we make the following contributions:
   %state of \ac{https} among domains and the expected growth of \ac{https}
   %deployment.
 \item We propose a design for \ac{name}, a system that enables the smooth
-  deployment and bootstrapping of improvements to the Web \ac{pki}.
+  bootstrapping of improvements to the Web \ac{pki}.
 \item We leverage techniques from data compression and compact data structures
   to present a design for clients to locally store the entire set of
   \ac{https}-deploying domains on the Web.
 \item We extend \ac{ct} logs to present a simple, deployable, and automated
   mechanism for maintaining and disseminating domain certificate policies.
-\item We evaluate \ac{name} against existing approaches and shows that
-  \ac{name} \steve{performs how relative to these approaches?}.
+% BP: Evaluation is how we validate the above.  It shouldn't typically be a separate contribution
+%\item We evaluate \ac{name} against existing approaches and shows that
+%  \ac{name} \steve{performs how relative to these approaches?}.
 \end{compactitem}
 
 
