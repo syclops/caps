@@ -14,42 +14,45 @@ bootstrapping of more advanced policies \steve{cite ARPKI, etc.\@ here?}
 \subsection{Overview}
 \label{sec:design:overview}
 
-\begin{figure}
-  \centering \includegraphics[width=\linewidth]{fig/overview} \caption{Overview
-    of \ac{name} architecture (log auditors and monitors not shown). The browser
-    is part of the client. Dotted lines denote browser components, and italic
-  text denotes new components or actions in \ac{name}. \steve{TODO: update}}
+\begin{figure*}
+  \centering
+  \includegraphics[width=\linewidth]{fig/overview2}
+  \caption{Overview of \ac{name} architecture (log auditors and monitors not
+  shown). Dotted lines denote the browser and its components, and italic text
+denotes new entities or actions in \ac{name}.}
   \label{fig:overview}
-\end{figure}
+\end{figure*}
 
-\ac{name} aims to provide mechanisms for smoothly transitioning the current
-\ac{pki} during the deployment of a \ac{pki} improvement or a new \ac{pki}
-(hereafter simply referred to as the improved \ac{pki}). During this deployment
-process, \ac{name} must
+
+% What are CAPS's goals and what must it do to achieve those goals?
+\ac{name} aims to smoothly transition the current \ac{pki} during the deployment
+of a \ac{pki} improvement or a new \ac{pki} (hereafter simply referred to as the
+\emph{improved \ac{pki}}). During this deployment process, \ac{name} must
 \begin{inparaenum}[(1)]
 \item ensure that clients and domains that support the improved \ac{pki} use
-  this \ac{pki} to negotiate encrypted connections, and
-\item public keys in the improved \ac{pki} can be protected against concerted
+  this \ac{pki} when negotiating encrypted connections, and
+\item protect public keys in the improved \ac{pki} against the concerted
   misbehavior by $n$ \acp{ca}, where each domain can choose a desired
   nonnegative value of $n$.
 \end{inparaenum}
 
-\autoref{fig:overview} illustrates the \ac{name} architecture and the steps by
-which \ac{name} achieves the goals stated above. Since \ac{name} seeks to
-transition from the current Web \ac{pki}, it necessarily includes the entities
-present in the current \ac{pki}:
+% Architecture
+\autoref{fig:overview} illustrates the \ac{name} architecture and how \ac{name}
+achieves the goals stated above. Since \ac{name} begins a transition from the
+current Web \ac{pki}, it necessarily includes the entities in the current
+\ac{pki}:
 \begin{compactitem}
 \item \emph{Domains} serve webpages to clients. Each domain has a name such as
-  \texttt{example.com}.
-  \steve{Put somewhere the rules of how domain names are
-  differentiated, like www.example.com being a distinct name}
+  \texttt{example.com}. \steve{\endnote{Put somewhere the rules of how domain
+  names are differentiated, like www.example.com being a distinct name.}}
 \item \emph{\acp{ca}} issue certificates to domains. Each certificate binds a
   set of names to a single public key.
 \item \emph{Clients} connect to domains over HTTP or \ac{https}, and in the
   latter case, verify the binding between a domain's name and public key.
 \item \emph{Browser/OS vendors} (hereafter simply \emph{vendors}) provide the
   software by which clients connect to domains and verify domains' certificates.
-  \steve{Vendors also name a set of root \ac{ca} keys.}
+  \steve{\endnote{Possible additional text: Vendors also name a set of root
+  \ac{ca} keys.}}
 \item \emph{Public logs} maintain a publicly auditable, append-only database of
   certificates.
 \end{compactitem}
@@ -66,35 +69,47 @@ but in \autoref{sec:discussion} we argue why browser vendors and public logs in
 the current Web \ac{pki} should respectively take on the responsibilities of
 these two entities.
 
-In \ac{name}, the signaling authority constructs a \emph{signaling set}, which
-represents the set of all domains that deploy HTTPS. To minimize the storage and
-memory overhead of the signaling set, we represent the set as a
-\emph{\ac{dafsa}} and apply data compression techniques to this representation.
-\steve{When the final set of compression techniques is decided, briefly
-summarize them here.} Clients download the signaling set and updates from the
-signaling authority and use this set when connecting to domains to determine
-whether to expect to connect over HTTP or HTTPS.
+% Procedures from the current PKI
+As shown in \autoref{fig:overview}, many of the interactions between entities in
+the current \ac{pki} remain the same in \ac{name}. \acp{ca} issue certificates
+to domains and log newly-issued certificates as they do in the current \ac{pki}
+(with \ac{ct}), clients and domains establish an encrypted communication channel
+through the \ac{tls} handshake, and vendors provide clients with browser
+software.
 
+% Signaling set overview
+To achieve \ac{name}'s goal of signaling which domains have deployed HTTPS, the
+signaling authority uses snapshots of the public logs' databases to construct a
+\emph{signaling set}, which represents the set of all domains that deploy HTTPS.
+The signaling authority builds this set by downloading the set of all currently
+valid (i.e., non-expired) certificates from the logs and extracting all domains
+named in these certificates. The signaling authority then makes this set, as
+well as updates to this set over time, available to client browsers in the form
+of a plugin. To minimize the storage and memory overhead of the signaling set,
+the signaling authority applies data compression techniques to create a
+representation of the signaling set that is space and memory-efficient.
+
+% Policy overview
+To achieve \ac{name}'s goal of protecting public keys against $n$ misbehaving
+\acp{ca}, the log aggregator uses snapshots of the public logs' databases to
+construct a set of \emph{key policies}, which establishes for each
+HTTPS-deploying domain one or more public keys to be treated as authoritative in
+the improved \ac{pki}. To provide a smooth transition from the current \ac{pki},
 \ac{name} uses a simple, intuitive policy to determine a domain's public key in
 the improved \ac{pki}: \emph{treat whichever public key is backed by the most
-independent certificate chains as authoritative in the improved \ac{pki}}. By
-\emph{independent} we mean that the certificate chains share no public keys
-except at the leaf. Our policy also implies that if $n$ is the highest number of
-observed independent certificate chains for a given domain, then \emph{any}
-public key backed by $n$ chains can be used as that domain's in the improved
-\ac{pki}. Thus, it is possible for a domain to have multiple public keys in the
-improved \ac{pki}.\endnote{In practice, any improved \ac{pki} can enforce the
-  use of a single public key by, for example, considering the first key backed
-by $n$ chains as authoritative and using a ``cool-off period'' as in
-AKI~\cite{kim2013accountable}.}
+  independent certificate chains\endnote{By \emph{independent} we mean that the
+  certificate chains share no public keys except at the leaf.} in the current
+\ac{pki} as authoritative in the improved \ac{pki}}.
 
-To implement this policy, the log aggregator pulls data from public logs to
-create a complete view of all certificates in the Web \ac{pki}. From this, the
-log aggregator extracts the set of all currently valid certificates, and uses
-the certificate chains and leaf keys to create a mapping of domain names to
-policies. To implement the policy we describe above, it is sufficient for the
-log aggregator to simply map each domain name to the highest number of currently
-valid independent certificate chains for that domain.
+%Our policy also implies that if $n$ is the
+%highest number of observed independent certificate chains for a given domain,
+%then \emph{any} public key backed by $n$ chains can be used as that domain's in
+%the improved \ac{pki}. Thus, it is possible for a domain to have multiple public
+%keys in the improved \ac{pki}.\endnote{In practice, any improved \ac{pki} can
+%enforce the use of a single public key by, for example, considering the first
+%key backed by $n$ chains as authoritative and using a ``cool-off period'' as in
+%AKI~\cite{kim2013accountable}.}
+
 
 %To move towards \iac{pki} with increased resilience to the compromise of trusted
 %parties (i.e., \acp{ca}), we need to prevent \iac{ca} that misissues a
@@ -153,9 +168,68 @@ valid independent certificate chains for that domain.
 \subsection{Signaling HTTPS Deployment}
 \label{sec:design:signaling}
 
+\begin{compactitem}
+\item High-level overview of FSA approach \steve{TODO: graphic}
+\item Shortcomings of other approaches
+  \begin{compactitem}
+  \item Bloom filters, filter cascades, probabilistic approaches have FPs/FNs
+    and still are large or require global view of all domain names
+  \item Standard compression utilities would require the set to be decompressed
+    before querying members
+  \item Tries only take into account common prefixes
+  \end{compactitem}
+\item FSA creation
+\item FSA compaction techniques
+  \begin{compactitem}
+  \item Coalescing single-edge paths
+  \item Compacting 1:N nodes
+  \item Binary representation
+  \item Huffman encoding labels
+  \item Huffman encoding destinations
+  \end{compactitem}
+\item Updating the FSA
+\end{compactitem}
+
 \subsection{Verifying Multiple Certificate Chains}
 \label{sec:design:verifying}
+
+\begin{compactitem}
+\item Log aggregation
+  \begin{compactitem}
+  \item Periodically collect snapshots from logs (similar to a log monitor in
+    \ac{ct})
+  \item maintain a database containing certificate chains that are valid (i.e.,
+    no certificate in the chain has expired)
+  \item maintaining a trusted set of root \acp{ca} for certificate chains is not
+    necessary, since the logs do this already
+  \end{compactitem}
+\item Determining the key policy
+  \begin{compactitem}
+  \item Given a set of currently valid certificate chains for the same public
+    key, take the min-cut to find the strength of this key
+  \item Consider EV certificates separately from non-EV certificates
+  \item Repeat this for all public keys for a domain, thus forming a $(m, n)$
+    pair for each key where $m$ is the number of EV certs and $n$ the number of
+    non-EV certs
+  \item The key policy is $(x, y)$ where $x$ is the maximum of all $m$ values
+    observed and $y$ is the maximum of all $n$ values for that specific $m$
+    value
+  \end{compactitem}
+\item Expiration/revocation
+\item Update interval
+\item Modified handshake
+  \begin{compactitem}
+  \item Signal through TLS extension
+  \item Domain sends multiple chains, proof of key policy (for efficiency)
+  \end{compactitem}
+\end{compactitem}
 
 \subsection{Bootstrapping Advanced Policies}
 \label{sec:design:bootstrapping}
 
+\begin{compactitem}
+\item Use keys established by these key policies to bootstrap more advanced
+  policies
+\item As an example, use PoliCert (since it has a clean separation between
+  policy and certificate)
+\end{compactitem}

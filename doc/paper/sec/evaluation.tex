@@ -4,6 +4,33 @@
 In this section, we evaluate the performance and overhead of \ac{name}. In
 particular, we examine the performance and overhead of our implementations of
 the clien, signaling authority, and the log aggregator, respectively.
+\steve{TODO: update}
+
+\subsection{Growth of HTTPS Deployment}
+
+\begin{compactitem}
+\item Motivation: empirical basis for how storage requirements are expected to
+  scale over time
+\item Sources: Censys, CT Logs
+\item Results
+  \begin{compactitem}
+  \item Discrepancy between number of domains in Censys and CT (almost a factor
+    of 10)
+    \begin{compactitem}
+    \item Currently: CT Google logs' valid name set grows from 113M to 168M in
+      the period of 1/1/17 to 12/4/17 (roughly 164k names per day)
+    \item Could indicate that Censys has low coverage due to errors of poor
+      server reliability, or that the vast majority of certificates are never
+      seen on the Web in practice
+    \end{compactitem}
+  \item Seems to be a fairly regular growth rate over time, with periods of high
+    growth corresponding to events in the community (e.g., CA removal or CT
+    requirement)
+  \item \steve{TODO: how has Let's Encrypt deployment affected this?}
+  \item \steve{TODO: expiration rate?}
+  \item \steve{TODO: what kinds of domains are newly deploying HTTPS?}
+  \end{compactitem}
+\end{compactitem}
 
 \subsection{Client}
 
@@ -15,6 +42,11 @@ We prototyped the client software as a Mozilla Firefox plugin.
 \item Disk storage size
 \item Connection latency
 \end{compactitem}
+
+\steve{TODO: how much space efficiency do we lose if we separate out domains?}
+
+\steve{TODO: also compare with set of domains covered by HTTPS Everywhere for
+comparison}
 
 \subsection{Signaling Authority}
 
