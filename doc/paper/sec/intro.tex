@@ -20,58 +20,58 @@ $\pk_B$ to establish a shared secret key with Alice, which they can subsequently
 use for encrypted communication.
 
 To convince Alice that $\pk_B$ should be associated with \texttt{bob.com},
-however, \ac{https} relies on the Web \ac{pki}. Trusted third parties called
-\emph{\acp{ca}} check that Bob owns both \texttt{bob.com} and $\pk_B$, and issue
-a digitally signed certificate that vouches for this binding. \acp{ca} thus play
-a crucial role in secure Web communication: the failure of any \ac{ca} to do its
-due diligence when making these checks can lead to a certificate that binds
+however, \ac{https} relies on the Web \ac{pki}. A trusted third party called a
+\emph{\ac{ca}} checks that Bob owns both \texttt{bob.com} and $\pk_B$, and
+issues a digitally signed certificate that vouches for this binding. \acp{ca}
+thus play a crucial role in secure Web communication: the failure of any \ac{ca}
+due to error, compromise, or coercion can lead to a certificate that binds
 \texttt{bob.com} to a different public key $\pk_M$. If for example this key
 belongs to an adversary Mallory, she can impersonate Bob to Alice in a
-\emph{\ac{mitm} attack}, the very problem that \iac{pki} aims to solve.
+\emph{\ac{mitm} attack}, one of the main problems that \iac{pki} aims to solve.
 
 Unfortunately, the current Web \ac{pki} is demonstrably fragile. Existing
-certificate databases indicate that more than 1,500 \acp{ca} are trusted by
-Mozilla, Apple and Microsoft in their respective Web browsers and operating
-systems. There are few measures in place to prevent any of these \acp{ca} from
-issuing an unauthorized certificate for any site, resulting in
-\emph{weakest-link security} for most sites: the compromise of any \ac{ca} can
-threaten the security of all Web domains, and by extension, all clients visiting
-sites on those domains. Recent years have seen a plethora of incidents where
-misbehaving \acp{ca} issued unauthorized certificates, both
+certificate databases indicate that Web browsers and operating systems provided
+by Mozilla, Apple, and Microsoft trust more than 1,500 \ac{ca} signing keys
+across more than 600 organizations worldwide. There are few measures in place to
+prevent any of these \acp{ca} from issuing an unauthorized certificate for any
+site, resulting in \emph{weakest-link security} for most sites: the compromise
+of any \ac{ca} can threaten the security of all Web domains, and by extension,
+all clients visiting sites on those domains. Recent years have seen a plethora
+of incidents where misbehaving \acp{ca} issued unauthorized certificates, both
 accidentally~\cite{sleevi2015sustaining} and
 intentionally~\cite{valsorda2015komodia}.
 
 Previous work has been insufficient to make the Web \ac{pki} resilient to
-certificate misissuances (see Section~\ref{sec:related}). 
-Systems like Google's \ac{ct} project~\cite{rfc6962} only allow
-for detection, not prevention, of unauthorized certificate issuance. Systems
-that do prevent unauthorized certificate issuance add new trusted
+certificate misissuances (see Section~\ref{sec:background} \steve{purposely
+missing link because this version is just the intro}). Systems like
+Google's \ac{ct} project~\cite{rfc6962} only allow for detection, not
+prevention, of unauthorized certificate issuance. Systems that do prevent
+unauthorized certificate issuance add new trusted
 parties~\cite{kim2013accountable}, require domains to deploy complex new
-infrastructure~\cite{rfc6698, szalachowski2014policert}, drastically increase
-latency and communication~\cite{yu2016dtki}, or require 
-all domains to increase their security level at once~\cite{basin2014arpki}.
-Many of these systems also require tens of millions of domains 
-to put significant effort into creating complex policies, hindering
-deployment.  In practice, for example, public-key pinning~\cite{pkpinning} proved to
-be error-prone, contributing to its limited deployment;
-as a result, Google recently decided to remove support for it~\cite{palmer2017intent}.
+infrastructure~\cite{rfc6698, szalachowski2014policert}, significantly increase
+latency and communication~\cite{yu2016dtki}, or require all domains to increase
+their security level at once~\cite{basin2014arpki}. Many of these systems also
+require tens of millions of domains to put significant effort into creating
+complex policies, hindering deployment.  In practice, for example, public-key
+pinning~\cite{rfc7469} proved to be error-prone, contributing to its limited
+deployment; as a result, Google recently decided to remove support for
+it~\cite{palmer2017intent}.
 
-To address these shortcomings, we propose \acs{name}, a system that provides a
+To address these shortcomings, we propose \ac{name}, a system that provides a
 modest roadmap to transition to a more resilient Web \ac{pki}. Specifically,
-\ac{name} prevents clients from accepting
-unauthorized certificates issued by individual misbehaving
-\acp{ca}, and allows this improvement to the Web
-\ac{pki} to coexist with the current \ac{pki}. By enabling this overlap and by
-preventing downgrade attacks (i.e., by preventing the existing \ac{pki} from
-being used between a client and domain who both support the improvement),
-\ac{name} allows domains to decide when they are ready to deploy the \ac{pki}
-improvement.  \ac{name} also avoids performance penalties for non-deployers while providing
-stronger security guarantees to even the earliest adopters. \ac{name} 
-focuses its major changes on a small handful of participants, namely browser
-vendors and public logs, who are better equipped to make these changes than the
-millions of domains that currently deploy \ac{https}. Domains do not need to
-change the way they interact with \acp{ca}, avoiding the perils of
-misconfiguration that these domains have plagued previously proposed
+\ac{name} prevents clients from accepting unauthorized certificates issued by
+individual misbehaving \acp{ca}, and allows this improvement to the Web \ac{pki}
+to coexist with the current \ac{pki}. By enabling this overlap and by preventing
+downgrade attacks (also called \emph{\ac{tls} stripping}), which prevent the
+existing \ac{pki} from being used between a client and domain who both support
+the improvement, \ac{name} allows domains to decide when they are ready to
+deploy the \ac{pki} improvement.  \ac{name} does not penalize non-deployers and
+provides stronger security guarantees to even the earliest adopters. The bulk of
+the deployment effort of \ac{name} can occur at a small handful of participants,
+namely browser vendors and public logs, who are better equipped to make these
+changes than the millions of domains that currently deploy \ac{https}. Domains
+do not need to change the way they interact with \acp{ca}, avoiding the perils
+of misconfiguration that these domains have plagued previously proposed
 improvements~\cite{palmer2017intent}.
 
 \ac{name} achieves the above properties through several important observations.
@@ -98,20 +98,19 @@ each client a succinct summary of the \emph{entire} set of domains that deploy
 \ac{https}; with our techniques, it requires just \steve{TODO}.
 
 We also observe that all known instances of \ac{ca} misbehavior up to this point
-have involved a single misbehaving \ac{ca}.  Hence, \ac{name} allows
-a domain to authenticate its public key using multiple independent certificate chains
-(we quantify the impact this has on connection latency and bandwidth in Section~\ref{sec:eval:client}).
-\ac{name}-enabled clients know how many chains to expect for each domain,
-and hence, the simultaneous failure of $n-1$ \acp{ca} cannot enable \iac{mitm} attack
-on a domain with $n$ chains.
-Note that \ac{name} signals to clients
-the \emph{number} of certificate chains to expect, rather than the list of
-authorized \acp{ca}.  This results in a useful practical property:
-misconfiguration or private key loss cannot render a domain inaccessible, since
-the domain can simply obtain the requisite number of certificates for a new
-public key, and revoke the old certificates 
-through the standard certificate revocation process (i.e., contacting the
-issuing \ac{ca}).
+have involved a single misbehaving \ac{ca}.  Hence, \ac{name} allows a domain to
+authenticate its public key using multiple independent certificate chains (we
+quantify the impact this has on connection latency and bandwidth in
+Section~\ref{sec:eval:client} \steve{purposely missing link because this version
+is just the intro}). \ac{name}-enabled clients know how many chains to expect
+for each domain, and hence, the simultaneous failure of $n-1$ \acp{ca} cannot
+enable \iac{mitm} attack on a domain with $n$ chains. Note that \ac{name}
+signals to clients the \emph{number} of certificate chains to expect, rather
+than the list of authorized \acp{ca}.  This results in a useful practical
+property: misconfiguration or private key loss cannot render a domain
+inaccessible, since the domain can simply obtain the requisite number of
+certificates for a new public key, and revoke the old certificates through the
+standard certificate revocation process (i.e., contacting the issuing \ac{ca}).
 
 %Moreover, this process must prevent misconfiguration or private key loss from
 %rendering a domain inaccessible as in existing systems for preventing \ac{mitm}
@@ -123,36 +122,34 @@ issuing \ac{ca}).
 %from misconfiguration or private key loss by simply obtaining certificates on a
 %new public key.
 
-To vouch for the number of certificate
-chains that a client should expect to receive, 
-\ac{name} uses a publicly auditable
-authenticated database service based on a global view of all certificates in the
-Web \ac{pki}, which allows us \emph{automatically} infer the number of
-certificate chains for each domain. In today's Web, we can obtain this global
-view through Google's \ac{ct} system~\cite{rfc6962}, which is included in all
-Chrome browsers and as of April 2018 will be required for all \ac{https}-enabled
-sites that wish to be treated as secure by Chrome~\cite{citation-needed}.
+To vouch for the number of certificate chains that a client should expect to
+receive, \ac{name} uses a publicly auditable authenticated database service
+based on a global view of all certificates in the Web \ac{pki}, which allows us
+to \emph{automatically} infer the number of certificate chains for each domain.
+In today's Web, we can obtain this global view through Google's \ac{ct}
+system~\cite{rfc6962}, which is included in all Chrome browsers and as of April
+2018 will be required for all \ac{https}-enabled sites that wish to be treated
+as secure by Chrome~\cite{sleevi2016requiring}.
 
 Finally, we observe that once we can establish a strongly authenticated,
 authoritative public key for a domain, we can use this key to secure richer
 policies as proposed in prior work~\cite{basin2014arpki,
 szalachowski2014policert}. \ac{name} can thus simplify the policy authentication
-mechanisms of these proposed systems, which rely on convoluted coordination
-among domains, \acp{ca}, and public logs to certify these policies. \ac{name}
-also enhances the recoverability of these systems, which, as originally proposed,
+mechanisms of these proposed systems, which rely on complex coordination among
+domains, \acp{ca}, and public logs to certify these policies. \ac{name} also
+enhances the recoverability of these systems, which, as originally proposed,
 require waiting for days to replace a policy if the corresponding private key is
 lost or compromised.
 
 \ac{name} is also attractive from a deployment standpoint. In particular, the
-burden of deployment for domains is limited to the cost of additional
-certificates, which can be no cost at all with the use of free certificate services
-like Let's Encrypt.\endnote{\url{https://letsencrypt.org/}} Furthermore,
-\ac{name} is an opt-in system, meaning that only domains who choose to obtain
-additional certificates incur a cost. 
-From its initial deployment, \ac{name} protects all domains from
-\ac{tls} stripping, and
-it allows non-deploying domains to coexist with deploying domains without enabling
-downgrade attacks.
+administrative burden of deployment for domains is limited to purchasing
+additional certificates, and with the use of free certificate services like
+Let's Encrypt,\endnote{\url{https://letsencrypt.org/}} the financial burden can
+be minimized as well. Furthermore, \ac{name} is an opt-in system, meaning that
+only domains who choose to obtain additional certificates incur a cost. From its
+initial deployment, \ac{name} protects all domains from \ac{tls} stripping, and
+it allows non-deploying domains to coexist with deploying domains without
+enabling downgrade attacks.
 
 In summary, we make the following contributions:
 \begin{compactitem}
