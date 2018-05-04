@@ -42,8 +42,7 @@ accidentally~\cite{sleevi2015sustaining} and
 intentionally~\cite{valsorda2015komodia}.
 
 Previous work has been insufficient to make the Web \ac{pki} resilient to
-certificate misissuances (see Section~\ref{sec:background} \steve{purposely
-missing link because this version is just the intro}). Systems like
+certificate misissuances (see Section~\ref{sec:background}). Systems like
 Google's \ac{ct} project~\cite{rfc6962} only allow for detection, not
 prevention, of unauthorized certificate issuance. Systems that do prevent
 unauthorized certificate issuance add new trusted
@@ -91,8 +90,8 @@ into the \ac{tls} handshake as an extension. Because existing solutions for
 indicating \ac{https} deployment require the client to trust its first
 connection to the domain, they have lagged in deployment~\cite{rfc4033,
 rfc6698}, and add significant storage
-overhead\endnote{\url{https://www.eff.org/https-everywhere}} or connection
-latency.\endnote{\url{https://mybrowseraddon.com/smart-https.html}} Instead, we
+overhead\footnote{\url{https://www.eff.org/https-everywhere}} or connection
+latency.\footnote{\url{https://mybrowseraddon.com/smart-https.html}} Instead, we
 use data compression techniques and compact data structures to locally store at
 each client a succinct summary of the \emph{entire} set of domains that deploy
 \ac{https}; with our techniques, it requires just \steve{TODO}.
@@ -101,8 +100,7 @@ We also observe that all known instances of \ac{ca} misbehavior up to this point
 have involved a single misbehaving \ac{ca}.  Hence, \ac{name} allows a domain to
 authenticate its public key using multiple independent certificate chains (we
 quantify the impact this has on connection latency and bandwidth in
-Section~\ref{sec:eval:client} \steve{purposely missing link because this version
-is just the intro}). \ac{name}-enabled clients know how many chains to expect
+Section~\ref{sec:eval:client}). \ac{name}-enabled clients know how many chains to expect
 for each domain, and hence, the simultaneous failure of $n-1$ \acp{ca} cannot
 enable \iac{mitm} attack on a domain with $n$ chains. Note that \ac{name}
 signals to clients the \emph{number} of certificate chains to expect, rather
@@ -144,7 +142,7 @@ lost or compromised.
 \ac{name} is also attractive from a deployment standpoint. In particular, the
 administrative burden of deployment for domains is limited to purchasing
 additional certificates, and with the use of free certificate services like
-Let's Encrypt,\endnote{\url{https://letsencrypt.org/}} the financial burden can
+Let's Encrypt,\footnote{\url{https://letsencrypt.org/}} the financial burden can
 be minimized as well. Furthermore, \ac{name} is an opt-in system, meaning that
 only domains who choose to obtain additional certificates incur a cost. From its
 initial deployment, \ac{name} protects all domains from \ac{tls} stripping, and

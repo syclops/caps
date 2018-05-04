@@ -16,7 +16,7 @@ bootstrapping of more advanced policies \steve{cite ARPKI, etc.\@ here?}
 
 \begin{figure*}
   \centering
-  \includegraphics[width=\linewidth]{fig/overview2}
+  \includegraphics[width=0.8\linewidth]{fig/overview2}
   \caption{Overview of \ac{name} architecture (log auditors and monitors not
   shown). Dotted lines denote the browser and its components, and italic text
 denotes new entities or actions in \ac{name}.}
@@ -43,7 +43,7 @@ current Web \ac{pki}, it necessarily includes the entities in the current
 \ac{pki}:
 \begin{compactitem}
 \item \emph{Domains} serve webpages to clients. Each domain has a name such as
-  \texttt{example.com}. \steve{\endnote{Put somewhere the rules of how domain
+  \texttt{example.com}. \steve{\footnote{Put somewhere the rules of how domain
   names are differentiated, like www.example.com being a distinct name.}}
 \item \emph{\acp{ca}} issue certificates to domains. Each certificate binds a
   set of names to a single public key.
@@ -51,7 +51,7 @@ current Web \ac{pki}, it necessarily includes the entities in the current
   latter case, verify the binding between a domain's name and public key.
 \item \emph{Browser/OS vendors} (hereafter simply \emph{vendors}) provide the
   software by which clients connect to domains and verify domains' certificates.
-  \steve{\endnote{Possible additional text: Vendors also name a set of root
+  \steve{\footnote{Possible additional text: Vendors also name a set of root
   \ac{ca} keys.}}
 \item \emph{Public logs} maintain a publicly auditable, append-only database of
   certificates.
@@ -97,7 +97,7 @@ HTTPS-deploying domain one or more public keys to be treated as authoritative in
 the improved \ac{pki}. To provide a smooth transition from the current \ac{pki},
 \ac{name} uses a simple, intuitive policy to determine a domain's public key in
 the improved \ac{pki}: \emph{treat whichever public key is backed by the most
-  independent certificate chains\endnote{By \emph{independent} we mean that the
+  independent certificate chains\footnote{By \emph{independent} we mean that the
   certificate chains share no public keys except at the leaf.} in the current
 \ac{pki} as authoritative in the improved \ac{pki}}.
 
@@ -105,7 +105,7 @@ the improved \ac{pki}: \emph{treat whichever public key is backed by the most
 %highest number of observed independent certificate chains for a given domain,
 %then \emph{any} public key backed by $n$ chains can be used as that domain's in
 %the improved \ac{pki}. Thus, it is possible for a domain to have multiple public
-%keys in the improved \ac{pki}.\endnote{In practice, any improved \ac{pki} can
+%keys in the improved \ac{pki}.\footnote{In practice, any improved \ac{pki} can
 %enforce the use of a single public key by, for example, considering the first
 %key backed by $n$ chains as authoritative and using a ``cool-off period'' as in
 %AKI~\cite{kim2013accountable}.}
@@ -164,6 +164,25 @@ the improved \ac{pki}: \emph{treat whichever public key is backed by the most
 %representation allows us to store the \ac{dafsa} in memory, offering performant
 %lookups. We further describe the details of our signal set design in
 %\autoref{sec:design:signaling}.
+
+\subsection{Threat Model}
+\label{sec:design:threat}
+
+Ultimately, an adversary of \iac{pki} has the goal of mounting a successful
+\ac{mitm} attack, and this goal remains before, during, and after the process of
+transitioning to an improved \ac{pki}. Therefore, in this paper we consider an
+adversary whose goal, informally stated, is to issue an unauthorized public-key
+certificate that a standard client (i.e., a client who trusts a standard set of
+root \acp{ca}) will accept.
+
+To achieve this goal, the adversary can control a set of $n$ \acp{ca}. For
+convenience, we assume that each \ac{ca} has a single private key, and thus the
+adversary can issue arbitrary certificates using any of $n$ different private
+keys. We also assume that the adversary controls the network, and thus can
+replay, drop, or modify messages sent over the network. Since we examine the
+process of deploying an improved \ac{pki}, we also assume that clients support
+both the existing and improved \ac{pki}. We also assume that the adversary
+cannot break cryptographic primitives.
 
 \subsection{Signaling HTTPS Deployment}
 \label{sec:design:signaling}
