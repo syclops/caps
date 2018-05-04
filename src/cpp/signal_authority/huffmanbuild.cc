@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
   std::chrono::high_resolution_clock::time_point huffman_start, huffman_end;
   std::cout << "Building Huffman tree..." << std::flush;
   huffman_start = std::chrono::high_resolution_clock::now();
-  HuffmanTree huffman_tree(counts_map);
+  HuffmanCoder huffman_tree(counts_map);
   huffman_end = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> huffman_duration
     = std::chrono::duration_cast<std::chrono::duration<double>>(

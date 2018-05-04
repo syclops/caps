@@ -105,7 +105,7 @@ void write_huffman(const DAFSADebug& mafsa, const std::string& outfile_name)
   chr::duration<double> counts_duration;
   std::cerr << "Creating Huffman codebook..." << std::flush;
   counts_start = chr::high_resolution_clock::now();
-  HuffmanTree codebook(mafsa.get_label_counts());
+  HuffmanCoder codebook(mafsa.get_label_counts());
   counts_end = chr::high_resolution_clock::now();
   counts_duration = chr::duration_cast<chr::duration<double>>(
     counts_end - counts_start);
