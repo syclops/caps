@@ -229,3 +229,6 @@ TSWLatexianTemp*
 
 # expex forward references with \gathertags
 *-tags.tex
+
+# Ignore Jupyter/ipynb notebook checkpoints
+.ipynb_checkpoints
