@@ -87,6 +87,19 @@ adversary can simply intercept and block the \ac{https} request to cause Smart
 
 \subsection{Rethinking Certificate Issuance and Validation}
 
+public key pinning is a tofu system that similarly to hsts allows sites to
+specify a public key that a browser should use for a set amount of time. 
+
+tofu of hpkp can be mitigated with pinsets
+
+it is very easy to shoot yourself in the foot with hpkp - changing keys when you
+are pinned with a long life, misconfiguring your key, subdomain issues, etc, and
+it's not easy to remove your pin
+
+HPKP, TACK
+
+AKI/ARPKI, PoliCert, CIRT
+
 Deployment requires many changes
 
 Without transitional plan, some break down (vulnerable to attack)
