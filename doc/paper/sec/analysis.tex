@@ -1,8 +1,109 @@
 \section{Security Analysis}
 \label{sec:analysis}
 
-In this section, we analyze the security that \ac{name} provides.
+In this section, we analyze the security that \ac{name} provides. We begin with
+our main security claim and informally argue that it holds given our adversary
+model. \steve{If time allows, provide a formal proof as well.} We then describe
+two potential weaknesses of \ac{name} not covered by our security claim, and
+argue that countermeasures (some of which are currently used) make these
+weaknesses difficult or impossible to exploit.
 
-\steve{Proposed property: for a domain with a key policy of $(m, n)$, at least
-  $m$ \acp{ca} issuing unauthorized EV certs or $n$ \acp{ca} issuing
-unauthorized non-EV certs must act in concert to enable a \ac{mitm} attack.}
+
+\subsection{Main Security Claim}
+\label{sec:analysis:informal}
+
+In making our main security claim, we assume that the client requests \numlas
+policy proofs and that the domain has a domain name of \domain and a policy
+value of \policy. We assume that both the client and domain follow the handshake
+protocol as described. We also assume that our adversary controls $\numlas - 1$
+private keys of log aggregators and the private keys of $\policy - 1$ \acp{ca},
+and we assume that the adversary is the sole entity that controls the private
+key corresponding to a public key $\pk_\adversary$. We assume that the adversary
+can intercept, suppress, replay, and modify any handshake message sent between
+the client and domain, and can sign any message it can construct with the
+information it has using its private keys. We also assume that the adversary
+cannot obtain a certificate binding \domain to $\pk_\adversary$ from any \ac{ca}
+besides the ones it controls. Under these assumptions, we claim that the client
+will abort the handshake protocol if it receives any certificate chain
+containing $\pk_\adversary$ as the leaf public key. The truth of this claim
+guarantees the security of \ac{name} because the adversary cannot mount a
+\ac{mitm} attack without the client completing the \ac{name} handshake based on
+a key that the adversary controls.
+
+We first show that the adversary cannot convince the client that that the domain
+has a policy value other than \policy. Because the client requests \numlas
+policy proofs for \domain, the client will abort the handshake if the extension
+data in the ServerHello message does not contain \numlas independent policy
+proofs. Because we assume that the adversary only has access to $\numlas - 1$
+log aggregator signing keys, we know that the adversary cannot use those keys to
+generate \numlas independent proofs. Specifically, if the adversary sends a set
+of proofs and there are fewer than \numlas valid proofs, or if any of them fails
+to prove that \policy is the policy value for \domain, then the client will
+abort the handshake.
+
+Recall that the client determines \policy as the one plus the number of valid,
+independent certificate chains sent in the extension message. We show that the
+adversary cannot convince the client that the $\pk_\adversary$ is the domain's
+public key. From our assumption that the adversary can access the signing keys
+of $\policy - 1$ \acp{ca}, we know that the adversary controls \emph{at least}
+$\policy - 1$ private keys. From this assumption, however, we also know that the
+number of \emph{independent} certificate chains that the adversary can generate
+is \emph{at most} $\policy - 1$. It is straightforward to show this by induction
+on \policy, with $\policy = 2$ as the base case.\footnote{Note that the $\policy
+= 1$ case is equivalent to the current Web \ac{pki} (i.e., the domain only
+provides a single certificate chain).} If the adversary generates $\policy - 1$
+independent certificate chains for $\pk_\adversary$ and sends these chains with
+the policy proofs in the extension message, then the client will proceed with
+the handshake. However, the adversary will be unable to generate a final
+independent certificate chain to send with the ServerCertificate message,
+causing the client to abort the handshake at that point.
+
+
+\subsection{Potential Weaknesses}
+\label{sec:analysis:weaknesses}
+
+Our main security claim shows that under our assumptions, the adversary cannot
+mount a successful \ac{mitm} attack on a client and domain. Therefore, we can
+conclude that the failure of log aggregators or \acp{ca} are not sufficient to
+enable a \ac{mitm} attack. However, we did not describe the consequence of
+misbehavior by the other parties shown in \autoref{fig:overview}: the data
+sources (namely, public logs) or the browser vendor. We now show that while
+failures of these entities can have negative consequences for the performance or
+security of \ac{name}, we consider these cases out of the scope of this work
+because they are unlikely to succeed in practice or are catastrophic failures
+that can circumvent almost any practical defense.
+
+Log aggregators rely on public logs to obtain a complete view of certificates in
+the Web \ac{pki}. However, given the open nature of many of these logs (i.e.,
+the fact that anyone can submit certificates to them or otherwise make
+certificates available to them), an adversary may take advantage of this
+openness to force the log aggregators to increase their resource consumption.
+For example, an adversary who controls \iac{ca} signing key can issue millions
+of certificates and make them available to the logs, causing the log aggregators
+to store these certificates when updating their respective policy databases.
+
+While \ac{name} provides no mechanism to stop this behavior, the issuance of
+these certificates produces non-repudiable proof of the adversary's behavior,
+and the requirement that newly-issued certificates be logged increases the
+likelihood of someone detecting this behavior. This detection would likely lead
+to consequences such as the revocation of the \ac{ca} certificate by its issuing
+\ac{ca} or by the browser vendor. Moreover, only an adversary with access to
+\iac{ca} signing key can carry out this attack; while Let's Encrypt does provide
+free certificates through an automatic protocol, it imposes a rate limit per
+domain based on the Public Suffix
+List,\footnote{\url{https://publicsuffix.org/}} thus requiring an adversary
+without access to \iac{ca} signing key to obtain many domain names to carry out
+this attack.
+
+Adversary control of the browser vendor is a catastrophic failure that can
+enable a \ac{mitm} attack under almost any circumstances, since this allows the
+adversary to completely control the client's experience with the Web. In this
+scenario, the adversary can arbitrarily deviate from the \ac{tls} or \ac{name}
+handshakes, insert its own root certificates, or display arbitrary pages. Even
+with \ac{name}, an adversary-controlled vendor can also intercept and modify the
+result of queries to the signaling set or rewrite HTTPS requests to HTTP
+requests, rendering \ac{name}'s protection against downgrade attacks useless.
+While some countermeasures such as OS-level protections may protect the client,
+this scenario is severe enough that \ac{name} makes no security guarantees if it
+occurs.
+

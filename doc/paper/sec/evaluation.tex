@@ -1,174 +1,259 @@
 \section{Evaluation}
 \label{sec:evaluation}
 
-In this section, we evaluate the performance and overhead of \ac{name}. In
-particular, we examine the performance and overhead of our implementations of
-the client, signaling authority, and the log aggregator, respectively.
-\steve{TODO: update}
+In this section, we describe our evaluation of the performance and overhead of
+\ac{name}. We first describe the domains represented by the signaling set,
+including how we determined these domains. Next, we compare different approaches
+and optimizations for representing the signaling set. Finally, we describe the
+performance effects of \ac{name} on connection establishment.
 
-\subsection{Growth of HTTPS Deployment}
+\subsection{Signaling Set Domains}
 \label{sec:evaluation:https}
 
-\begin{compactitem}
-\item Motivation: empirical basis for how storage requirements are expected to
-  scale over time
-\item Sources: Censys, CT Logs
-\item Results
-  \begin{compactitem}
-  \item Discrepancy between number of domains in Censys and CT (almost a factor
-    of 10)
-    \begin{compactitem}
-    \item Currently: CT Google logs' valid name set grows from 113M to 168M in
-      the period of 1/1/17 to 12/4/17 (roughly 164k names per day)
-    \item Could indicate that Censys has low coverage due to errors of poor
-      server reliability, or that the vast majority of certificates are never
-      seen on the Web in practice
-    \end{compactitem}
-  \item Seems to be a fairly regular growth rate over time, with periods of high
-    growth corresponding to events in the community (e.g., CA removal or CT
-    requirement)
-  \item \steve{TODO: how has Let's Encrypt deployment affected this?}
-  \item \steve{TODO: expiration rate?}
-  \item \steve{TODO: what kinds of domains are newly deploying HTTPS?}
-  \end{compactitem}
-\end{compactitem}
+Before building a representation of the signaling set, we need to determine
+which domains belong in the signaling set. Moreover, to determine the long-term
+viability of our solution, we also need to understand how the size of this set
+of domains may change in the future. Addressing both of these problems requires
+a complete and accurate view of the Web \ac{pki}, namely, the set of domains
+that are accessible over HTTPS.
 
-As of April 2018, Google requires all newly-issued certificates to
-be logged in \ac{ct}~\cite{sleevi2017certificate}, so we expect that in time,
-the log aggregator will determine these sets solely with \ac{ct} log data.
-However, because our crawl of \ac{ct} logs (\autoref{sec:evaluation:https} shows
-that they currently contain \steve{XX\%} of known
-\steve{certificates/\acp{fqdn}}, we also used scans of the IPv4 address space
-from Censys~\cite{durumeric2015search} alongside our \ac{ct} log data to build
-\httpsset and \multicertset for our prototype. The combination of Censys and
-\ac{ct} data has been shown to encompass over 99\% of known certificates and
-\acp{fqdn}~\cite{vandersloot2016towards}.
+We can obtain a view of the Web \ac{pki} using data from public logs, as we
+describe in \autoref{sec:design}. Specifically, we can obtain public-key
+certificates from sources such as Censys~\cite{durumeric2015search} and logs in
+\ac{ct}~\cite{rfc6962}. From Censys, we collected 1,026 scans of the IPv4
+address space over a period ranging from September 12, 2015 to July 3, 2018.
+From \ac{ct}, we collected all entries from known \ac{ct} logs that were not
+disqualified or unreachable as of July 3,
+2018,\footnote{\url{https://www.certificate-transparency.org/known-logs}} which
+totaled approximately 1.74B certificates from 26 logs over a period ranging from
+March 26, 2013 to July 3, 2018.
 
-While previous work~\cite{vandersloot2016towards, larisch2017crlite} has
-successfully collected and used data from these sources to construct a
-near-complete view of the set of \ac{https} certificates at a given time, there
-is little data about how \ac{https} deployment has changed over time. Proxy
-measures, such as the percentage of \ac{https} connections in
-Chrome\footnote{\url{https://transparencyreport.google.com/https/overview}} or
-the number of certificates issued by Let's
-Encrypt\footnote{\url{https://letsencrypt.org/stats/}}, only provide an
-approximation of this change. In order to design \ac{name} with the appropriate
-scale of data in mind, we used data from Censys and \ac{ct} to analyze the
-change in the number of \acp{fqdn} associated with \iac{https} certificate over
-time.
-
-We collected certificates from Censys and \ac{ct} over a period ranging from 26
-March 2013 to 3 July 2018, though a majority of the observations are
-concentrated over the last two years. In total, we collected 58.3 billion
-entries representing 609 million distinct certificates that were either obtained
-in a \ac{tls} handshake in Censys or logged in a known good\footnote{Taken from
-  \url{https://www.certificate-transparency.org/known-logs}. A good log is a log
-  on this list that has not been disqualified or ceased operation} \ac{ct} log.
-  We then extracted all valid\footnote{A valid \ac{fqdn} has \iac{tld} that is a
-  current global \ac{tld} in ICANN, is up to 253 bytes in length overall, and
-has no label longer than 63 bytes.} \acp{fqdn} from these certificates. Because
-names and certificates appeared multiple times over these entries, we considered
-a name $N$ valid on a given day if there was at least one certificate that
-\begin{inparaenum}
-\item contained $N$ as a subject name or a subject alternative name,
-\item had been observed on or before that day, and
-\item was valid on that day (its validity period had started and not yet
-  expired).
-\end{inparaenum}
-
-\begin{figure}
+\begin{figure*}
   \centering
-  \includegraphics[width=\linewidth]{fig/cert_count_valid}
-  \caption{Number of HTTPS-enabled domains over time.}
-\label{fig:certs}
-\end{figure}
+  \subfloat[Certs.]{
+    \includegraphics[width=0.33\linewidth]{fig/cert_count_valid}
+    \label{fig:count:certs}
+  }
+  \subfloat[Names.]{
+    \includegraphics[width=0.33\linewidth]{fig/name_count_valid}
+    \label{fig:count:names}
+  }
+  \subfloat[Domains.]{
+    \includegraphics[width=0.33\linewidth]{fig/name_count_valid}
+    \label{fig:count:domains}
+  }
+  \caption{Certificates, names, and domains in the Web \ac{pki} as seen by
+  Censys and \ac{ct}. \steve{The domains graphic is a placeholder for now.}}
+  \label{fig:count}
+\end{figure*}
 
-\begin{figure}
-  \centering
-  \includegraphics[width=\linewidth]{fig/name_count_valid}
-  \caption{Number of HTTPS-enabled domains over time.}
-  \label{fig:cert-add-exp}
-\end{figure}
+On each of these days, we consider an ``active set'' of certificates consisting
+of all certificates that were valid on that day and had an associated
+certificate chain rooted in one of the three major root certificate stores,
+determined by Apple, Microsoft, or Mozilla. In the Censys dataset, because we
+observed a great deal of churn (i.e., certificates disappearing and appearing in
+consecutive scans), we considered a certificate as in the active set from the
+time it was first observed in our data until its expiration. We then consider
+the number of unique, valid domain names, which we use to build the signaling
+set. \steve{Finally, we considered the unique domains (names directly under a
+domain from the Public Suffix List.}
 
-Because HTTPS adoption trends changed during our measurement period, we focus on
-the last two years of data, from 3 July 2016 to 3 July 2018, which we show in
-\autoref{fig:certs}. There are close to 200 million distinct \acp{fqdn}
-currently associated with \iac{https} certificates. We did not find a clear
-trend that encompassed the entire range of the data, but we observe a roughly
-linear trend from April to July 2018. Specifically, the set of \acp{fqdn} that
-deploy \ac{https} grows at an average of 574,921 names per day, with $R^2=0.97$.
+\autoref{fig:count} shows the number of each observed by Censys, \ac{ct}, and
+their overlap over time. Our results show that there are far more certificates
+(and consequently names and domains) observed by \ac{ct} than by Censys, which
+can indicate either that many certificates logged in \ac{ct} are never used in
+the wild, or that Censys misses many certificates. \steve{To determine which is
+  the case, we performed a scan with ZMap~\cite{durumeric2013zmap} for the
+  domain names in \ac{ct} that were not found by Censys.} \steve{Compare the
+growth rate of domains with the growth of overall domain names, as estimated by
+VeriSign's quarterly Domain Name Industry Brief, if we can get old versions.}
 
-\steve{Further things to explore:
-  \begin{compactitem}
-  \item How much data is captured in Censys vs \ac{ct}
-  \item Scale of \acp{fqdn} in Alexa Top 1M sites
-  \item List of names under the public suffix list
-  \item Overall trends for \ac{fqdn} growth
-  \item When names that expire reappear
-  \item Issuers/domains that don't renew before expiration
-  \end{compactitem}
-}
+We also observe a surge of growth in HTTPS deployment during \steve{\emph{list
+time periods here, along with events that triggered them, such as Let's Encrypt
+deployment, or adoption of CT/LE by major CAs/hosting providers}}.
 
-\subsection{Implementation}
+%As of April 2018, Google requires all newly-issued certificates to
+%be logged in \ac{ct}~\cite{sleevi2017certificate}, so we expect that in time,
+%the log aggregator will determine these sets solely with \ac{ct} log data.
+%However, because our crawl of \ac{ct} logs (\autoref{sec:evaluation:https} shows
+%that they currently contain \steve{XX\%} of known
+%\steve{certificates/\acp{fqdn}}, we also used scans of the IPv4 address space
+%from Censys~\cite{durumeric2015search} alongside our \ac{ct} log data to build
+%\httpsset and \multicertset for our prototype. The combination of Censys and
+%\ac{ct} data has been shown to encompass over 99\% of known certificates and
+%\acp{fqdn}~\cite{vandersloot2016towards}.
+
+%While previous work~\cite{vandersloot2016towards, larisch2017crlite} has
+%successfully collected and used data from these sources to construct a
+%near-complete view of the set of \ac{https} certificates at a given time, there
+%is little data about how \ac{https} deployment has changed over time. Proxy
+%measures, such as the percentage of \ac{https} connections in
+%Chrome\footnote{\url{https://transparencyreport.google.com/https/overview}} or
+%the number of certificates issued by Let's
+%Encrypt\footnote{\url{https://letsencrypt.org/stats/}}, only provide an
+%approximation of this change. In order to design \ac{name} with the appropriate
+%scale of data in mind, we used data from Censys and \ac{ct} to analyze the
+%change in the number of \acp{fqdn} associated with \iac{https} certificate over
+%time.
+
+%We collected certificates from Censys and \ac{ct} over a period ranging from 26
+%March 2013 to 3 July 2018, though a majority of the observations are
+%concentrated over the last two years. In total, we collected 58.3 billion
+%entries representing 609 million distinct certificates that were either obtained
+%in a \ac{tls} handshake in Censys or logged in a known good\footnote{Taken from
+  %\url{https://www.certificate-transparency.org/known-logs}. A good log is a log
+  %on this list that has not been disqualified or ceased operation} \ac{ct} log.
+  %We then extracted all valid\footnote{A valid \ac{fqdn} has \iac{tld} that is a
+  %current global \ac{tld} in ICANN, is up to 253 bytes in length overall, and
+%has no label longer than 63 bytes.} \acp{fqdn} from these certificates. Because
+%names and certificates appeared multiple times over these entries, we considered
+%a name $N$ valid on a given day if there was at least one certificate that
+%\begin{inparaenum}
+%\item contained $N$ as a subject name or a subject alternative name,
+%\item had been observed on or before that day, and
+%\item was valid on that day (its validity period had started and not yet
+  %expired).
+%\end{inparaenum}
+
+%Because HTTPS adoption trends changed during our measurement period, we focus on
+%the last two years of data, from 3 July 2016 to 3 July 2018, which we show in
+%\autoref{fig:certs}. There are close to 200 million distinct \acp{fqdn}
+%currently associated with \iac{https} certificates. We did not find a clear
+%trend that encompassed the entire range of the data, but we observe a roughly
+%linear trend from April to July 2018. Specifically, the set of \acp{fqdn} that
+%deploy \ac{https} grows at an average of 574,921 names per day, with $R^2=0.97$.
+
+%\steve{Further things to explore:
+  %\begin{compactitem}
+  %\item How much data is captured in Censys vs \ac{ct}
+  %\item Scale of \acp{fqdn} in Alexa Top 1M sites
+  %\item List of names under the public suffix list
+  %\item Overall trends for \ac{fqdn} growth
+  %\item When names that expire reappear
+  %\item Issuers/domains that don't renew before expiration
+  %\end{compactitem}
+%}
+
+\subsection{Signaling Set Representation}
 \label{sec:evaluation:implementation}
 
-We prototyped the client software as a Mozilla Firefox plugin.
+To justify our design decisions for our representation of the signaling set, we
+used several features of our underlying set of domain names. To demonstrate the
+shortcomings of other approaches, we represented this set as a Bloom filter and
+as a compressed archive of strings.
 
-\begin{compactitem}
-\item Update sizes
-\item Memory usage
-\item Disk storage size
-\item Connection latency
-\end{compactitem}
+Recall from \autoref{sec:design} that it is important to minimize the
+size of the representation of the signaling set, as well as the latency
+inflation from querying the signaling set. It is also important to ensure that
+this size will not grow at an unsustainable rate as new domains deploy HTTPS.
+In order to compare different approaches to representing the signaling set given
+these objectives, we must examine the representations of a variety of domain
+name sets with a variety of approaches.
 
-\steve{TODO: how much space efficiency do we lose if we separate out domains?}
+Specifically, we compare signaling sets of various sizes using Bloom filters,
+compression utilities, HTTPS Everywhere (which internally uses a set of regular
+expressions) and our \ac{dafsa}-based approach. We constructed signaling sets by
+selecting the set of active certificates on different days (recall that the
+construction of these sets is described in \autoref{sec:evaluation:https}). We
+also constructed projected future signaling sets by merging sets of domain names
+over various days, up to a maximum of \steve{XX} names. For each of these sets,
+we selected a sample of \steve{XX} domains \steve{representing a range of domain
+name lengths} and compared the size of the representation and the distribution
+of query latencies of the sample names.
 
-\steve{TODO: also compare with set of domains covered by HTTPS Everywhere for
-comparison}
+As we describe in \autoref{sec:design:signaling}, we use a \ac{dafsa}-based
+design of the signaling set with two optimizations over previous work. To
+examine the impact of these optimizations, we perform the above comparison with
+four different sets of optimizations: the minimal approach as described by
+existing work~\cite{daciuk2012smaller}, our approach with transition compaction
+only, our approach with path compaction only, and our approach with both
+transition and path compaction. The full set of test configurations we tried
+is shown in \steve{Table XX}.
 
-\subsection{Performance}
+Our results, shown in \steve{Figure XX}, show that Bloom filters offer fast
+queries, but at the cost of either a high false positive rate or a large
+representation size. On the other hand, compression utilities have no false
+positives, but at the cost of either a large representation size or high query
+latency. The \ac{dafsa}-based representations are at a ``sweet spot'' of these
+metrics, offering a relatively small representation size as well as a relatively
+low query latency. Within the \ac{dafsa}-based representations, \steve{talk
+about the results here}.
+
+%We tuned the parameters for each of these
+%representations; namely, we tested the Bloom filter representation with three
+%different false positive rates (10\%, 1\%, and 0.1\%), and the compressed
+%archive representation with several compression utilities (gzip, bzip2, xzip,
+%and zpaq) and a range of parameters specific to each utility. For each, we
+%measured the size of the representation on disk, as well as the distribution of
+%query latencies for a sample input set, and we compared these metrics to those
+%for the \ac{dafsa}-based representation. Our results, shown in \steve{Fig. XX},
+%demonstrate that \steve{the \ac{dafsa}-based representation falls on the Pareto
+%frontier of size and median query latency.} Moreover, our \ac{dafsa}-based
+%representation does not result in significantly user-unfriendly size or latency
+%overhead.
+
+%To justify our approach to further reduce the \ac{dafsa} size using transition
+%and path compaction, we built \iac{dafsa} using the approach of prior work and
+%performed several steps that reduced the size of the representation. \steve{Fig.
+%XX(a)} shows the occurrences of isolated paths (length and count) and
+%\steve{Fig. XX(b)} shows the size reduction, both plotted against the number of
+%strings represented by the \ac{dafsa}. After applying this compaction, we show
+%that the distribution of labels (\steve{Fig. XX}) as well as the distribution of
+%destination states of each transition, both as absolute states (\steve{Fig.
+%XX(a)} and as relative states forward or backward (\steve{Fig. XX(b)},
+%justifying our use of Huffman coding for the label and destination state in each
+%transition. Finally, we show selections of various connected components and
+%their characteristics, along with the reduction in representation size resulting
+%from applying path compaction to each component.
+
+%Finally, to compare the coverage of HTTPS enforcement with existing tools, we
+%downloaded the ruleset of HTTPS Everywhere (represented as a set of regular
+%expressions) as of July 3, 2018 and measured the difference in the domain names
+%represented in the ruleset and in the signaling set. The results, shown in
+%\steve{Fig. XX} indicate that \steve{our signaling set covers a significantly
+%larger set of domain names than HTTPS Everywhere does}.
+
+\subsection{Connection Establishment}
 \label{sec:evaluation:performance}
 
-\begin{compactitem}
-\item Changes to the signaling set (what domains change and overall growth)
-\item Time to create/update set
-\end{compactitem}
+To test the performance of connection establishment in \ac{name}, we implemented
+an extension to the \steve{Chrome/Firefox} browser that intercepts outgoing HTTP
+and HTTPS requests, queries the domain name in the signaling set, and if
+necessary, initiates a connection to the site with the \ac{name} handshake. We
+implemented the handshake as a custom \ac{tls} extension in the
+\steve{OpenSSL/BoringSSL/NSS} library. On the server side, we modified a a
+\steve{Apache/Nginx} HTTPS server to handle the extension and send back policy
+proofs and extra certificate chains.
 
-\subsection{Log Aggregator}
+To measure the performance of the browser as it established connections with
+different sites, we constructed sample sets of domain names based on five
+parameters:
+\begin{inparaenum}
+\item the client's value of \numlas,
+\item whether or not the domain deployed HTTPS,
+\item if the domain deployed HTTPS, the number of certificates it had (\policy),
+\item the distribution of certificate size for that domain name, and
+\item whether or not the result of querying the domain name in the signaling set
+  was cached by the browser.
+\end{inparaenum}
+We specifically measured the amount of extra data sent in the \ac{name}
+handshake, the combined latency of the query and handshake, \steve{and the
+  memory used by the browser}. We also compared our approach to Smart HTTPS, a
+  browser extension that attempts to connect to all sites over HTTPS first, and
+  only falls back to HTTP if connection establishment with HTTPS fails.
 
-\begin{compactitem}
-\item Size of aggregated log data over time (shows storage overhead and growth)
-\item Mapping size vs. number of certificates
-\end{compactitem}
+\steve{Fig. XX(a)-(c)} shows the results for the various configurations we
+tested. \steve{Different observations about how much caching helps, realistic
+  estimate of how much extra time we're looking at, and a comparison with Smart
+  HTTPS, which always tries HTTPS and falls back to HTTP.}
 
-%\subsection{Policy Mechanism}
+%\subsection{Log Aggregator}
 
-%\draft{We implemented a log that tracks policies. Our code is in \steve{TODO}.
-%We measured its performance and storage requirements given realistic rates of
-%new certificates.}
-
-%\subsection{Signaling Mechanism}
-
-%We implemented our signal set construction in C++.
-
-%\draft{We compare our approach to simple compression of the list of deploying
-%domains, and to succinct encodings of a prefix tree (trie). We measure the
-%compressed size, memory footprint, and added connection latency.}
-
-%\steve{TODO: Add projections on how the metrics will change if there are $n$
-%deploying domains.}
-
-%\textbf{Failures of a Probabilistic Approach.} While at first it may seem that
-%data structures implementing probabilistic membership queries (i.e., Bloom
-%filters~\cite{bloom1970space} and their variants) could provide much of the
-%benefits of a signaling set with only a small cost, this approach has several
-%critical shortcomings. First, Bloom filters allow false positives but no false
-%negatives. Therefore, while clients are protected from \ac{mitm} attacks that
-%could result from false negatives, clients may be blocked from accessing sites
-%that do not deploy \ac{https} because they are false positives in the Bloom
-%filter. Second, on average, a Bloom filter with false positive probability
-%\bloomfpp requires approximately $-\ln \bloomfpp/(\ln 2)^2$ bits per inserted
-%element in the optimal case. Thus for a false positive rate of $p = 0.01$ (which
-%would still cause 10,000 sites out of 1M sites deploying \ac{https} to be
-%blocked), we would require 9.59 bits per site on average. Thus for our full data
-%set, a Bloom filter would require \steve{145 MB}.
+%To measure the resource requirements for a log aggregator, we implemented the
+%log aggregator \steve{in \emph{language} on \emph{platform}}. In addition to
+%retrieving signaling set data as in \autoref{sec:evaluation:https}, we also
+%retrieved revocation information from \steve{CRLs, OCSP responders, and browser
+%revocation lists}. We then measured the storage requirements and mapping size
+%over time. \steve{Fig. XX} shows our results. \steve{Small tweaks to make to our
+  %design based on these numbers. For example, we can use a NOVOMODO-like system
+%to reduce the signature load for all names whose policy value doesn't change.}
