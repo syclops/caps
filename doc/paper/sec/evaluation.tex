@@ -24,7 +24,7 @@ certificates from sources such as Censys~\cite{durumeric2015search} and logs in
 address space over a period ranging from September 12, 2015 to July 3, 2018.
 From \ac{ct}, we collected all entries from known \ac{ct} logs that were not
 disqualified or unreachable as of July 3,
-2018,\footnote{\url{https://www.certificate-transparency.org/known-logs}} which
+2018,\endnote{\url{https://www.certificate-transparency.org/known-logs}} which
 totaled approximately 1.74B certificates from 26 logs over a period ranging from
 March 26, 2013 to July 3, 2018.
 
@@ -60,13 +60,16 @@ domain from the Public Suffix List.}
 
 \autoref{fig:count} shows the number of each observed by Censys, \ac{ct}, and
 their overlap over time. Our results show that there are far more certificates
-(and consequently names and domains) observed by \ac{ct} than by Censys, which
-can indicate either that many certificates logged in \ac{ct} are never used in
-the wild, or that Censys misses many certificates. \steve{To determine which is
-  the case, we performed a scan with ZMap~\cite{durumeric2013zmap} for the
-  domain names in \ac{ct} that were not found by Censys.} \steve{Compare the
-growth rate of domains with the growth of overall domain names, as estimated by
-VeriSign's quarterly Domain Name Industry Brief, if we can get old versions.}
+(and consequently names and domains) observed by \ac{ct} than by Censys. To
+determine whether the names seen in \ac{ct} simply never deployed HTTPS in the
+wild or whether Censys was not observing certain certificates, we performed a
+scan of port 443 using ZGrab~\cite{durumeric2015search} for all domain
+names in \ac{ct} that were not found by Censys. We find that as of our most
+recent measurement, there are \steve{XX} domain names that are accessible over
+HTTPS, and that this number has seen an average growth of approximately
+\steve{XX} names per day. \steve{Compare the growth rate of domains with the
+growth of overall domain names, as estimated by VeriSign's quarterly Domain Name
+Industry Brief, if we can get old versions.}
 
 We also observe a surge of growth in HTTPS deployment during \steve{\emph{list
 time periods here, along with events that triggered them, such as Let's Encrypt
@@ -88,9 +91,9 @@ deployment, or adoption of CT/LE by major CAs/hosting providers}}.
 %near-complete view of the set of \ac{https} certificates at a given time, there
 %is little data about how \ac{https} deployment has changed over time. Proxy
 %measures, such as the percentage of \ac{https} connections in
-%Chrome\footnote{\url{https://transparencyreport.google.com/https/overview}} or
+%Chrome\endnote{\url{https://transparencyreport.google.com/https/overview}} or
 %the number of certificates issued by Let's
-%Encrypt\footnote{\url{https://letsencrypt.org/stats/}}, only provide an
+%Encrypt\endnote{\url{https://letsencrypt.org/stats/}}, only provide an
 %approximation of this change. In order to design \ac{name} with the appropriate
 %scale of data in mind, we used data from Censys and \ac{ct} to analyze the
 %change in the number of \acp{fqdn} associated with \iac{https} certificate over
@@ -100,10 +103,10 @@ deployment, or adoption of CT/LE by major CAs/hosting providers}}.
 %March 2013 to 3 July 2018, though a majority of the observations are
 %concentrated over the last two years. In total, we collected 58.3 billion
 %entries representing 609 million distinct certificates that were either obtained
-%in a \ac{tls} handshake in Censys or logged in a known good\footnote{Taken from
+%in a \ac{tls} handshake in Censys or logged in a known good\endnote{Taken from
   %\url{https://www.certificate-transparency.org/known-logs}. A good log is a log
   %on this list that has not been disqualified or ceased operation} \ac{ct} log.
-  %We then extracted all valid\footnote{A valid \ac{fqdn} has \iac{tld} that is a
+  %We then extracted all valid\endnote{A valid \ac{fqdn} has \iac{tld} that is a
   %current global \ac{tld} in ICANN, is up to 253 bytes in length overall, and
 %has no label longer than 63 bytes.} \acp{fqdn} from these certificates. Because
 %names and certificates appeared multiple times over these entries, we considered
@@ -160,6 +163,63 @@ over various days, up to a maximum of \steve{XX} names. For each of these sets,
 we selected a sample of \steve{XX} domains \steve{representing a range of domain
 name lengths} and compared the size of the representation and the distribution
 of query latencies of the sample names.
+
+\input{table/signaling}
+
+\begin{table}[t]
+  \centering
+  \caption{Size of \ac{name} signaling set on July 3, 2018 (\numnames{} names)
+  with various compression approaches.}
+  \begin{tabularx}{\linewidth}{|Xr|}
+    \toprule
+    \textbf{Representation} & \textbf{Size (MB)} \\
+    Plaintext & \plaintextsize \\
+    Bloom Filter (1\% FP, best-case) & \bloomlargesize \\
+    Bloom Filter (0.1\% FP, best-case) & \bloommedsize \\
+    Bloom Filter (0.01\% FP, best-case) & \bloomsmallsize \\
+    bzip2 (100kB blocks) & \bzlargesize \\
+    bzip2 (500kB blocks) & \bzmedsize \\
+    bzip2 (900kB blocks) & \bzsmallsize \\
+    zpaq (method 1, 16 MiB blocks) & \zpaqlargesize \\
+    zpaq (method 5, 64 MiB blocks) & \zpaqmedsize \\
+    zpaq (method 5, 2048 MiB blocks) & \zpaqsmallsize \\
+    DAFSA & \fsalargesize \\
+    DAFSA w/ path compaction & \fsamedsize \\
+    DAFSA w/ path + transition compaction & \fsasmallsize \\
+
+
+    %&
+    %\multicolumn{2}{c|}{\textbf{Approximate Cost}}
+    %& &
+    %\multicolumn{2}{c|}{\textbf{Approximate Cost}}\\
+    %\midrule
+    %\textbf{Operation} & \textbf{Gas} & \textbf{USD} & \textbf{Operation} &
+    %\textbf{Gas} & \textbf{USD} \\
+    %\midrule
+
+    %Verif.\ cert. & 31\,012 & \$0.0238 &
+    %Bootstrap\,proof & 681\,731 & \$0.5232 \\
+    %Register CA & 91\,400 & \$0.0701 &
+    %Register DCP & 152\,579 & \$0.1171 \\
+    %Update CA & 34\,656 & \$0.0266 &
+    %Update DCP & 181\,226 & \$0.1391 \\
+
+    %Order RP & 49\,024 & \$0.0376 &
+    %Pre-report\,cert & 63\,951 & \$0.0491 \\
+    %Create RP & 226\,892 & \$0.1741 &
+    %Report cert& 149\,284 & \$0.1146 \\
+    %Terminate RP & 99\,461 & \$0.0763 &
+    %Send payouts & 107\,962 & \$0.0829 \\
+    %Expire RP & 39\,823 & \$0.0306 &
+    %CA Balance & 39\,716 & \$0.0305 \\
+    %\midrule
+    %\multicolumn{4}{|l}{\textbf{IKP Contract Creation}} & 1\,660\,319 & \$1.2742 \\
+    \bottomrule
+
+  \end{tabularx}
+  \label{tab:op-costs}
+\end{table}
+
 
 As we describe in \autoref{sec:design:signaling}, we use a \ac{dafsa}-based
 design of the signaling set with two optimizations over previous work. To

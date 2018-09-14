@@ -21,7 +21,7 @@ various Web browsers or operating systems.
 
 \acf{ct} is a project focused on widespread publicization of certificate
 issuance~\cite{rfc6962}. \ac{ct} introduces new roles to the \ac{ca}-based
-ecosystem, most notably \emph{certificate logs}, who record nearly\footnote{A
+ecosystem, most notably \emph{certificate logs}, who record nearly\endnote{A
   log records all certificates submitted with chains rooted in \iac{ca} trusted
 by the log.} all certificates encountered by Web users. Logs maintain an
 auditable, append-only, and tamper-proof database~\cite{crosby2009efficient} of
@@ -31,7 +31,7 @@ been logged. Typically, \acp{ca} send certificates to a log before issuing them,
 and include a receipt from the log called a \emph{\ac{sct}} as an X.509
 extension in the issued certificate. However, anyone can submit certificates to
 a log, and clients can also accept \acp{sct} sent in an extension to the
-\ac{tls} handshake protocol.\footnote{Two extensions may be used: a
+\ac{tls} handshake protocol.\endnote{Two extensions may be used: a
 \iac{ct}-specific extension or the Certificate Status Request extension, also
 known as OCSP stapling~\cite{rfc6066}}
 
@@ -61,7 +61,7 @@ limited set of sites.
 
 \ac{https} Everywhere is a Web browser extension that rewrites HTTP requests to
 \ac{https} requests for certain sites confirmed to serve over
-\ac{https}.\footnote{\url{https://www.eff.org/https-everywhere/}} The extension
+\ac{https}.\endnote{\url{https://www.eff.org/https-everywhere/}} The extension
 uses a list of regular expressions as the base for its rules, which determine
 when to rewrite a request. Because additions to this list are typically
 suggested to the developers by members of the public, there may be a delay
@@ -75,7 +75,7 @@ justifies the claim in the previous sentence.}
 Smart \ac{https} is a Web browser extension that simply rewrites \emph{all} HTTP
 requests to \ac{https} requests, and only uses HTTP if it encounters an error
 during the \ac{https} connection
-attempt.\footnote{\url{https://mybrowseraddon.com/smart-https.html}} Smart
+attempt.\endnote{\url{https://mybrowseraddon.com/smart-https.html}} Smart
 \ac{https} does not distinguish between errors such as certificate errors or the
 page not being found; any error will cause a fallback to HTTP. If the extension
 encounters such an error, the site is added to a whitelist to avoid future
@@ -87,24 +87,45 @@ adversary can simply intercept and block the \ac{https} request to cause Smart
 
 \subsection{Rethinking Certificate Issuance and Validation}
 
-public key pinning is a tofu system that similarly to hsts allows sites to
-specify a public key that a browser should use for a set amount of time. 
+Recent work on improving certificate issuance and validation has focused on
+providing alternate or additional mechanisms by which domains can authenticate
+their public keys to clients. We focus on two approaches: public-key pinning and
+log-based authentication.
 
-tofu of hpkp can be mitigated with pinsets
+Public-key pinning is \iac{tofu} approach that, similarly to \ac{hsts}, allows a
+domain to provide directives to clients during client validation of public keys.
+Rather than communicate simply that the client should use HTTPS, however,
+public-key pinning communicates a set of public keys that should be used when
+authenticating a client public key. \ac{hpkp} allows a domain to specify hashes
+of public key information for one or more certificates in the domain's
+certificate chain, thus binding those keys to the domain name for use in future
+connections~\cite{rfc7469}. \ac{tack} allows a domain to specify a separate
+public key that the client should treat similarly to \iac{ca} public key when
+checking public keys for the domain~\cite{marlinspike2013trust}. For security,
+these approaches deliberately make it difficult to prematurely remove or update
+a pin for a domain. This feature makes it easy for domains to become
+inaccessible due to misconfiguration or malicious behavior, and in 2017,
+\ac{hpkp} was slated for removal from Google Chrome, due in part to these
+pitfalls~\cite{palmer2017intent}. (\ac{tack} was never widely adopted.)
 
-it is very easy to shoot yourself in the foot with hpkp - changing keys when you
-are pinned with a long life, misconfiguring your key, subdomain issues, etc, and
-it's not easy to remove your pin
-
-HPKP, TACK
-
-AKI/ARPKI, PoliCert, CIRT
-
-Deployment requires many changes
-
-Without transitional plan, some break down (vulnerable to attack)
-
-Recovery in case of accident or attack is often more difficult
+Log-based authentication extends functionality of \ac{ct} to enable logs to
+provide or authenticate public-key information for a domain.
+AKI~\cite{kim2013accountable}, its successor ARPKI~\cite{basin2014arpki}, and
+CIRT~\cite{ryan2014enhanced} have logs directly provide public-key information
+for domains and use log proofs to efficiently prove this information.
+PoliCert~\cite{szalachowski2014policert} allows domains to specify a rich set of
+policies. These policies can emulate public-key pinning or systems such as AKI
+by directly listing the public keys of a domain, or simply list a set of
+\acp{ca} authorized to issue certificates for that domain. While these systems
+can provide strong security guarantees (ARPKI, for example, protects against
+\ac{mitm} attacks despite the failure of $n$ \acp{ca}), they require significant
+changes to the certificate issuance process. In particular, these systems
+typically require multiple \acp{ca} to coordinate to issue a certificate, and in
+the event of misconfiguration or impersonation by an adversary, these systems,
+like public-key pinning, do not offer a quick, simple path for recovery.
+Furthermore, these systems propose limited deployment strategies, expecting all
+domains to switch to the new \ac{pki} at once or allowing adversaries to
+downgrade handshakes to the current, vulnerable \ac{pki}.
 
 %%%%%%%%%%%%%%%
 
@@ -292,7 +313,7 @@ Recovery in case of accident or attack is often more difficult
 %of the most popular sites that have deployed \ac{https}. These lists are
 %incomplete (covering only \steve{TODO: fill in} names in Chrome), and domains
 %must explicitly opt into adding themselves. As indicated by vendor-provided
-%guidelines,\footnote{\url{https://hstspreload.org/}} this process is prone to
+%guidelines,\endnote{\url{https://hstspreload.org/}} this process is prone to
 %mistakes by domain operators that lead to site inaccessibility.
 
 %As described in \steve{TODO: refer to previous section if mentioned elsewhere},
@@ -320,7 +341,7 @@ Recovery in case of accident or attack is often more difficult
 %standardization in 2011 and DNSSEC's in 2005, only 5,885 DANE records for
 %\ac{https} and 1.67M verified DNSSEC zones out of more than 329M registered DNS
 %names overall~\cite{dnib-14-1}
-%exist.\footnote{\url{http://secspider.verisignlabs.com/stats.html}, retrieved 1
+%exist.\endnote{\url{http://secspider.verisignlabs.com/stats.html}, retrieved 1
 %August 2017} Changing these numbers would require significant deployment efforts
 %on the parts of domains, including registering domain names through the subset
 %of DNS registrars that offer DNSSEC, usually as a paid service.

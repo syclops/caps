@@ -1,32 +1,34 @@
 \section{Discussion}
 \label{sec:discussion}
 
-\textbf{Data Source Integrity.} \ac{name} relies on the integrity of the data
-sources (in our current prototype, Censys, and in the long term, the \ac{ct}
-logs). Therefore, \iac{ca} who issues and publicizes an unauthorized certificate
-for a domain that does not deploy \ac{https} can cause the domain to be included
-in the signal set and thus render the domain inaccessible. This fragility
-effectively allows an adversary to ``poison the well'' that \ac{name} relies on,
-and execute a denial-of-service attack of indefinite duration with just a single
-unauthorized certificate.
+\steve{TODO}
 
-Unfortunately, recovering from such an attack requires immediate action. The
-affected domain could request that the \ac{ca} revoke the certificate if the
-\ac{ca} issued the certificate in error. If the \ac{ca} deliberately misissued
-the certificate, the browser vendor could treat the certificate as revoked
-(though such action is unlikely unless the domain is popular). The affected
-domain could also upgrade to \ac{https}, obtaining enough certificates to
-override the misissued certificate. In the event that the domain wishes to
-remain without \ac{https}, we can allow domains to set a policy flag that
-signals that the domain will communicate over HTTP. The domain, however, must
-still send this policy and proof during connection establishment.
+%\textbf{Data Source Integrity.} \ac{name} relies on the integrity of the data
+%sources (in our current prototype, Censys, and in the long term, the \ac{ct}
+%logs). Therefore, \iac{ca} who issues and publicizes an unauthorized certificate
+%for a domain that does not deploy \ac{https} can cause the domain to be included
+%in the signal set and thus render the domain inaccessible. This fragility
+%effectively allows an adversary to ``poison the well'' that \ac{name} relies on,
+%and execute a denial-of-service attack of indefinite duration with just a single
+%unauthorized certificate.
 
-\textbf{Size of domain names.}
-\begin{compactitem}
-\item What can we do about the large number of domain names?
-\item Ideas
-  \begin{compactitem}
-  \item Have separate FSAs for top sites overall or by country (likely small
-    changes over time)
-  \end{compactitem}
-\end{compactitem}
+%Unfortunately, recovering from such an attack requires immediate action. The
+%affected domain could request that the \ac{ca} revoke the certificate if the
+%\ac{ca} issued the certificate in error. If the \ac{ca} deliberately misissued
+%the certificate, the browser vendor could treat the certificate as revoked
+%(though such action is unlikely unless the domain is popular). The affected
+%domain could also upgrade to \ac{https}, obtaining enough certificates to
+%override the misissued certificate. In the event that the domain wishes to
+%remain without \ac{https}, we can allow domains to set a policy flag that
+%signals that the domain will communicate over HTTP. The domain, however, must
+%still send this policy and proof during connection establishment.
+
+%\textbf{Size of domain names.}
+%\begin{compactitem}
+%\item What can we do about the large number of domain names?
+%\item Ideas
+  %\begin{compactitem}
+  %\item Have separate FSAs for top sites overall or by country (likely small
+    %changes over time)
+  %\end{compactitem}
+%\end{compactitem}
