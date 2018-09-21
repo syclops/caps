@@ -1,8 +1,6 @@
 # CAPS Lexicon Unit Test Configuration
 # Author: Steve Matsumoto <stephanos.matsumoto@sporic.me>
 
-include(GoogleTest)
-
 # Lexicon
 add_executable(lexicon_test lexicon_test.cc)
 target_link_libraries(lexicon_test

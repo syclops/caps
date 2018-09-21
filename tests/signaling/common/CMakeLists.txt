@@ -1,8 +1,6 @@
 # Signaling Common Utilities Unit Test Configuration
 # Author: Steve Matsumoto <stephanos.matsumoto@sporic.me>
 
-include(GoogleTest)
-
 # TODO: contains
 
 # TODO: compare
