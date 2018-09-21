@@ -508,36 +508,53 @@ std::shared_ptr<Node> LabeledGraph::add_unattached_node()
 
 bool operator==(const LabeledGraph& lhs, const LabeledGraph& rhs)
 {
+  // Immediately reject if the high-level graph properties don't match
   if (lhs.get_num_nodes() != rhs.get_num_nodes()
       || lhs.get_num_accept() != rhs.get_num_accept()
       || lhs.get_num_edges() != rhs.get_num_edges()) {
     return false;
   }
-  std::unordered_map<std::shared_ptr<Node>, std::shared_ptr<Node>> node_table;
+
+  // Type aliases
+  using NodePtrType = std::shared_ptr<Node>;
+  using PairType = std::pair<NodePtrType, NodePtrType>;
+
+  // Perform a BFS in an attempt to create a graph isomorphism
+  std::unordered_map<NodePtrType, NodePtrType> node_table;
   node_table.emplace(lhs.get_root(), rhs.get_root());
-  std::queue<std::pair<std::shared_ptr<Node>, std::shared_ptr<Node>>> queue;
+  std::queue<PairType> queue;
   queue.emplace(lhs.get_root(), rhs.get_root());
   while (!queue.empty()) {
     auto current_pair = queue.front();
-    if (current_pair.first->get_accept() != current_pair.second->get_accept()) {
+    // Reject if nodes do not have the same accept status or if their
+    // out-degrees or in-degrees differ
+    if (current_pair.first->get_accept() != current_pair.second->get_accept()
+        || current_pair.first->get_in_degree()
+           != current_pair.second->get_in_degree()
+        || current_pair.first->get_out_degree()
+           != current_pair.second->get_out_degree()) {
       return false;
     }
     queue.pop();
     for (auto lhs_edge_itr = current_pair.first->get_out_edges().begin(),
-           rhs_edge_itr = current_pair.second->get_out_edges().begin();
+              rhs_edge_itr = current_pair.second->get_out_edges().begin();
          lhs_edge_itr != current_pair.first->get_out_edges().end()
            && rhs_edge_itr != current_pair.second->get_out_edges().end();
          ++lhs_edge_itr, ++rhs_edge_itr) {
-      if (contains(node_table, lhs_edge_itr->second)) {
+      // Add a pair of newly-visited nodes to the isomorphism table
+      if (!contains(node_table, lhs_edge_itr->second)) {
         node_table.emplace(lhs_edge_itr->second, rhs_edge_itr->second);
         queue.emplace(lhs_edge_itr->second, rhs_edge_itr->second);
       }
+      // Reject if they have mismatched edge labels (traversed in
+      // alphabetical order) or if their destinations do not match
       if (lhs_edge_itr->first != rhs_edge_itr->first
           || node_table.at(lhs_edge_itr->second) != rhs_edge_itr->second) {
         return false;
       }
     }
   }
+
   return true;
 }
 
