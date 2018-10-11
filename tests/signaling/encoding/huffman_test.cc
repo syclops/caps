@@ -14,6 +14,7 @@
 // Include other headers from this project.
 #include "../../../src/signaling/common/contains.h"
 #include "../../../src/signaling/encoding/huffman.h"
+#include "../../../src/signaling/encoding/bitvector/bitvector.h"
 
 // Include header from other projects.
 #include "gtest/gtest.h"
@@ -30,10 +31,7 @@ class HuffmanCoderString: public testing::TestWithParam<std::string>
       }
       ++counts_[c];
     }
-//    for (auto s: counts_) {
-//      std::cout << s.first << " " << s.second << std::endl;
-//    }
-    coder_ = new HuffmanCoder<char>(counts_);
+    coder_ = new HuffmanCoder<char, BitVector<std::vector<bool>>>(counts_);
   }
 
   virtual void TearDown()
@@ -44,7 +42,7 @@ class HuffmanCoderString: public testing::TestWithParam<std::string>
  protected:
   std::string string_;
   std::unordered_map<char, int> counts_;
-  HuffmanCoder<char>* coder_;
+  HuffmanCoder<char, BitVector<std::vector<bool>>>* coder_;
 };
 
 TEST_P(HuffmanCoderString, EncodeDecodeInverse)
@@ -71,22 +69,24 @@ TEST(HuffmanCoder, Abracadabra)
   counts['r'] = 2;
   counts['c'] = 1;
   counts['d'] = 1;
-  HuffmanCoder<char> coder(counts);
-  EXPECT_EQ(coder.encode("a"), std::vector<bool>{0});
-  EXPECT_EQ(coder.encode("b"), std::vector<bool>({1, 0, 0}));
-  EXPECT_EQ(coder.encode("c"), std::vector<bool>({1, 0, 1}));
-  EXPECT_EQ(coder.encode("d"), std::vector<bool>({1, 1, 0}));
-  EXPECT_EQ(coder.encode("r"), std::vector<bool>({1, 1, 1}));
-  EXPECT_EQ(coder.decode(std::vector<bool>{0}), "a");
-  EXPECT_EQ(coder.decode(std::vector<bool>{1, 0, 0}), "b");
-  EXPECT_EQ(coder.decode(std::vector<bool>{1, 0, 1}), "c");
-  EXPECT_EQ(coder.decode(std::vector<bool>{1, 1, 0}), "d");
-  EXPECT_EQ(coder.decode(std::vector<bool>{1, 1, 1}), "r");
+  using ImplType = std::vector<bool>;
+  HuffmanCoder<char, BitVector<ImplType>> coder(counts);
+  EXPECT_EQ(coder.encode("a"), BitVector<ImplType>(ImplType{0}));
+  EXPECT_EQ(coder.encode("b"), BitVector<ImplType>(ImplType({1, 0, 0})));
+  EXPECT_EQ(coder.encode("c"), BitVector<ImplType>(ImplType({1, 0, 1})));
+  EXPECT_EQ(coder.encode("d"), BitVector<ImplType>(ImplType({1, 1, 0})));
+  EXPECT_EQ(coder.encode("r"), BitVector<ImplType>(ImplType({1, 1, 1})));
+  EXPECT_EQ(coder.decode(BitVector<ImplType>(ImplType{0})), "a");
+  EXPECT_EQ(coder.decode(BitVector<ImplType>(ImplType{1, 0, 0})), "b");
+  EXPECT_EQ(coder.decode(BitVector<ImplType>(ImplType{1, 0, 1})), "c");
+  EXPECT_EQ(coder.decode(BitVector<ImplType>(ImplType{1, 1, 0})), "d");
+  EXPECT_EQ(coder.decode(BitVector<ImplType>(ImplType{1, 1, 1})), "r");
 //  EXPECT_EQ(coder.encode("b"), std::vector<bool>({1, 0, 0}));
 //  EXPECT_EQ(coder.encode("c"), std::vector<bool>({1, 0, 1}));
 //  EXPECT_EQ(coder.encode("d"), std::vector<bool>({1, 1, 0}));
 //  EXPECT_EQ(coder.encode("r"), std::vector<bool>({1, 1, 1}));
   EXPECT_EQ("abracadabra", coder.decode(coder.encode("abracadabra")));
-  EXPECT_EQ(coder.decode(std::vector<bool>({0, 1, 0, 0, 1, 1, 1})), "abr");
+  EXPECT_EQ(coder.decode(BitVector<ImplType>(ImplType{0, 1, 0, 0, 1, 1, 1})),
+    "abr");
 }
 

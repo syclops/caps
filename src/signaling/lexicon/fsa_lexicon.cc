@@ -16,11 +16,13 @@
 #include <sstream>
 #include <string>
 #include <utility>
+#include <vector>
 
 // Include other headers from this project.
 #include "../common/contains.h"
 #include "../common/powerset.h"
 #include "../encoding/huffman.h"
+#include "../encoding/bitvector/bitvector.h"
 #include "../graph/connected_component.h"
 #include "../graph/graph_search.h"
 
@@ -296,7 +298,7 @@ void FSALexicon::dump_label_huffman(std::ostream& outstream) const
 {
   auto label_count_visitor = std::make_shared<LabelCountVisitor>();
   visit_unordered(label_count_visitor, graph_);
-  HuffmanCoder<std::string> coder(label_count_visitor->get_counts());
+  HuffmanCoder<std::string, BitVector<std::vector<bool>>> coder(label_count_visitor->get_counts());
   auto codebook = coder.decoding_map();
   for (const auto& symbol: std::get<0>(codebook)) {
     outstream << symbol << std::endl;
@@ -317,14 +319,15 @@ int FSALexicon::binary_size() const
   auto struct_size = 2 * graph_.get_num_edges();
 
   auto label_count_map = label_counts();
-  HuffmanCoder<std::string> label_coder(label_count_map);
+  HuffmanCoder<std::string, BitVector<std::vector<bool>>> label_coder(label_count_map);
   for (auto pair: label_count_map) {
     struct_size += pair.second * label_coder.encode({pair.first}).size();
     size += 8 * pair.first.length();
   }
 
   auto dest_count_map = dest_counts();
-  HuffmanCoder<std::shared_ptr<Node>> dest_coder(dest_count_map);
+  HuffmanCoder<std::shared_ptr<Node>, BitVector<std::vector<bool>>> dest_coder
+  (dest_count_map);
   for (auto pair: dest_count_map) {
     struct_size += pair.second * dest_coder.encode({pair.first}).size();
   }

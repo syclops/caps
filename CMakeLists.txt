@@ -8,7 +8,7 @@ enable_testing()
 
 # Project-wide setup
 #list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_DEBUG "-Wall -Wextra -pedantic -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-Wall -Wextra -pedantic -O3")
 
