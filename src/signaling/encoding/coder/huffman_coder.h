@@ -229,15 +229,15 @@ class HuffmanCoder: public Coder<SymbolType, EncodingType>
   {
     using PtrType = std::shared_ptr<HuffmanNode>;
     std::priority_queue<PtrType, std::vector<PtrType>, HuffmanNodeComp> heap;
-    auto unique_symbols = 0;  // debug
+//    auto unique_symbols = 0;  // debug
     for (auto it: counts) {
       const auto& [symbol, count] = it;
-      if (count == 1) {
-        ++unique_symbols;
-      }
+//      if (count == 1) {
+//        ++unique_symbols;
+//      }
       heap.push(std::make_shared<HuffmanNode>(symbol, count));
     }
-    std::cerr << unique_symbols << " unique symbols" << std::endl;
+//    std::cerr << unique_symbols << " unique symbols" << std::endl;
     while (heap.size() > 1) {
       auto first = heap.top();
       heap.pop();

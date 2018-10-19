@@ -8,6 +8,12 @@
 // Include C standard libraries.
 
 // Include C++ standard libraries.
+#include <functional>
+#include <iostream>
+#include <memory>
+#include <set>
+#include <string>
+#include <unordered_map>
 
 // Include other headers from this project.
 #include "lexicon.h"

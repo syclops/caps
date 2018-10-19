@@ -48,7 +48,7 @@ OrderType reverse_topological_order(const LabeledGraph& graph)
 std::unordered_map<NodePtrType, int> node_to_order_map(const OrderType& order)
 {
   std::unordered_map<NodePtrType, int> map;
-  for (auto i = 0; i < order.size(); ++i) {
+  for (size_t i = 0; i < order.size(); ++i) {
     map[order[i]] = i;
   }
   return map;
@@ -57,7 +57,7 @@ std::unordered_map<NodePtrType, int> node_to_order_map(const OrderType& order)
 std::map<int, NodePtrType> order_to_node_map(const OrderType& order)
 {
   std::map<int, NodePtrType> map;
-  for (auto i = 0; i < order.size(); ++i) {
+  for (size_t i = 0; i < order.size(); ++i) {
     map[i] = order[i];
   }
   return map;

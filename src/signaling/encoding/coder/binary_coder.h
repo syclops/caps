@@ -38,7 +38,7 @@ class BinaryCoder: public Coder<IntType, EncodingType>
 
     // If the codeword width is zero, the coder can encode any nonnegative
     // value. Otherwise, make sure the value fits into the codeword width.
-    return width_ == 0 || value < (1 << width_);
+    return width_ == 0 || value < static_cast<IntType>(1 << width_);
   }
 
   inline size_t value_size(const IntType& value) const override
