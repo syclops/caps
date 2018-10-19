@@ -25,7 +25,11 @@ class StringCoder: public Coder<StringType, EncodingType>
 {
  public:
 
-  // Compiler generated methods are fine.
+  StringCoder()
+    : Coder<StringType, EncodingType>{}, char_coder_{}
+  {
+    // Nothing to do here.
+  }
 
   inline bool valid_value(const StringType& value) const override
   {
@@ -51,7 +55,7 @@ class StringCoder: public Coder<StringType, EncodingType>
    * @return - as defined in the parent method.
    */
   void encode_impl(const StringType& value,
-                            EncodingType* buffer) const override
+                         EncodingType* buffer) const override
   {
     for (auto itr = value.begin(); itr != value.end(); ++itr) {
       // We use encode instead of encode_impl because the latter is protected
@@ -93,7 +97,7 @@ class StringCoder: public Coder<StringType, EncodingType>
       // Otherwise, check whether the character is the last in the string. If
       // it is, return the completed string. Otherwise, just append the
       // character.
-      auto decoded_char = decoded.first.value();
+      auto decoded_char = decoded->first;
       if(decoded_char & LAST_CHAR_BIT) {
         value.push_back(decoded_char - LAST_CHAR_BIT);
         return std::make_optional(std::make_pair(value, value_size(value)));

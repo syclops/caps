@@ -6,17 +6,13 @@ target_sources(defs INTERFACE ${CMAKE_CURRENT_LIST_DIR}/defs.h)
 
 add_subdirectory(bitvector)
 
-add_subdirectory(coder)
-
 add_library(integer INTERFACE)
 target_sources(integer INTERFACE ${CMAKE_CURRENT_LIST_DIR}/integer.h)
 
-add_library(huffman INTERFACE)
-target_sources(huffman INTERFACE ${CMAKE_CURRENT_LIST_DIR}/huffman.h)
-target_link_libraries(huffman INTERFACE integer)
+add_subdirectory(coder)
 
-add_library(fsa_encoder fsa_encoder.h)
-target_link_libraries(fsa_encoder
-    PUBLIC fsa_lexicon graph sdsl
-    PRIVATE bitvector contains compare
-)
+add_library(bitvector_io INTERFACE)
+target_sources(bitvector_io INTERFACE ${CMAKE_CURRENT_LIST_DIR}/bitvector_io.h)
+target_link_libraries(bitvector_io INTERFACE bitvector char_coder)
+
+add_subdirectory(fsa_encoder)

@@ -143,19 +143,6 @@ class BitVector
     }
   }
 
-  template <typename IntType>
-  void push_back(IntType i)
-  {
-    if (i == 0) {
-      push_back(false);
-    } else {
-      auto num_bits = static_cast<size_t>(ceil(log2(i)));
-      for (auto j = num_bits; j > 0; --j) {
-        push_back(static_cast<bool>(i >> (j - 1) & 1));
-      }
-    }
-  }
-
   void pop_back()
   {
     bits_.pop_back();
@@ -207,28 +194,5 @@ bool operator!=(const BitVector<BitContainerType>& lhs,
 }
 
 // TODO: if necessary, operators <, >, <=, >=
-
-
-//template <typename BitContainerType>
-//std::ostream& operator<<(std::ostream& os,
-//                         BitVector<BitContainerType>& bv)
-//{
-//  bv.pad();
-//  for (size_t i = 0; i < bv.size(); i += BITS_IN_CHAR) {
-//    char c = 0;
-//    for (size_t j = 0; j < BITS_IN_CHAR; ++j) {
-//      c = (c << 1) + bv[i + j];
-//    }
-//    os << c;
-//  }
-//  return os;
-//}
-
-// TODO: template specialization for operator<< with boost:dynamic_bitset
-
-// TODO: operator>>
-//template <typename BitContainerType>
-//std::istream& operator>>(std::istream& is,
-//                         const BitVector<BitContainerType>& bv);
 
 #endif //CAPS_BITVECTOR_H

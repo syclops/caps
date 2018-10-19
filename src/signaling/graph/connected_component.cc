@@ -91,22 +91,22 @@ ConnectedComponent::ConnectedComponent(
   }
 }
 
-int ConnectedComponent::size() const
+size_t ConnectedComponent::size() const
 {
-  return static_cast<int>(nodes_.size());
+  return nodes_.size();
 }
 
-int ConnectedComponent::upstream_size() const
+size_t ConnectedComponent::upstream_size() const
 {
-  return static_cast<int>(upstream_nodes_.size());
+  return upstream_nodes_.size();
 }
 
-int ConnectedComponent::downstream_size() const
+size_t ConnectedComponent::downstream_size() const
 {
-  return static_cast<int>(downstream_nodes_.size());
+  return downstream_nodes_.size();
 }
 
-int ConnectedComponent::num_edges() const
+size_t ConnectedComponent::num_edges() const
 {
   return num_edges_;
 }

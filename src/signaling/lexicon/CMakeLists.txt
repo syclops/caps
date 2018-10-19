@@ -10,5 +10,5 @@ add_library(fsa_lexicon fsa_lexicon.h fsa_lexicon.cc)
 target_link_libraries(fsa_lexicon
     PUBLIC node graph visitor
     INTERFACE lexicon
-    PRIVATE contains powerset connected_component graph_search huffman
+    PRIVATE contains powerset connected_component graph_search
 )

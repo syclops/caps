@@ -9,12 +9,13 @@
 #include <memory>
 
 // Include other headers from this projects.
-#include "../common/contains.h"
-#include "../common/compare.h"
-#include "../lexicon/fsa_lexicon.h"
-#include "bitvector/bitvector.h"
-#include "coder/string_coder.h"
-#include "coder/binary_coder.h"
+#include "../../common/contains.h"
+#include "../../common/compare.h"
+#include "../../graph/ordering.h"
+#include "../../lexicon/fsa_lexicon.h"
+#include "../bitvector/bitvector.h"
+#include "../coder/string_coder.h"
+#include "../coder/binary_coder.h"
 
 /**
  * Base class for a generic FSA encoder.
@@ -37,9 +38,19 @@ class FSAEncoder
    * @param graph - a constant reference to the graph for the encoder to encode.
    */
   explicit FSAEncoder(const FSALexicon& lexicon)
-    : lexicon_{lexicon}
+    : lexicon_{lexicon}, node_to_order_{}, order_to_node_{}
   {
     // Nothing to do here.
+    auto label_coder =
+      std::make_shared<StringCoder<std::string, BitVectorType>>();
+    using LabelCoderType = Coder<std::string, BitVectorType>;
+    label_coder_ = std::static_pointer_cast<LabelCoderType>(label_coder);
+
+    auto destination_coder =
+      std::make_shared<BinaryCoder<int, BitVectorType>>();
+    using DestCoderType = Coder<int, BitVectorType>;
+    destination_coder_ = std::static_pointer_cast<DestCoderType>(
+      destination_coder);
   }
 
   // Default rule-of-five methods are fine.
@@ -57,12 +68,18 @@ class FSAEncoder
   {
     order_nodes();
     BitVectorType buffer;
+    add_header(buffer);
+    add_prefix(buffer);
     for (const auto& order_node: order_to_node_) {
       auto node_encoding = encode_node(order_node.second);
       buffer.push_back(node_encoding);
     }
+    add_suffix(buffer);
     return buffer;
   }
+
+  // TODO: add functions to get read-only instances of the lexicon, ordering,
+  // and coders
 
  protected:
 
@@ -113,6 +130,21 @@ class FSAEncoder
     }
   }
 
+  virtual void add_header(BitVectorType& buffer)
+  {
+    // TODO
+  }
+
+  virtual void add_prefix(BitVectorType& buffer)
+  {
+    // Nothing to do here.
+  }
+
+  virtual void add_suffix(BitVectorType& buffer)
+  {
+    // Nothing to do here.
+  }
+
   /**
    * Encode a node in the graph as a bitvector.
    * @param node
@@ -124,7 +156,7 @@ class FSAEncoder
     buffer.push_back(node->get_accept());
     for (auto out_edge: node->get_out_edges()) {
       auto edge_encoding = encode_edge(node, out_edge.second, out_edge.first);
-      buffer.push_back(edge_encoding);
+      buffer.push_back(*edge_encoding);
     }
     return buffer;
   }
@@ -135,28 +167,27 @@ class FSAEncoder
    * @param dst
    * @return
    */
-  virtual BitVectorType encode_edge(const std::shared_ptr<Node>& src,
-                                    const std::shared_ptr<Node>& dst,
-                                    const std::string& label)
+  virtual std::unique_ptr<BitVectorType> encode_edge(
+    const std::shared_ptr<Node>& src, const std::shared_ptr<Node>& dst,
+    const std::string& label)
   {
     // Create an encoding of the label in the buffer.
-    StringCoder<std::string, BitVectorType> label_coder;
-    BitVectorType buffer = label_coder.encode(label);
+    auto buffer = std::unique_ptr<BitVectorType>(label_coder_->encode(label));
 
     // Check if the destination is next from the source in the ordering.
-    auto order_diff = node_to_order_.at(dst) - node_to_order_.at(src);
+    auto order_diff = FSAEncoder<BitVectorType>::node_to_order_.at(dst) -
+                      FSAEncoder<BitVectorType>::node_to_order_.at(src);
     bool next = (order_diff == 1);
-    buffer.push_back(next);
+    buffer->push_back(next);
 
     // If the destination does not follow the source, encode the difference.
     if (!next) {
       bool negative = order_diff < 0;
-      buffer.push_back(negative);
-      BinaryCoder<int, BitVectorType> destination_coder;
-      buffer.push_back(destination_coder.encode(
+      buffer->push_back(negative);
+      buffer->push_back(destination_coder_->encode(
         negative ? -order_diff : order_diff));
     }
-    return buffer;
+    return std::move(buffer);
   }
 
   /**
@@ -188,6 +219,8 @@ class FSAEncoder
   std::unordered_map<std::shared_ptr<Node>, int> node_to_order_;
   std::map<int, std::shared_ptr<Node>> order_to_node_;
 
+  std::shared_ptr<Coder<std::string, BitVectorType>> label_coder_;
+  std::shared_ptr<Coder<int, BitVectorType>> destination_coder_;
 };
 
 #endif //CAPS_FSA_ENCODER_H

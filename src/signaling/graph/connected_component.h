@@ -5,6 +5,8 @@
 #ifndef CAPS_CONNECTED_COMPONENT_H
 #define CAPS_CONNECTED_COMPONENT_H
 
+#include <cstddef>
+
 #include <memory>
 #include <set>
 #include <string>
@@ -25,13 +27,46 @@ class ConnectedComponent
                      std::set<std::shared_ptr<Node>> upstream_nodes,
                      std::set<std::shared_ptr<Node>> downstream_nodes);
 
-  int size() const;
+  /**
+   * Return the number of nodes in the component.
+   * @return
+   */
+  size_t size() const;
 
-  int upstream_size() const;
+  /**
+   * Return the number of nodes upstream from the component.
+   *
+   * An upstream node is a node not in the component with a directed edge to
+   * a node in the component.
+   *
+   * @return
+   */
+  size_t upstream_size() const;
 
-  int downstream_size() const;
+  /**
+   * Return the number of nodes downstream from the component.
+   *
+   * A downstream node is a node not in the component with a directed edge
+   * from a node in the component.
+   *
+   * @return
+   */
+  size_t downstream_size() const;
 
-  int num_edges() const;
+  /**
+   * Return the number of edges in the component.
+   *
+   * An edge is considered to be in the component if it begins or ends at a
+   * node in the component. Therefore, any edge connecting the component to
+   * its upstream or downstream nodes is also considered to be in the component.
+   *
+   * The number of edges in the component can be used to determine how many
+   * edges will be eliminated from the graph if path compaction is applied to
+   * the component.
+   *
+   * @return
+   */
+  size_t num_edges() const;
 
   std::unordered_map<std::string, int> label_counts() const;
 
@@ -47,9 +82,6 @@ class ConnectedComponent
 
   const std::set<std::shared_ptr<Node>> downstream_nodes() const;
 
-//  std::vector<std::tuple<std::shared_ptr<Node>, std::shared_ptr<Node>,
-//                         std::string>> transitive_paths() const;
-
  private:
 
   void count_labels();
@@ -58,7 +90,7 @@ class ConnectedComponent
   std::set<std::shared_ptr<Node>> upstream_nodes_;
   std::set<std::shared_ptr<Node>> downstream_nodes_;
   std::unordered_map<std::string, int> label_counts_;
-  int num_edges_;
+  size_t num_edges_;
 };
 
 class TransitivePathVisitor: public CloneableVisitor<TransitivePathVisitor,

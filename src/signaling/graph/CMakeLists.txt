@@ -6,7 +6,10 @@ find_package(Boost
     REQUIRED
 )
 add_library(node node.cc node.h)
-target_link_libraries(node PRIVATE Boost::boost)
+target_link_libraries(node
+    PUBLIC reverse_iterable
+    PRIVATE Boost::boost
+)
 
 add_library(graph graph.h graph.cc)
 target_link_libraries(graph PUBLIC node)
@@ -22,4 +25,4 @@ add_library(connected_component connected_component.h connected_component.cc)
 target_link_libraries(connected_component PUBLIC node visitor)
 
 add_library(ordering ordering.h ordering.cc)
-target_link_libraries(ordering PUBLIC node graph iterable)
+target_link_libraries(ordering PUBLIC node graph reverse_iterable)

@@ -52,6 +52,11 @@ class BinaryCoder: public Coder<IntType, EncodingType>
     }
   }
 
+  void set_width(const size_t width)
+  {
+    width_ = width;
+  }
+
  protected:
 
   void encode_impl(const IntType& value, EncodingType* encoding) const override
@@ -63,11 +68,10 @@ class BinaryCoder: public Coder<IntType, EncodingType>
     for (auto i = width; i > 0; --i) {
       encoding->push_back((1 << (i - 1) & value) != 0);
     }
-    return encoding;
   }
 
   std::optional<std::pair<IntType, size_t>> decode_impl(
-    const EncodingType& buffer, size_t position) const override
+    const EncodingType& buffer, const size_t position) const override
   {
     if (width_ != 0 && buffer.size() <= position + width_) {
       return std::nullopt;

@@ -9,5 +9,6 @@ add_subdirectory(encoding)
 add_executable(build_lexicon build_lexicon.cc)
 target_link_libraries(build_lexicon
     PUBLIC fsa_lexicon
-    PRIVATE cxxopts io_option measure_time
+    PRIVATE cxxopts io_option measure_time bitvector_io fsa_encoder
+            fsa_huffman_encoder
 )

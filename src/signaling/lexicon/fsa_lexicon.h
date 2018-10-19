@@ -67,9 +67,9 @@ class FSALexicon: public Lexicon
 
   std::unordered_map<std::string, int> label_counts() const;
 
-  void dump_label_huffman(std::ostream& outstream) const;
-
-  int binary_size() const;
+//  void dump_label_huffman(std::ostream& outstream) const;
+//
+//  int binary_size() const;
 
  private:
 
@@ -83,7 +83,6 @@ class FSALexicon: public Lexicon
     bool registered = contains(register_, node)
                       && (*register_.find(node) == node);
     if (registered) {
-      std::cerr << "Registered " << node << std::endl;
       register_.erase(node);
     }
     function(node);

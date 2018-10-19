@@ -66,8 +66,8 @@ class Coder
    *           append the bits to the instance pointed to by encoding and
    *           return encoding.
    */
-  auto encode(const DataType& value, EncodingType* encoding = nullptr,
-              bool reserve_size = false) const final
+  EncodingType* encode(const DataType& value, EncodingType* encoding = nullptr,
+                       bool reserve_size = false) const
   {
     // If the value is invalid, return the null pointer.
     if (!valid_value(value)) {
@@ -97,7 +97,8 @@ class Coder
    *           error value. Otherwise, return the decoded DataType instance
    *           along with the number of bits decoded.
    */
-  auto decode(const EncodingType& buffer, const size_t position = 0) const final
+  std::optional<std::pair<DataType, size_t>> decode(const EncodingType& buffer,
+    const size_t position = 0) const
   {
     if (buffer.size() <= position) {
       return std::nullopt;
