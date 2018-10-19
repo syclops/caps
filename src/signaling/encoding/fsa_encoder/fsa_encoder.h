@@ -184,8 +184,9 @@ class FSAEncoder
     if (!next) {
       bool negative = order_diff < 0;
       buffer->push_back(negative);
-      buffer->push_back(destination_coder_->encode(
-        negative ? -order_diff : order_diff));
+      auto destination_encoding = std::unique_ptr<BitVectorType>(
+        destination_coder_->encode(negative ? -order_diff : order_diff));
+      buffer->push_back(*destination_encoding);
     }
     return std::move(buffer);
   }
