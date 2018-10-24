@@ -312,14 +312,14 @@ of the extension.
 % to all sites over HTTPS first, and only falls back to HTTP if
 % connection establishment with HTTPS fails.]}
 
-To measure the performance of the client as it established connections
-with different sites, we constructed sample sets of domain names based
-on four parameters:
+\jay{Restructure this?} To measure the performance of the client as it
+established connections with different sites, we constructed sample
+sets of \jay{domain names?} based on four parameters:
 \begin{inparaenum}
 \item the client's value of \numlas,
 \item the number of certificate chains the server had (\policy),
 \item average number of certificates per chain, and
-\item average length of chain.
+\item average size of certificate.
 \end{inparaenum}
 We specifically measured the amount of extra data sent in the
 \ac{name} handshake, and the latency of handshake both with and
@@ -335,13 +335,17 @@ loopback interface.
 %   HTTPS, which always tries HTTPS and falls back to HTTP.}
 % ]}
 
-\jay{TODO: Add in a table for results; explain table here.}
+\jay{TODO: Add in a table/graphs for results; explain table/graphs
+  here. If we directly add in a table with all possible dimensions, it
+  would be too large. Might be better to make into 4 different
+  graphs.}
 
-Overall, via the two-tailed paired Student's t-test, we see that
-statistically, the latency with and without the \ac{name} \ac{tls}
-extension is drawn from the same distribution, with the same mean. We
-obtain a p-value of $9.24 \times 10^{-35}$ and $3.06 \times 10^{-132}$
-respectively for \jay{localhost} and \jay{hophop} for this.
+\jay{Restructure this?} Overall, via the two-tailed paired Student's
+t-test, we see that statistically, the latency with and without the
+\ac{name} \ac{tls} extension is drawn from the same distribution, with
+the same mean. We obtain a p-value of $9.24 \times 10^{-35}$ and
+$3.06 \times 10^{-132}$ respectively for \jay{localhost} and
+\jay{hophop} for this test.
 
 %\subsection{Log Aggregator}
 
