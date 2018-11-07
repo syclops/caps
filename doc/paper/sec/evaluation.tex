@@ -276,6 +276,28 @@ about the results here}.
 \subsection{Connection Establishment}
 \label{sec:evaluation:performance}
 
+\begin{figure*}[thb]
+  \centering
+  \subfloat[vs Number of Proofs Requested]{
+    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/0-time_elapsed_vs_num_proofs_requested}
+    \label{fig:evaltlsext:numproof}
+  }
+  \subfloat[vs Number of Chains Sent]{
+    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/1-time_elapsed_vs_num_chains_sent}
+    \label{fig:evaltlsext:numchain}
+  }
+  \subfloat[vs Number of Certificates per Chain]{
+    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/2-time_elapsed_vs_num_certs_per_chain}
+    \label{fig:evaltlsext:numcert}
+  }
+  \subfloat[vs Average Size of Chain]{
+    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/3-time_elapsed_vs_avg_chain_size}
+    \label{fig:evaltlsext:sizechain}
+  }
+  \caption{Time Elapsed during Connection Establishment}
+  \label{fig:evaltlsext}
+\end{figure*}
+
 % \jay{We had decided to drop the idea of a Chrome/Firefox extension in
 %   favor of doing a purely curl+nginx thing}
 
@@ -298,28 +320,6 @@ handshake both with and without the \ac{name} \ac{tls} extension. We
 tested this both over a regular network interface, by connecting to a
 VPS (referred to as \emph{hophop}), as well as over the local loopback
 interface (referred to as \emph{localhost}).
-
-\begin{figure*}
-  \centering
-  \subfloat[vs Number of Proofs Requested]{
-    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/0-time_elapsed_vs_num_proofs_requested}
-    \label{fig:evaltlsext:numproof}
-  }
-  \subfloat[vs Number of Chains Sent]{
-    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/1-time_elapsed_vs_num_chains_sent}
-    \label{fig:evaltlsext:numchain}
-  }
-  \subfloat[vs Number of Certificates per Chain]{
-    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/2-time_elapsed_vs_num_certs_per_chain}
-    \label{fig:evaltlsext:numcert}
-  }
-  \subfloat[vs Average Size of Chain]{
-    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/3-time_elapsed_vs_avg_chain_size}
-    \label{fig:evaltlsext:sizechain}
-  }
-  \caption{Time Elapsed during Connection Establishment}
-  \label{fig:evaltlsext}
-\end{figure*}
 
 Our results with respect to the time elapsed per \ac{tls} connection,
 shown in Figure~\ref{fig:evaltlsext}, show that there is a some small
