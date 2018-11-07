@@ -281,25 +281,23 @@ about the results here}.
 
 To measure the performance of connection establishment in \ac{name},
 we implemented the handshake as a custom \ac{tls} extension in the
-OpenSSL library, which is used by modified versions of nginx and curl
-(on the server and client sides, respectively), which enable the use
-of the extension.
+OpenSSL library. For concrete evaluation of this extension, we use
+nginx and curl with minor modifications to use our \ac{tls} extension.
 
-\jay{Restructure this?} To measure the performance of the client as it
-established connections with different sites, we constructed sample
-sets of \jay{domain names?} based on four parameters:
+Additionally, we constructed sample sets of \jay{domain names} based
+on four parameters:
 \begin{inparaenum}
 \item the client's value of \numlas,
 \item the number of certificate chains the server had (\policy),
 \item average number of certificates per chain, and
 \item average size of certificate.
 \end{inparaenum}
-We specifically measured the amount of extra data sent in the
-\ac{name} handshake, and the latency of handshake both with and
-without the \ac{name} \ac{tls} extension. We tested this both over a
-regular network interface, by connecting to a VPS (referred to as
-\emph{hophop}), as well as over the local loopback interface (referred
-to as \emph{localhost}).
+While varying each of these parameters, we measured the amount of
+extra data sent in the \ac{name} handshake, and the latency of
+handshake both with and without the \ac{name} \ac{tls} extension. We
+tested this both over a regular network interface, by connecting to a
+VPS (referred to as \emph{hophop}), as well as over the local loopback
+interface (referred to as \emph{localhost}).
 
 \begin{figure*}
   \centering
