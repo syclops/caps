@@ -339,7 +339,15 @@ measurement fluctuations, when we look at 90\% confidence intervals.
   $3.49 \times 10^{-130}$ and $1.37 \times 10^{-42}$ respectively for
   \emph{localhost} and \emph{hophop} for this test.]}
 
-\jay{TODO: Write about added data}
+The extra data sent in the \ac{name} handshake is directly dependent
+on the size and number certificate chains, as well as the number of
+proofs sent. In particular, the extra data sent from client to server
+is 1 byte, and the extra data sent from server to client is
+$(2 + (292 \times \text{\#proofs}) +
+(\sum_{\text{chain}}\texttt{sizeof}(\text{chain})))$ bytes. \jay{Here,
+  the chains can be serialized using whichever serialization format is
+  preferred. For simplicity in implementation, we used PEM, but for
+  better use of bandwidth, we recommend using DER.}
 
 %\subsection{Log Aggregator}
 
