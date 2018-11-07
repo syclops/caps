@@ -335,6 +335,28 @@ loopback interface.
 %   HTTPS, which always tries HTTPS and falls back to HTTP.}
 % ]}
 
+\begin{figure*}
+  \centering
+  \subfloat[vs Number of Proofs Requested]{
+    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/0-time_elapsed_vs_num_proofs_requested}
+    \label{fig:evaltlsext:numproof}
+  }
+  \subfloat[vs Number of Chains Sent]{
+    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/1-time_elapsed_vs_num_chains_sent}
+    \label{fig:evaltlsext:numproof}
+  }
+  \subfloat[vs Number of Certificates per Chain]{
+    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/2-time_elapsed_vs_num_certs_per_chain}
+    \label{fig:evaltlsext:numproof}
+  }
+  \subfloat[vs Average Size of Chain]{
+    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/3-time_elapsed_vs_avg_chain_size}
+    \label{fig:evaltlsext:numproof}
+  }
+  \caption{Time Elapsed during Connection Establishment}
+  \label{fig:evaltlsext}
+\end{figure*}
+
 \jay{TODO: Add in a table/graphs for results; explain table/graphs
   here. If we directly add in a table with all possible dimensions, it
   would be too large. Might be better to make into 4 different
