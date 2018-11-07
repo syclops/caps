@@ -326,9 +326,8 @@ shown in Figure~\ref{fig:evaltlsext}, show that there is a some small
 latency overhead, when comparing the mean time elapsed. This appears
 primarily due to the extra data sent over the network. However, since
 our \ac{tls} extension does not add any extra round-trips to the
-handshake, the time added is small. In addition, if we look at the
-90\% confidence intervals, then we observe that the mean added latency
-due to our extension is smaller than random measurement fluctuations.
+handshake, the time added is small, especially in comparison to random
+measurement fluctuations, when we look at 90\% confidence intervals.
 \jay{[The null hypothesis on the Student's t-test says that the two
   distributions are identical. With such a low p-value, isn't the
   null-hypothesis invalidated? In particular, doesn't this mean that
