@@ -357,17 +357,18 @@ to as \emph{localhost}).
   \label{fig:evaltlsext}
 \end{figure*}
 
-\jay{TODO: Add in a table/graphs for results; explain table/graphs
-  here. If we directly add in a table with all possible dimensions, it
-  would be too large. Might be better to make into 4 different
-  graphs.}
-
-\jay{Restructure this?} Overall, via the two-tailed paired Student's
+Our results, shown in Figure~\ref{fig:evaltlsext}, show that there is
+a some small latency overhead, mainly due to the extra data sent over
+the network. However, since our \ac{tls} extension does not add any
+extra round-trips to the handshake, the time added is
+small. Additionally, by performing the two-tailed paired Student's
 t-test, we see that statistically, the latency with and without the
-\ac{name} \ac{tls} extension is drawn from the same distribution, with
-the same mean. We obtain a p-value of $3.49 \times 10^{-130}$ and
-$1.37 \times 10^{-42}$ respectively for \jay{localhost} and
-\jay{hophop} for this test.
+\ac{name} \ac{tls} extension appears to be drawn from the same
+distribution with the same mean. We obtain a p-value of
+$3.49 \times 10^{-130}$ and $1.37 \times 10^{-42}$ respectively for
+\emph{localhost} and \emph{hophop} for this test.
+
+\jay{TODO: Write about added data}
 
 %\subsection{Log Aggregator}
 
