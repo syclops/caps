@@ -308,16 +308,18 @@ OpenSSL library. For concrete evaluation of this extension, we use
 nginx and curl with minor modifications to use our \ac{tls} extension.
 
 Additionally, we constructed sample sets of \jay{domain names} based
-on four parameters:
+on four parameters: \bryan{Make the \texttt{inparaenum} numbering bold}
 \begin{inparaenum}
-\item the client's value of \numlas,
-\item the number of certificate chains the server had (\policy),
-\item average number of certificates per chain, and
-\item average size of certificate.
+\item the number of proofs requested by the client (\numlas),
+\item the number of certificate chains the server \bryan{which server?} sends (\policy),
+\item the average number of certificates per chain, and
+\item the average size of each certificate chain.
 \end{inparaenum}
 While varying each of these parameters, we measured the amount of
 extra data sent in the \ac{name} handshake, and the latency of
-handshake both with and without the \ac{name} \ac{tls} extension. We
+handshake both with and without
+\bryan{A bit unclear, given that most params don't apply. Need to more precisely define the baseline.}
+the \ac{name} \ac{tls} extension. We
 tested this both over a regular network interface, by connecting to a
 VPS (referred to as \emph{hophop}), as well as over the local loopback
 interface (referred to as \emph{localhost}).
