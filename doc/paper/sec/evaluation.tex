@@ -315,26 +315,40 @@ on four parameters: \bryan{Make the \texttt{inparaenum} numbering bold}
 \item the average number of certificates per chain, and
 \item the average size of each certificate chain.
 \end{inparaenum}
+\jay{Number of samples collected?}
 While varying each of these parameters, we measured the amount of
 extra data sent in the \ac{name} handshake, and the latency of
 handshake both with and without
 \bryan{A bit unclear, given that most params don't apply. Need to more precisely define the baseline.}
 the \ac{name} \ac{tls} extension. We
-tested this both over a regular network interface, by connecting to a
-VPS (referred to as \emph{hophop}), as well as over the local loopback
-interface (referred to as \emph{localhost}).
+tested this both over a regular network interface
+\bryan{ping latency? bandwidth?}
+, by connecting to a
+VPS \bryan{?} (referred to as \emph{hophop}), as well as over the local loopback
+interface (referred to as \emph{localhost}) \bryan{why is the local loopback one interesting?}.
 
+\jay{Restructure the start of this sentence}
 Our results with respect to the time elapsed per \ac{tls} connection,
-shown in Figure~\ref{fig:evaltlsext}, show that there is a some small
+shown in Figure~\ref{fig:evaltlsext}, show that there is some
+\bryan{be precise ; give abs + relative $\Delta$ ; small is an opinion/judgement unless you specify your comparison points}
+small
 latency overhead, when comparing the mean time elapsed. This appears
-primarily due to the extra data sent over the network. However, since
+primarily due to
+\bryan{how do you know?}
+the extra data
+\bryan{how much?}
+sent over the network. However, since
 our \ac{tls} extension does not add any extra round-trips to the
 handshake, the time added is small, especially in comparison to random
-measurement fluctuations, when we look at 90\% confidence intervals.
+measurement fluctuations, when we look at 90\% confidence intervals
+\bryan{is that what the bars are? if so, say so.}
+.
 \jay{[The null hypothesis on the Student's t-test says that the two
   distributions are identical. With such a low p-value, isn't the
   null-hypothesis invalidated? In particular, doesn't this mean that
-  the distributions are, in fact, \emph{not} identical?]  [OLD:
+  the distributions are, in fact, \emph{not} identical?]
+  \bryan{Yes I think that's true.}
+  [OLD:
   Additionally, by performing the two-tailed paired Student's t-test,
   we see that statistically, the latency with and without the
   \ac{name} \ac{tls} extension appears to be drawn from the same
@@ -343,7 +357,7 @@ measurement fluctuations, when we look at 90\% confidence intervals.
   \emph{localhost} and \emph{hophop} for this test.]}
 
 The extra data sent in the \ac{name} handshake is directly dependent
-on the size and number certificate chains, as well as the number of
+on the size and number of certificate chains, as well as the number of
 proofs sent. In particular, the extra data sent from client to server
 is 1 byte, and the extra data sent from server to client is
 $(2 + (292 \times \text{\#proofs}) +
