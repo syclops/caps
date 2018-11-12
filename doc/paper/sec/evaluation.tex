@@ -331,12 +331,13 @@ VPS \bryan{?} (referred to as \emph{hophop}), as well as over the local loopback
 interface (referred to as \emph{localhost}) \bryan{why is the local loopback one interesting?}.
 A total of 15385 TLS connections were established for our testing \jay{5768 over hophop, 9617 over localhost}.
 
-For time elapsed per \ac{tls} connection, our results, in
-Figure~\ref{fig:evaltlsext}, show that there is some
-\bryan{be precise ; give abs + relative $\Delta$ ; small is an opinion/judgement unless you specify your comparison points}
-small
-latency overhead, when comparing the mean time elapsed. This appears
-primarily due to
+Our results, shown in Figure~\ref{fig:evaltlsext}, show that in
+comparison to the mean time elapsed, there is an approximately 5\%
+increase in connection establishment time \jay{For hophop, we get an
+  additional 11ms on average; for localhost, we get an additional
+  1.2ms}.
+%
+This appears primarily due to
 \bryan{how do you know?}
 the extra data
 \bryan{how much?}
