@@ -314,8 +314,8 @@ nginx and curl with minor modifications to use our \ac{tls} extension.
 Additionally, we constructed sample sets of domain names based
 on four parameters:
 \begin{inparaenum}
-\item the number of proofs requested by the client (\numlas),
-\item the number of certificate chains the server \bryan{which server?} sends (\policy),
+\item the number of proofs requested by the client (\numlas) during the ClientHello message,
+\item the number of certificate chains the server \bryan{which server?} \jay{isn't this clear from the fact that we have written a TLS extension?} sends (\policy) during the ServerHello message,
 \item the average number of certificates per chain, and
 \item the average size of each certificate chain.
 \end{inparaenum}
