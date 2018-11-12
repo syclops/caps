@@ -319,7 +319,6 @@ on four parameters:
 \item the average number of certificates per chain, and
 \item the average size of each certificate chain.
 \end{inparaenum}
-\jay{Number of samples collected?}
 While varying each of these parameters, we measured the amount of
 extra data sent in the \ac{name} handshake, and the latency of
 handshake both with and without
@@ -330,6 +329,7 @@ tested this both over a regular network interface
 , by connecting to a
 VPS \bryan{?} (referred to as \emph{hophop}), as well as over the local loopback
 interface (referred to as \emph{localhost}) \bryan{why is the local loopback one interesting?}.
+A total of 15385 TLS connections were established for our testing \jay{5768 over hophop, 9617 over localhost}.
 
 \jay{Restructure the start of this sentence}
 Our results with respect to the time elapsed per \ac{tls} connection,
