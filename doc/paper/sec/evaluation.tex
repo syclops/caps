@@ -337,12 +337,6 @@ increase in connection establishment time \jay{For hophop, we get an
   additional 11ms on average; for localhost, we get an additional
   1.2ms}.
 %
-This appears primarily due to
-\bryan{how do you know?}
-the extra data
-\bryan{how much?}
-sent over the network.
-%
 However, since our \ac{tls} extension does not add any extra
 round-trips to the handshake, the time added is small, especially in
 comparison to random measurement fluctuations, when we look at
