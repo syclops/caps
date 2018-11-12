@@ -341,12 +341,13 @@ This appears primarily due to
 \bryan{how do you know?}
 the extra data
 \bryan{how much?}
-sent over the network. However, since
-our \ac{tls} extension does not add any extra round-trips to the
-handshake, the time added is small, especially in comparison to random
-measurement fluctuations, when we look at 90\% confidence intervals
-\bryan{is that what the bars are? if so, say so.}
-.
+sent over the network.
+%
+However, since our \ac{tls} extension does not add any extra
+round-trips to the handshake, the time added is small, especially in
+comparison to random measurement fluctuations, when we look at
+confidence intervals within one standard deviation from the mean
+(shown as error bars in Figure~\ref{fig:evaltlsext}).
 
 The extra data sent in the \ac{name} handshake is directly dependent
 on the size and number of certificate chains, as well as the number of
