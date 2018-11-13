@@ -324,10 +324,7 @@ extra data sent in the \ac{name} handshake, and the latency of
 handshake both with and without
 \bryan{A bit unclear, given that most params don't apply. Need to more precisely define the baseline.} \jay{Not sure I understand}
 the \ac{name} \ac{tls} extension. We
-tested this both over a regular network interface
-\bryan{ping latency? bandwidth?}
-, by connecting to a
-VPS \bryan{?} \jay{Not sure I understand} (referred to as \emph{hophop}), as well as over the local loopback
+tested this both over the internet (by connecting to a virtual private server \jay{with latency varying between 30 to 300 ms, based upon network conditions}, referred to as \emph{hophop}), as well as over the local loopback
 interface (referred to as \emph{localhost}) \bryan{why is the local loopback one interesting?}.
 A total of 15385 TLS connections were established for our testing \jay{5768 over hophop, 9617 over localhost}.
 
