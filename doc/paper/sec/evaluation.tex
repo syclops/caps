@@ -326,7 +326,7 @@ handshake both with and without
 the \ac{name} \ac{tls} extension. We
 tested this both over the internet (by connecting to a virtual private server \jay{with latency varying between 30 to 300 ms, based upon network conditions}, referred to as \emph{hophop}), as well as over the local loopback
 interface (referred to as \emph{localhost}) \bryan{why is the local loopback one interesting?}.
-\jay{[Restructure this] The tests over the internet to \emph{hophop} provide an indication of the effect of the extension on ``real world'' servers, which are usually accessed over WAN, whereas the \emph{localhost} tests provide a lower bound on time added due to sending/receiving/processing extra data.}
+\jay{[TODO: Restructure this] The tests over the internet to \emph{hophop} provide an indication of the effect of the extension on ``real world'' servers, which are usually accessed over WAN, whereas the \emph{localhost} tests provide a lower bound on time added due to sending/receiving/processing extra data.}
 A total of 15385 TLS connections were established for our testing \jay{5768 over hophop, 9617 over localhost}.
 
 Our results, shown in Figure~\ref{fig:evaltlsext}, show that in
