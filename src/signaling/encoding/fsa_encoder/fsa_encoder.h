@@ -6,13 +6,14 @@
 #define CAPS_FSA_ENCODER_H
 
 // Include standard C++ libraries.
+#include <functional>
 #include <memory>
 
 // Include other headers from this projects.
 #include "../../common/contains.h"
 #include "../../common/compare.h"
 #include "../../graph/ordering.h"
-#include "../../lexicon/fsa_lexicon.h"
+#include "../../lexicon/fsa_lexicon/fsa_lexicon.h"
 #include "../bitvector/bitvector.h"
 #include "../coder/string_coder.h"
 #include "../coder/binary_coder.h"
@@ -26,6 +27,10 @@ template <typename BitVectorType>
 class FSAEncoder
 {
  public:
+
+  // Type alias declarations
+  using NodeHandle = const Node*;
+  using Dist = int;
 
   // Explicitly disallow default construction.
   FSAEncoder() = delete;
@@ -70,8 +75,8 @@ class FSAEncoder
     BitVectorType buffer;
     add_header(buffer);
     add_prefix(buffer);
-    for (const auto& order_node: order_to_node_) {
-      auto node_encoding = encode_node(order_node.second);
+    for (const auto& [index, node]: order_to_node_) {
+      auto node_encoding = encode_node(node);
       buffer.push_back(node_encoding);
     }
     add_suffix(buffer);
@@ -97,34 +102,31 @@ class FSAEncoder
     }
 
     // Type aliases
-    using PtrType = std::shared_ptr<Node>;
-    using DistType = int;
-    using PairType = std::pair<PtrType, DistType>;
+    using PairType = std::pair<NodeHandle, Dist>;
 
     // The DFS explores children by maximum distance from the sink node (desc.)
     auto distance_map = max_distances();
 
     // Populate DFS stack with root node
-    std::stack<PtrType> stack;
-    stack.push(lexicon_.get_graph().get_root());
+    std::stack<NodeHandle> stack;
+    stack.emplace(lexicon_.get_graph().get_root());
 
     // Set up queue for ordering child nodes in the DFS
     std::priority_queue<PairType, std::vector<PairType>,
-                        first_greater<PtrType, DistType>> queue;
+                        second_greater<NodeHandle, Dist>> queue;
 
     // Run the DFS.
     while (!stack.empty()) {
       auto node = stack.top();
       auto order_number = node_to_order_.size();
-      node_to_order_[node] = static_cast<int>(order_number);
-      order_to_node_[order_number] = node;
+      node_to_order_.emplace(node, static_cast<int>(order_number));
+      order_to_node_.emplace(order_number, node);
       stack.pop();
-      for (const auto& out_edge: node->get_out_edges()) {
-        queue.push(std::make_pair(out_edge.second,
-                                  distance_map.at(out_edge.second)));
+      for (const auto& [label, parent]: node->get_out_edges()) {
+        queue.emplace(parent, distance_map.at(parent));
       }
       while (!queue.empty()) {
-        stack.push(queue.top().first);
+        stack.emplace(queue.top().first);
         queue.pop();
       }
     }
@@ -135,12 +137,12 @@ class FSAEncoder
     // TODO
   }
 
-  virtual void add_prefix(BitVectorType& buffer)
+  virtual void add_prefix(BitVectorType&)
   {
     // Nothing to do here.
   }
 
-  virtual void add_suffix(BitVectorType& buffer)
+  virtual void add_suffix(BitVectorType&)
   {
     // Nothing to do here.
   }
@@ -150,12 +152,12 @@ class FSAEncoder
    * @param node
    * @return
    */
-  virtual BitVectorType encode_node(const std::shared_ptr<Node>& node)
+  virtual BitVectorType encode_node(const Node* node)
   {
     BitVectorType buffer;
     buffer.push_back(node->get_accept());
-    for (auto out_edge: node->get_out_edges()) {
-      auto edge_encoding = encode_edge(node, out_edge.second, out_edge.first);
+    for (const auto& [label, parent]: node->get_out_edges()) {
+      auto edge_encoding = encode_edge(node, parent, label);
       buffer.push_back(*edge_encoding);
     }
     return buffer;
@@ -168,8 +170,7 @@ class FSAEncoder
    * @return
    */
   virtual std::unique_ptr<BitVectorType> encode_edge(
-    const std::shared_ptr<Node>& src, const std::shared_ptr<Node>& dst,
-    const std::string& label)
+    const Node* src, const Node* dst, const std::string& label)
   {
     // Create an encoding of the label in the buffer.
     auto buffer = std::unique_ptr<BitVectorType>(label_coder_->encode(label));
@@ -197,17 +198,17 @@ class FSAEncoder
    * @param dest
    * @return
    */
-  std::unordered_map<std::shared_ptr<Node>, int> max_distances() const
+  std::unordered_map<NodeHandle, int> max_distances() const
   {
-    std::unordered_map<std::shared_ptr<Node>, int> map;
+    std::unordered_map<NodeHandle, int> map;
     for (const auto& node: reverse_topological_order(lexicon_.get_graph())) {
-      if (map.empty()) {
-        map[node] = 0;
+      if (map.find(node) == map.end()) {
+        map.emplace(node, 0);
       }
-      for (const auto& in_edge: node->get_in_edges()) {
-        auto dist = map[node] + 1;
-        if (!contains(map, node) || dist > map.at(node)) {
-          map[in_edge.second.lock()] = dist;
+      for (const auto& [label, parent]: node->get_in_edges()) {
+        auto dist = map.at(node) + 1;
+        if (map.find(parent) == map.end() || dist > map.at(parent)) {
+          map.emplace(parent, dist);
         }
       }
     }
@@ -217,8 +218,8 @@ class FSAEncoder
   const FSALexicon& lexicon_;
 
   // TODO: This could be replaced with boost bimap
-  std::unordered_map<std::shared_ptr<Node>, int> node_to_order_;
-  std::map<int, std::shared_ptr<Node>> order_to_node_;
+  std::unordered_map<NodeHandle, int> node_to_order_;
+  std::map<int, NodeHandle> order_to_node_;
 
   std::shared_ptr<Coder<std::string, BitVectorType>> label_coder_;
   std::shared_ptr<Coder<int, BitVectorType>> destination_coder_;

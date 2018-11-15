@@ -21,12 +21,12 @@ SetLexicon::SetLexicon()
   // Nothing to do here.
 }
 
-void SetLexicon::add_string(std::string str)
+void SetLexicon::add_string(const std::string& str)
 {
   set_.insert(str);
 }
 
-bool SetLexicon::has_string(std::string str) const
+bool SetLexicon::has_string(const std::string& str) const
 {
   return set_.find(str) != set_.end();
 }

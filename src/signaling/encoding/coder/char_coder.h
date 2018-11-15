@@ -24,12 +24,12 @@ class CharCoder: public Coder<char, EncodingType>
 
  public:
 
-  inline bool valid_value(const char& value) const override
+  inline bool valid_value(const char&) const override
   {
     return true;
   }
 
-  inline size_t value_size(const char& value) const override
+  inline size_t value_size(const char&) const override
   {
     return BITS_IN_CHAR;
   }

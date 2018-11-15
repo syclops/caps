@@ -10,43 +10,15 @@
 // Include C++ standard libraries.
 #include <map>
 #include <memory>
+#include <optional>
 #include <set>
 #include <string>
 
 // Include other headers from this project.
-#include "../common/iterable.h"
+#include "../../common/iterable.h"
 
 // Include headers from other projects.
-
-// Forward declare the Node class for the custom comparator and equality
-// predicate.
-class Node;
-
-struct in_edge_comparator
-{
-  bool operator()(const std::pair<std::string, std::weak_ptr<Node>>& lhs,
-                  const std::pair<std::string, std::weak_ptr<Node>>& rhs) const;
-};
-
-bool in_edge_equal(const std::pair<std::string, std::weak_ptr<Node>>& lhs,
-                   const std::pair<std::string, std::weak_ptr<Node>>& rhs);
-
-/**
- * Functor to calculate the hash of a node.
- */
-struct NodeHash
-{
-  std::size_t operator()(const std::shared_ptr<Node>& node) const;
-};
-
-/**
- * Functor to determine if two node pointers are equivalent.
- */
-struct NodePred
-{
-  bool operator()(const std::shared_ptr<Node>& lhs,
-                  const std::shared_ptr<Node>& rhs) const;
-};
+#include <boost/functional/hash.hpp>
 
 /**
  * Node with an accept flag and string-labeled, bidirectional edges for use in
@@ -54,15 +26,14 @@ struct NodePred
  */
 class Node
 {
-//  friend struct NodeHash;
-
- private:
-  bool accept_;
-  std::set<std::pair<std::string, std::weak_ptr<Node>>,
-           in_edge_comparator> in_edges_;
-  std::map<std::string, std::shared_ptr<Node>> out_edges_;
-
  public:
+
+  // Alias declarations
+  using NodeHandle = Node*;
+  using Label = std::string;
+  using HalfEdge = std::pair<Label, NodeHandle>;
+  using InEdgeSet = std::set<HalfEdge>;
+  using OutEdgeSet = std::map<Label, NodeHandle>;
 
   /**
    * Create an empty node.
@@ -84,13 +55,13 @@ class Node
    * Get the node's in-degree (i.e., the number of incoming edges).
    * @return
    */
-  int get_in_degree() const noexcept;
+  size_t get_in_degree() const noexcept;
 
   /**
    * Get the node's out-degree (i.e., the number of outgoing edges).
    * @return
    */
-  int get_out_degree() const noexcept;
+  size_t get_out_degree() const noexcept;
 
   /**
    * Check whether a node has an incoming edge with a given source node and
@@ -99,7 +70,7 @@ class Node
    * @param source
    * @return
    */
-  bool has_in_edge(std::string label, std::weak_ptr<Node> source) const;
+  bool has_in_edge(const Label& label, Node* source) const;
 
   /**
    * Check whether a node has an outgoing edge with a given target node and
@@ -108,14 +79,14 @@ class Node
    * @param source
    * @return
    */
-  bool has_out_edge(std::string label, std::shared_ptr<Node> source) const;
+  bool has_out_edge(const Label& label, const Node* source) const;
 
   /**
    * Check whether a node has an outgoing edge with a given label.
    * @param label
    * @return
    */
-  bool has_out_label(std::string label) const;
+  bool has_out_label(const Label& label) const;
 
   /**
    * Set the node's accept flag value.
@@ -128,21 +99,28 @@ class Node
    * @param label
    * @param source
    */
-  void add_in_edge(std::string label, std::weak_ptr<Node> source);
+  void add_in_edge(const Label& label, Node* source);
 
   /**
    * Remove an incoming edge from the node with a given source node and label.
+   *
+   * NOTE: the lack of const for source is deliberate, and has to do with the
+   *       way that sets guarantee const-ness when finding or erasing
+   *       elements. Specifically, the pointer's const-ness is guaranteed,
+   *       but not the const-ness of the node pointed to. There is probably a
+   *       safer way to do this, but it is in here for now.
+   *
    * @param label
    * @param source
    */
-  void remove_in_edge(std::string label, std::weak_ptr<Node> source);
+  void remove_in_edge(const Label& label, Node* source);
 
   /**
    * Add an outgoing edge to a node with a given target node and label.
    * @param label
    * @param target
    */
-  void add_out_edge(std::string label, std::shared_ptr<Node> target);
+  void add_out_edge(const Label& label, Node* target);
 
   /**
    * Remove an outgoing edge from the node with a given label.
@@ -151,7 +129,7 @@ class Node
    * single outgoing edge with a given label at any time.
    * @param label
    */
-  void remove_out_edge(std::string label);
+  void remove_out_edge(const Label& label);
 
   /**
    * Get a pointer to the target node of a node's outgoing edge with a given
@@ -159,20 +137,19 @@ class Node
    * @param label
    * @return
    */
-  std::shared_ptr<Node> follow_out_edge(std::string label) const;
+  Node* follow_out_edge(const Label& label) const;
 
   /**
    * Get the set of a node's incoming edges.
    * @return
    */
-  const std::set<std::pair<std::string, std::weak_ptr<Node>>,
-                 in_edge_comparator>& get_in_edges() const;
+  const std::set<HalfEdge>& get_in_edges() const;
 
   /**
    * Get the set of a node's outgoing edges.
    * @return
    */
-  const std::map<std::string, std::shared_ptr<Node>>& get_out_edges() const;
+  const std::map<Label, Node*>& get_out_edges() const;
 
   /**
    * Get the set of a node's incoming edges in reverse order.
@@ -182,7 +159,7 @@ class Node
    * be considered a reliable ordering).
    * @return
    */
-  ReverseIterable<decltype(in_edges_)> get_reverse_in_edges() const;
+  ReverseIterable<InEdgeSet> get_reverse_in_edges() const;
 
   /**
    * Get the set of a node's outgoing edges in reverse order.
@@ -190,7 +167,12 @@ class Node
    * The edges are ordered by reverse lexicographical order of the labels.
    * @return
    */
-  ReverseIterable<decltype(out_edges_)> get_reverse_out_edges() const;
+  ReverseIterable<OutEdgeSet> get_reverse_out_edges() const;
+
+ private:
+  bool accept_;
+  InEdgeSet in_edges_;
+  OutEdgeSet out_edges_;
 };
 
 /**
@@ -215,5 +197,41 @@ bool operator==(const Node& lhs, const Node& rhs);
  * @return
  */
 bool operator!=(const Node& lhs, const Node& rhs);
+
+namespace std {
+  template<> struct hash<Node>
+  {
+    size_t operator()(const Node& node) const
+    {
+      size_t seed = 0;
+      boost::hash_combine(seed, node.get_accept());
+      for (const auto& [label, parent]: node.get_in_edges()) {
+        boost::hash_combine(seed, label);
+        boost::hash_combine(seed, parent);
+      }
+      for (const auto& [label, child]: node.get_out_edges()) {
+        boost::hash_combine(seed, label);
+        boost::hash_combine(seed, child);
+      }
+      return seed;
+    }
+  };
+
+  template<> struct hash<reference_wrapper<Node>>
+  {
+    size_t operator()(const reference_wrapper<Node>& wrapper) const
+    {
+      return hash<Node>()(wrapper.get());
+    }
+  };
+
+  template<> struct hash<reference_wrapper<const Node>>
+  {
+    size_t operator()(const reference_wrapper<const Node>& wrapper) const
+    {
+      return hash<Node>()(wrapper.get());
+    }
+  };
+}
 
 #endif  // CAPS_NODE_H_

@@ -7,36 +7,36 @@
 #include "ordering.h"
 #include "../common/contains.h"
 
-ReverseIterable<OrderType> topological_order(const LabeledGraph& graph)
+ReverseIterable<Order> topological_order(const LabeledGraph& graph)
 {
   return {reverse_topological_order(graph)};
 }
 
-OrderType reverse_topological_order(const LabeledGraph& graph)
+Order reverse_topological_order(const LabeledGraph& graph)
 {
-  // Assumes OrderType is vector
-  OrderType order;
-  order.reserve(static_cast<unsigned long>(graph.get_num_nodes()));
+  // Assumes Order is vector
+  Order order;
+  order.reserve(graph.get_num_nodes());
 
-  std::unordered_set<NodePtrType> visited;
-  std::stack<std::pair<NodePtrType, bool>> stack;
+  std::unordered_set<NodeHandle> ordered;
+  std::stack<std::pair<NodeHandle, bool>> stack;
 
-  stack.push(std::make_pair(graph.get_root(), false));
+  stack.emplace(graph.get_root(), false);
 
   while (!stack.empty()) {
-    auto pair = stack.top();
+    auto [node, all_children_ordered] = stack.top();
     stack.pop();
-    if (contains(visited, pair.first)) {
+    if (ordered.find(node) != ordered.end()) {
       continue;
     }
-    if (pair.second) {
-      visited.insert(pair.first);
-      order.push_back(pair.first);
+    if (all_children_ordered) {
+      order.push_back(node);
+      ordered.insert(node);
     } else {
-      stack.push(std::make_pair(pair.first, true));
-      for (const auto& out_edge: pair.first->get_out_edges()) {
-        if (!contains(visited, out_edge.second)) {
-          stack.push(std::make_pair(out_edge.second, false));
+      stack.emplace(node, true);
+      for (const auto& [label, child]: node->get_out_edges()) {
+        if (ordered.find(child) == ordered.end()) {
+          stack.emplace(child, false);
         }
       }
     }
@@ -45,20 +45,20 @@ OrderType reverse_topological_order(const LabeledGraph& graph)
   return order;
 }
 
-std::unordered_map<NodePtrType, int> node_to_order_map(const OrderType& order)
+std::unordered_map<NodeHandle, int> node_to_order_map(const Order& order)
 {
-  std::unordered_map<NodePtrType, int> map;
+  std::unordered_map<NodeHandle, int> map;
   for (size_t i = 0; i < order.size(); ++i) {
-    map[order[i]] = i;
+    map.emplace(order[i], static_cast<int>(i));
   }
   return map;
 }
 
-std::map<int, NodePtrType> order_to_node_map(const OrderType& order)
+std::map<int, NodeHandle> order_to_node_map(const Order& order)
 {
-  std::map<int, NodePtrType> map;
+  std::map<int, NodeHandle> map;
   for (size_t i = 0; i < order.size(); ++i) {
-    map[i] = order[i];
+    map.emplace(i, order[i]);
   }
   return map;
 }

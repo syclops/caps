@@ -10,8 +10,8 @@
 // Include C++ standard libraries.
 
 // Include other headers from this project.
-#include "../../../src/signaling/graph/graph.h"
-#include "../../../src/signaling/graph/node.h"
+#include "../../../src/signaling/graph/labeled_graph/graph.h"
+#include "../../../src/signaling/graph/node/node.h"
 
 // Include header from other projects.
 #include "gtest/gtest.h"
@@ -23,31 +23,50 @@ TEST(LabeledGraph, EmptyGraph)
   EXPECT_EQ(0, graph.get_num_edges());
   EXPECT_EQ(0, graph.get_num_accept());
   EXPECT_FALSE(graph.get_compacted());
+  EXPECT_EQ(1, graph.get_nodes().size());
+  EXPECT_TRUE(graph.get_source_counts().empty());
+  EXPECT_TRUE(graph.get_dest_counts().empty());
+  EXPECT_TRUE(graph.get_label_counts().empty());
 }
 
 TEST(LabeledGraph, GraphReflexiveEqual)
 {
   const LabeledGraph graph;
-  EXPECT_EQ(graph.get_root(), graph.get_root());
   EXPECT_EQ(graph, graph);
 }
 
 TEST(LabeledGraph, EmptyGraphsEqual)
 {
   const LabeledGraph graph1, graph2;
-  EXPECT_NE(graph1.get_root(), graph2.get_root());
   EXPECT_EQ(graph1, graph2);
 }
 
 TEST(LabeledGraph, CopyEmptyGraph)
 {
   const LabeledGraph graph1;
-  const LabeledGraph graph2(graph1);
-  EXPECT_NE(graph1.get_root(), graph2.get_root());
+  const LabeledGraph graph2{graph1};
   EXPECT_EQ(graph1, graph2);
 }
 
 const auto SAMPLE_LABEL = "a";
+
+TEST(LabeledGraph, CopyNonEmptyGraph)
+{
+  LabeledGraph graph1;
+  graph1.add_edge(graph1.get_root(), SAMPLE_LABEL);
+  LabeledGraph graph2{graph1};
+  EXPECT_EQ(graph1.get_num_nodes(), graph2.get_num_nodes());
+  EXPECT_EQ(graph1.get_num_edges(), graph2.get_num_edges());
+  EXPECT_EQ(graph1.get_num_accept(), graph2.get_num_accept());
+  EXPECT_EQ(graph1.get_compacted(), graph2.get_compacted());
+  EXPECT_EQ(graph1.get_source_counts().size(),
+            graph2.get_source_counts().size());
+  EXPECT_EQ(graph1.get_dest_counts().size(),
+            graph2.get_dest_counts().size());
+  EXPECT_EQ(graph1.get_label_counts().size(),
+            graph2.get_label_counts().size());
+  EXPECT_EQ(graph1, graph2);
+}
 
 TEST(LabeledGraph, GraphsNotEqual)
 {
@@ -58,6 +77,20 @@ TEST(LabeledGraph, GraphsNotEqual)
 
 //TODO: tests more pathological unequal graphs
 
+TEST(LabeledGraph, SetAccept)
+{
+  LabeledGraph graph;
+  graph.set_accept(graph.get_root(), true);
+  EXPECT_EQ(1, graph.get_num_nodes());
+  EXPECT_EQ(0, graph.get_num_edges());
+  EXPECT_EQ(1, graph.get_num_accept());
+  EXPECT_FALSE(graph.get_compacted());
+  EXPECT_EQ(1, graph.get_nodes().size());
+  EXPECT_TRUE(graph.get_source_counts().empty());
+  EXPECT_TRUE(graph.get_dest_counts().empty());
+  EXPECT_TRUE(graph.get_label_counts().empty());
+}
+
 // We don't tests the add_node function since it's an alias for add_edge with the
 // same parameters.
 
@@ -67,20 +100,52 @@ TEST(LabeledGraph, RemoveNode)
   LabeledGraph graph;
   auto node = graph.add_node(graph.get_root(), SAMPLE_LABEL);
   graph.remove_node(node);
+  EXPECT_EQ(1, graph.get_num_nodes());
+  EXPECT_EQ(0, graph.get_num_edges());
+  EXPECT_EQ(0, graph.get_num_accept());
+  EXPECT_FALSE(graph.get_compacted());
+  EXPECT_EQ(1, graph.get_nodes().size());
+  EXPECT_TRUE(graph.get_source_counts().empty());
+  EXPECT_TRUE(graph.get_dest_counts().empty());
+  EXPECT_TRUE(graph.get_label_counts().empty());
   EXPECT_EQ(empty_graph, graph);
 }
 
-// TODO: tests removing a node not in the graph
+TEST(LabeledGraph, RemoveNonMemberNode)
+{
+  const LabeledGraph empty_graph;
+  LabeledGraph graph;
+  auto non_member = std::make_unique<Node>();
+  graph.remove_node(non_member.get());
+  EXPECT_EQ(empty_graph, graph);
+}
 
-TEST(LabeledGraph, RemoveNodeRecursive)
+TEST(LabeledGraph, RemoveAcceptNode)
 {
   LabeledGraph graph;
   auto child = graph.add_node(graph.get_root(), SAMPLE_LABEL);
-  auto grandchild = graph.add_node(child, SAMPLE_LABEL);
+  graph.set_accept(child, true);
+  graph.remove_node(child);
+  EXPECT_EQ(0, graph.get_num_accept());
+}
+
+TEST(LabeledGraph, RemoveNodeRecursive)
+{
+  const LabeledGraph empty_graph;
+  LabeledGraph graph;
+  auto child = graph.add_node(graph.get_root(), SAMPLE_LABEL);
+  graph.add_node(child, SAMPLE_LABEL);
   EXPECT_EQ(2, graph.get_num_edges());
   graph.remove_node(child);
   EXPECT_EQ(1, graph.get_num_nodes());
   EXPECT_EQ(0, graph.get_num_edges());
+  EXPECT_EQ(0, graph.get_num_accept());
+  EXPECT_FALSE(graph.get_compacted());
+  EXPECT_EQ(1, graph.get_nodes().size());
+  EXPECT_TRUE(graph.get_source_counts().empty());
+  EXPECT_TRUE(graph.get_dest_counts().empty());
+  EXPECT_TRUE(graph.get_label_counts().empty());
+  EXPECT_EQ(empty_graph, graph);
 }
 
 const auto SAMPLE_LABEL2 = "b";

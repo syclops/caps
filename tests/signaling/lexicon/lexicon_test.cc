@@ -12,7 +12,7 @@
 // Include other headers from this project.
 #include "../../../src/signaling/lexicon/lexicon.h"
 #include "../../../src/signaling/lexicon/set_lexicon.h"
-#include "../../../src/signaling/lexicon/fsa_lexicon.h"
+#include "../../../src/signaling/lexicon/fsa_lexicon/fsa_lexicon.h"
 
 // Include header from other projects.
 #include "gtest/gtest.h"

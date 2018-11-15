@@ -7,7 +7,7 @@
 #include <fstream>
 #include <utility>
 
-#include "lexicon/fsa_lexicon.h"
+#include "lexicon/fsa_lexicon/fsa_lexicon.h"
 #include "common/io_option.h"
 #include "common/measure_time.h"
 #include "encoding/fsa_encoder/fsa_encoder.h"
@@ -198,7 +198,7 @@ int main(int argc, char* argv[])
   }
 
   using BVType = BitVector<>;
-  using EncPtrType = std::shared_ptr<FSAEncoder<BVType>>;
+  using EncPtrType = std::unique_ptr<FSAEncoder<BVType>>;
   EncPtrType encoder{parsed.transition_compact
                      ? new FSAHuffmanEncoder<BVType>(lexicon)
                      : new FSAEncoder<BVType>(lexicon)};
@@ -208,8 +208,8 @@ int main(int argc, char* argv[])
 //    : FSAEncoder<BitVector<>>{lexicon};
 
   // Write the compacted lexicon to file.
-  FunctionTimer<void, std::string, EncPtrType> out_timer([](
-    std::string outfile, EncPtrType encoder) {
+  FunctionTimer<void, std::string, const EncPtrType&> out_timer([](
+    std::string outfile, const EncPtrType& encoder) {
     output_option(write_lexicon, outfile, encoder.get());
   });
   std::cout << "Writing lexicon to "

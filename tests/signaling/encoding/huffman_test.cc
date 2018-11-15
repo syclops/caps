@@ -13,7 +13,7 @@
 
 // Include other headers from this project.
 #include "../../../src/signaling/common/contains.h"
-#include "../../../src/signaling/encoding/huffman.h"
+#include "../../../src/signaling/encoding/huffman/huffman.h"
 #include "../../../src/signaling/encoding/bitvector/bitvector.h"
 
 // Include header from other projects.

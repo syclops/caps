@@ -22,9 +22,9 @@ class SetLexicon: public Lexicon
 
   ~SetLexicon() override = default;
 
-  void add_string(std::string) override;
+  void add_string(const std::string& str) override;
 
-  bool has_string(std::string) const override;
+  bool has_string(const std::string& str) const override;
 
   int size() const override;
 

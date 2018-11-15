@@ -28,7 +28,7 @@ class SignedIntCoder: public Coder<SignedIntType, EncodingType>
     // Nothing to do here.
   }
 
-  inline bool valid_value(const SignedIntType& value) const override
+  inline bool valid_value(const SignedIntType&) const override
   {
     return true;
   }

@@ -10,24 +10,21 @@
 #include <stack>
 #include <unordered_set>
 
-#include "graph.h"
-#include "node.h"
+#include "../labeled_graph/graph.h"
+#include "../node/node.h"
+#include "../visitor/visitor.h"
 
 template <typename Visitor>
-void visit_dfs(std::shared_ptr<Visitor> visitor,
-               std::shared_ptr<Node> source)
+void visit_dfs(std::shared_ptr<Visitor> visitor, Node* source)
 {
-  std::stack<std::pair<std::shared_ptr<Visitor>,
-    std::shared_ptr<Node>>> stack;
+  std::stack<std::pair<std::shared_ptr<Visitor>, Node*>> stack;
   stack.emplace(std::make_pair(visitor, source));
-  std::unordered_set<std::shared_ptr<Node>> visited;
+  std::unordered_set<Node*> visited;
   visited.insert(source);
   while (!stack.empty()) {
     auto pair = stack.top();
     stack.pop();
     auto node_copy = pair.first->clone();
-//    std::cerr << "node copy: " << node_copy << std::endl;
-//    std::cerr << "target node: " << pair.second << std::endl;
     node_copy->process_node(pair.second);
     for (const auto &out_edge_itr: pair.second->get_reverse_out_edges()) {
       if (node_copy->should_proceed(pair.second, out_edge_itr.second,
@@ -38,6 +35,32 @@ void visit_dfs(std::shared_ptr<Visitor> visitor,
       }
     }
   }
+}
+
+template <typename Iterator>
+void depth_first_search(Visitor<Iterator>& visitor, const Node* start)
+{
+  // Initialize data structures used in the rest of this algorithm.
+  std::stack<const Node*> stack;
+  stack.push(start);
+  visitor.setup();
+
+  // Perform the standard DFS algorithm using the now non-empty stack.
+  while (!stack.empty()) {
+    auto node = stack.top();
+    stack.pop();
+    if (visitor.should_visit_node(node)) {
+      visitor.visit_node(node);
+    }
+    for (auto i = visitor.begin(node); i != visitor.end(node); ++i) {
+      const auto& [label, dest] = *i;
+      if (visitor.should_visit_edge(node, dest, label)) {
+        visitor.visit_edge(node, dest, label);
+        stack.emplace(dest);
+      }
+    }
+  }
+  visitor.finish();
 }
 
 template <typename Visitor>
@@ -63,14 +86,18 @@ void visit_bfs(std::shared_ptr<Visitor> visitor,
   }
 }
 
-template <typename Visitor>
-void visit_unordered(std::shared_ptr<Visitor> visitor,
-                     const LabeledGraph& graph)
+template <typename Iterator>
+void visit_unordered(Visitor<Iterator>& visitor, const LabeledGraph& graph)
 {
-  for (auto node: graph.get_nodes()) {
-    visitor->process_node(node);
-    for (auto out_edge_itr: node->get_out_edges()) {
-      visitor->process_label(out_edge_itr.first);
+  for (const auto& node: graph.get_nodes()) {
+    if (visitor.should_visit_node(node)) {
+      visitor.visit_node(node);
+    }
+    for (const auto& edge: visitor) {
+      const auto& [label, dest] = edge;
+      if (visitor.should_visit_edge(node, *dest, label)) {
+        visitor.visit_edge(node, *dest, label);
+      }
     }
   }
 }

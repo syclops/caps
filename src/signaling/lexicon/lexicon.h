@@ -27,9 +27,9 @@ class Lexicon
 
   virtual void add_file(std::istream& instream);
 
-  virtual void add_string(std::string str) = 0;
+  virtual void add_string(const std::string& str) = 0;
 
-  virtual bool has_string(std::string str) const = 0;
+  virtual bool has_string(const std::string& str) const = 0;
 
   virtual int size() const;
 

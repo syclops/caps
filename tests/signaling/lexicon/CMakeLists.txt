@@ -19,7 +19,8 @@ gtest_discover_tests(set_lexicon_test)
 # DAFSA Lexicon
 add_executable(fsa_lexicon_test fsa_lexicon_test.cc)
 target_link_libraries(fsa_lexicon_test
-    PUBLIC node fsa_lexicon
-    PRIVATE gtest gtest_main
+    PUBLIC fsa_lexicon
+    PRIVATE gtest gtest_main graph
 )
 gtest_discover_tests(fsa_lexicon_test)
+

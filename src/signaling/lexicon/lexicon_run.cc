@@ -2,7 +2,7 @@
 // Created by smaptas on 27.10.17.
 //
 
-#include "fsa_lexicon.h"
+#include "fsa_lexicon/fsa_lexicon.h"
 
 int main() {
   FSALexicon lexicon;

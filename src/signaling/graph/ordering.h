@@ -5,24 +5,25 @@
 #ifndef CAPS_ORDERING_H
 #define CAPS_ORDERING_H
 
+#include <functional>
 #include <unordered_set>
 
-#include "graph.h"
-#include "node.h"
+#include "labeled_graph/graph.h"
+#include "node/node.h"
 #include "../common/iterable.h"
 
 namespace {
-  using NodePtrType = std::shared_ptr<Node>;
-  using OrderType = std::vector<NodePtrType>;
-  using SetType = std::unordered_set<NodePtrType>;
+  using NodeHandle = const Node*;
+  using Order = std::vector<NodeHandle>;
+  using Set = std::unordered_set<NodeHandle>;
 }
 
-ReverseIterable<OrderType> topological_order(const LabeledGraph& graph);
+ReverseIterable<Order> topological_order(const LabeledGraph& graph);
 
-OrderType reverse_topological_order(const LabeledGraph& graph);
+Order reverse_topological_order(const LabeledGraph& graph);
 
-std::unordered_map<NodePtrType, int> node_to_order_map(const OrderType& order);
+std::unordered_map<NodeHandle, int> node_to_order_map(const Order& order);
 
-std::map<int, NodePtrType> order_to_node_map(const OrderType& order);
+std::map<int, NodeHandle> order_to_node_map(const Order& order);
 
 #endif //CAPS_ORDERING_H

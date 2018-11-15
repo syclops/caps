@@ -10,7 +10,7 @@
 #include <string>
 
 // Include other headers from this project.
-#include "../../lexicon/fsa_lexicon.h"
+#include "../../lexicon/fsa_lexicon/fsa_lexicon.h"
 #include "../coder/huffman_coder.h"
 #include "../coder/signed_int_coder.h"
 #include "fsa_encoder.h"
@@ -27,7 +27,7 @@ class FSAHuffmanEncoder: public FSAEncoder<BitVectorType>
   {
     auto label_coder = std::make_shared<HuffmanCoder<std::string,
                                                      BitVectorType>>(
-      lexicon.label_counts());
+      get_label_counts(lexicon));
     using LabelCoderType = Coder<std::string, BitVectorType>;
     FSAEncoder<BitVectorType>::label_coder_ =
       std::static_pointer_cast<LabelCoderType>(label_coder);
@@ -72,15 +72,20 @@ class FSAHuffmanEncoder: public FSAEncoder<BitVectorType>
     buffer.push_back(dest_codebook);
   }
 
+  virtual LabeledGraph::LabelMap get_label_counts(
+    const FSALexicon& lexicon) const
+  {
+    return lexicon.get_graph().get_label_counts();
+  }
+
   std::unordered_map<int, int> get_ordering_diff_counts(
     const FSALexicon& lexicon) const
   {
     std::unordered_map<int, int> diff_counts;
     for (const auto& source: lexicon.get_graph().get_nodes()) {
-      for (const auto& edge: source->get_out_edges()) {
-        auto dest = edge.second;
-        auto diff = FSAEncoder<BitVectorType>::node_to_order_.at(dest)
-          - FSAEncoder<BitVectorType>::node_to_order_.at(source);
+      for (const auto& [label, child]: source->get_out_edges()) {
+        auto diff = FSAEncoder<BitVectorType>::node_to_order_.at(child)
+          - FSAEncoder<BitVectorType>::node_to_order_.at(source.get());
         if (diff_counts.find(diff) == diff_counts.end()) {
           diff_counts[diff] = 1;
         } else {

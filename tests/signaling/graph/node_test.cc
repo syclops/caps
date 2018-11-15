@@ -13,7 +13,7 @@
 // Include other headers from this project.
 #include "../../../src/signaling/common/contains.h"
 #include "../../../src/signaling/common/iterable.h"
-#include "../../../src/signaling/graph/node.h"
+#include "../../../src/signaling/graph/node/node.h"
 
 // Include headers; from other projects.
 #include "gtest/gtest.h"
@@ -76,10 +76,15 @@ class AddOutEdge: public virtual TestNode, public virtual TestLabel
 
   virtual void SetUp()
   {
-    add_node_shared_ptr_ = std::shared_ptr<Node>{new Node};
+    downstream_node_ = new Node;
   }
 
-  std::shared_ptr<Node> add_node_shared_ptr_;
+  virtual void TearDown()
+  {
+    delete downstream_node_;
+  }
+
+  Node* downstream_node_;
 };
 
 /**
@@ -94,10 +99,16 @@ class AddInEdge: public virtual AddOutEdge
   virtual void SetUp()
   {
     AddOutEdge::SetUp();
-    add_node_weak_ptr_ = {add_node_shared_ptr_};
+    upstream_node_ = new Node;
   }
 
-  std::weak_ptr<Node> add_node_weak_ptr_;
+  virtual void TearDown()
+  {
+    AddOutEdge::TearDown();
+    delete upstream_node_;
+  }
+
+  Node* upstream_node_;
 };
 
 
@@ -160,7 +171,7 @@ class NodeTestInEdge: public AddInEdge, public TwoTestLabels
   {
     AddInEdge::SetUp();
     TwoTestLabels::SetUp();
-    test_node_.add_in_edge(label_, add_node_weak_ptr_);
+    test_node_.add_in_edge(label_, upstream_node_);
   }
 };
 
@@ -171,7 +182,7 @@ class NodeTestInEdge: public AddInEdge, public TwoTestLabels
 TEST_F(NodeTestInEdge, AddInEdge)
 {
   EXPECT_EQ(1, test_node_.get_in_degree());
-  EXPECT_TRUE(test_node_.has_in_edge(label_, add_node_weak_ptr_));
+  EXPECT_TRUE(test_node_.has_in_edge(label_, upstream_node_));
 }
 
 /**
@@ -180,7 +191,7 @@ TEST_F(NodeTestInEdge, AddInEdge)
  */
 TEST_F(NodeTestInEdge, AddInEdgeIdempotent)
 {
-  test_node_.add_in_edge(label_, add_node_weak_ptr_);
+  test_node_.add_in_edge(label_, upstream_node_);
   EXPECT_EQ(1, test_node_.get_in_degree());
 }
 
@@ -190,9 +201,9 @@ TEST_F(NodeTestInEdge, AddInEdgeIdempotent)
  */
 TEST_F(NodeTestInEdge, RemoveInEdge)
 {
-  test_node_.remove_in_edge(label_, add_node_weak_ptr_);
+  test_node_.remove_in_edge(label_, upstream_node_);
   EXPECT_EQ(0, test_node_.get_in_degree());
-  EXPECT_FALSE(test_node_.has_in_edge(label_, add_node_weak_ptr_));
+  EXPECT_FALSE(test_node_.has_in_edge(label_, upstream_node_));
   // TODO: check that no other in-edges have changed.
 }
 
@@ -202,8 +213,8 @@ TEST_F(NodeTestInEdge, RemoveInEdge)
  */
 TEST_F(NodeTestInEdge, RemoveInEdgeIdempotent)
 {
-  test_node_.remove_in_edge(label_, add_node_weak_ptr_);
-  test_node_.remove_in_edge(label_, add_node_weak_ptr_);
+  test_node_.remove_in_edge(label_, upstream_node_);
+  test_node_.remove_in_edge(label_, upstream_node_);
   EXPECT_EQ(0, test_node_.get_in_degree());
 }
 
@@ -213,9 +224,9 @@ TEST_F(NodeTestInEdge, RemoveInEdgeIdempotent)
  */
 TEST_F(NodeTestInEdge, RemoveNonexistentInEdge)
 {
-  test_node_.remove_in_edge(label2_, add_node_weak_ptr_);
+  test_node_.remove_in_edge(label2_, upstream_node_);
   EXPECT_EQ(1, test_node_.get_in_degree());
-  EXPECT_TRUE(test_node_.has_in_edge(label_, add_node_weak_ptr_));
+  EXPECT_TRUE(test_node_.has_in_edge(label_, upstream_node_));
 }
 
 /**
@@ -224,13 +235,13 @@ TEST_F(NodeTestInEdge, RemoveNonexistentInEdge)
  */
 TEST_F(NodeTestInEdge, IterateInEdges)
 {
-  test_node_.add_in_edge(label2_, add_node_weak_ptr_);
-  const std::vector<std::pair<std::string, std::weak_ptr<Node>>> edges{
-    {label_, add_node_weak_ptr_}, {label2_, add_node_weak_ptr_}};
+  test_node_.add_in_edge(label2_, upstream_node_);
+  const std::vector<std::pair<std::string, Node*>> edges{
+    {label_, upstream_node_}, {label2_, upstream_node_}};
   auto i = 0;
   for (const auto in_edge_itr: test_node_.get_in_edges()) {
     EXPECT_EQ(in_edge_itr.first, edges[i].first);
-    EXPECT_EQ(in_edge_itr.second.lock(), edges[i].second.lock());
+    EXPECT_EQ(in_edge_itr.second, edges[i].second);
     ++i;
   }
 }
@@ -241,13 +252,13 @@ TEST_F(NodeTestInEdge, IterateInEdges)
  */
 TEST_F(NodeTestInEdge, IterateReverseInEdges)
 {
-  test_node_.add_in_edge(label2_, add_node_weak_ptr_);
-  const std::vector<std::pair<std::string, std::weak_ptr<Node>>> edges{
-    {label2_, add_node_weak_ptr_}, {label_, add_node_weak_ptr_}};
+  test_node_.add_in_edge(label2_, upstream_node_);
+  const std::vector<std::pair<std::string, Node*>> edges{
+    {label2_, upstream_node_}, {label_, upstream_node_}};
   auto i = 0;
   for (const auto in_edge_itr: test_node_.get_reverse_in_edges()) {
     EXPECT_EQ(in_edge_itr.first, edges[i].first);
-    EXPECT_EQ(in_edge_itr.second.lock(), edges[i].second.lock());
+    EXPECT_EQ(in_edge_itr.second, edges[i].second);
     ++i;
   }
 }
@@ -263,7 +274,7 @@ class NodeTestOutEdge: public AddOutEdge, public TwoTestLabels
   {
     AddOutEdge::SetUp();
     TwoTestLabels::SetUp();
-    test_node_.add_out_edge(label_, add_node_shared_ptr_);
+    test_node_.add_out_edge(label_, downstream_node_);
   }
 };
 
@@ -274,7 +285,7 @@ class NodeTestOutEdge: public AddOutEdge, public TwoTestLabels
 TEST_F(NodeTestOutEdge, AddOutEdgeDegree)
 {
   EXPECT_EQ(1, test_node_.get_out_degree());
-  EXPECT_TRUE(test_node_.has_out_edge(label_, add_node_shared_ptr_));
+  EXPECT_TRUE(test_node_.has_out_edge(label_, downstream_node_));
 }
 
 /**
@@ -283,9 +294,9 @@ TEST_F(NodeTestOutEdge, AddOutEdgeDegree)
  */
 TEST_F(NodeTestOutEdge, AddOutEdgeIdempotent)
 {
-  test_node_.add_out_edge(label_, add_node_shared_ptr_);
+  test_node_.add_out_edge(label_, downstream_node_);
   EXPECT_EQ(1, test_node_.get_out_degree());
-  EXPECT_TRUE(test_node_.has_out_edge(label_, add_node_shared_ptr_));
+  EXPECT_TRUE(test_node_.has_out_edge(label_, downstream_node_));
 }
 
 /**
@@ -296,7 +307,7 @@ TEST_F(NodeTestOutEdge, RemoveOutEdge)
 {
   test_node_.remove_out_edge(label_);
   EXPECT_EQ(0, test_node_.get_out_degree());
-  EXPECT_FALSE(test_node_.has_out_edge(label_, add_node_shared_ptr_));
+  EXPECT_FALSE(test_node_.has_out_edge(label_, downstream_node_));
 }
 
 /**
@@ -308,7 +319,7 @@ TEST_F(NodeTestOutEdge, RemoveOutEdgeIdempotent)
   test_node_.remove_out_edge(label_);
   test_node_.remove_out_edge(label_);
   EXPECT_EQ(0, test_node_.get_out_degree());
-  EXPECT_FALSE(test_node_.has_out_edge(label_, add_node_shared_ptr_));
+  EXPECT_FALSE(test_node_.has_out_edge(label_, downstream_node_));
 }
 
 /**
@@ -318,7 +329,7 @@ TEST_F(NodeTestOutEdge, RemoveOutEdgeIdempotent)
 TEST_F(NodeTestOutEdge, RemoveNonexistentOutEdge)
 {
   test_node_.remove_out_edge(label2_);
-  EXPECT_TRUE(test_node_.has_out_edge(label_, add_node_shared_ptr_));
+  EXPECT_TRUE(test_node_.has_out_edge(label_, downstream_node_));
 }
 
 /**
@@ -327,9 +338,9 @@ TEST_F(NodeTestOutEdge, RemoveNonexistentOutEdge)
  */
 TEST_F(NodeTestOutEdge, IterateOutEdges)
 {
-  test_node_.add_out_edge(label2_, add_node_shared_ptr_);
-  const std::vector<std::pair<std::string, std::shared_ptr<Node>>> edges{
-    {label_, add_node_shared_ptr_}, {label2_, add_node_shared_ptr_}};
+  test_node_.add_out_edge(label2_, downstream_node_);
+  const std::vector<std::pair<std::string, Node*>> edges{
+    {label_, downstream_node_}, {label2_, downstream_node_}};
   auto i = 0;
   for (auto& out_edge_itr: test_node_.get_out_edges()) {
     EXPECT_EQ(out_edge_itr.first, edges[i].first);
@@ -344,9 +355,9 @@ TEST_F(NodeTestOutEdge, IterateOutEdges)
  */
 TEST_F(NodeTestOutEdge, IterateReverseOutEdges)
 {
-  test_node_.add_out_edge(label2_, add_node_shared_ptr_);
-  const std::vector<std::pair<std::string, std::shared_ptr<Node>>> edges{
-    {label2_, add_node_shared_ptr_}, {label_, add_node_shared_ptr_}};
+  test_node_.add_out_edge(label2_, downstream_node_);
+  const std::vector<std::pair<std::string, Node*>> edges{
+    {label2_, downstream_node_}, {label_, downstream_node_}};
   auto i = 0;
   for (auto& out_edge_itr: test_node_.get_reverse_out_edges()) {
     EXPECT_EQ(out_edge_itr.first, edges[i].first);
@@ -439,9 +450,9 @@ TEST_F(NodeTestEqual, AcceptEqual)
  */
 TEST_F(NodeTestEqual, AddInEdge)
 {
-  test_node_.add_in_edge(label_, add_node_weak_ptr_);
+  test_node_.add_in_edge(label_, upstream_node_);
   EXPECT_NE(test_node_, other_test_node_);
-  other_test_node_.add_in_edge(label_, add_node_weak_ptr_);
+  other_test_node_.add_in_edge(label_, upstream_node_);
   EXPECT_EQ(test_node_, other_test_node_);
 }
 
@@ -451,8 +462,8 @@ TEST_F(NodeTestEqual, AddInEdge)
  */
 TEST_F(NodeTestEqual, AddDifferentInEdges)
 {
-  test_node_.add_in_edge(label_, add_node_weak_ptr_);
-  other_test_node_.add_in_edge(label2_, add_node_weak_ptr_);
+  test_node_.add_in_edge(label_, upstream_node_);
+  other_test_node_.add_in_edge(label2_, upstream_node_);
   EXPECT_NE(test_node_, other_test_node_);
 }
 
@@ -461,9 +472,9 @@ TEST_F(NodeTestEqual, AddDifferentInEdges)
  */
 TEST_F(NodeTestEqual, AddOutEdge)
 {
-  test_node_.add_out_edge(label_, add_node_shared_ptr_);
+  test_node_.add_out_edge(label_, downstream_node_);
   EXPECT_NE(test_node_, other_test_node_);
-  other_test_node_.add_out_edge(label_, add_node_shared_ptr_);
+  other_test_node_.add_out_edge(label_, downstream_node_);
   EXPECT_EQ(test_node_, other_test_node_);
 }
 
@@ -473,8 +484,8 @@ TEST_F(NodeTestEqual, AddOutEdge)
  */
 TEST_F(NodeTestEqual, AddDifferentOutEdges)
 {
-  test_node_.add_out_edge(label_, add_node_shared_ptr_);
-  other_test_node_.add_out_edge(label2_, add_node_shared_ptr_);
+  test_node_.add_out_edge(label_, downstream_node_);
+  other_test_node_.add_out_edge(label2_, downstream_node_);
   EXPECT_NE(test_node_, other_test_node_);
 }
 
