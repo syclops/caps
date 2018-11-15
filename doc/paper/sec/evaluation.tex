@@ -276,36 +276,82 @@ about the results here}.
 \subsection{Connection Establishment}
 \label{sec:evaluation:performance}
 
-To test the performance of connection establishment in \ac{name}, we implemented
-an extension to the \steve{Chrome/Firefox} browser that intercepts outgoing HTTP
-and HTTPS requests, queries the domain name in the signaling set, and if
-necessary, initiates a connection to the site with the \ac{name} handshake. We
+\begin{figure*}[thb]
+  \centering
+  \subfloat[vs Number of Proofs Requested]{
+    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/0-time_elapsed_vs_num_proofs_requested}
+    \label{fig:evaltlsext:numproof}
+  }
+  \subfloat[vs Number of Chains Sent]{
+    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/1-time_elapsed_vs_num_chains_sent}
+    \label{fig:evaltlsext:numchain}
+  }
+  \subfloat[vs Number of Certificates per Chain]{
+    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/2-time_elapsed_vs_num_certs_per_chain}
+    \label{fig:evaltlsext:numcert}
+  }
+  \subfloat[vs Average Size of Chain]{
+    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/3-time_elapsed_vs_avg_chain_size}
+    \label{fig:evaltlsext:sizechain}
+  }
+  \caption{Time Elapsed during Connection Establishment \jay{TODO:
+      Figure out how to make these readable, without taking up too
+      much more space. Maybe move to Appendix? In that case, will need
+      to restructure the text in the paper.}}
+  \label{fig:evaltlsext}
+\end{figure*}
+
+% \jay{We had decided to drop the idea of a Chrome/Firefox extension in
+%   favor of doing a purely curl+nginx thing}
+
+To measure the \bryan{Need to motivate/remind} \jay{Not sure I
+  understand this comment. Earlier in the section, we say ``Finally,
+  we describe the performance effects of CAPS on connection
+  establishment'', so this part is simply finally bringing this up,
+  right?}
+performance of connection establishment in \ac{name}, we
 implemented the handshake as a custom \ac{tls} extension in the
-\steve{OpenSSL/BoringSSL/NSS} library. On the server side, we modified a a
-\steve{Apache/Nginx} HTTPS server to handle the extension and send back policy
-proofs and extra certificate chains.
+OpenSSL library. For concrete evaluation of this extension, we use
+nginx and curl with minor modifications to use our \ac{tls} extension.
 
-To measure the performance of the browser as it established connections with
-different sites, we constructed sample sets of domain names based on five
-parameters:
+Additionally, we constructed sample sets of domain names based
+on four parameters:
 \begin{inparaenum}
-\item the client's value of \numlas,
-\item whether or not the domain deployed HTTPS,
-\item if the domain deployed HTTPS, the number of certificates it had (\policy),
-\item the distribution of certificate size for that domain name, and
-\item whether or not the result of querying the domain name in the signaling set
-  was cached by the browser.
+\item the number of proofs requested by the client (\numlas) during the ClientHello message,
+\item the number of certificate chains the server \bryan{which server?} \jay{isn't it clear from the fact that we have written a TLS extension, that we are talking about the server that the user is trying to establish a connection to?} sends (\policy) during the ServerHello message,
+\item the average number of certificates per chain, and
+\item the average size of each certificate chain.
 \end{inparaenum}
-We specifically measured the amount of extra data sent in the \ac{name}
-handshake, the combined latency of the query and handshake, \steve{and the
-  memory used by the browser}. We also compared our approach to Smart HTTPS, a
-  browser extension that attempts to connect to all sites over HTTPS first, and
-  only falls back to HTTP if connection establishment with HTTPS fails.
+While varying each of these parameters, we measured the amount of
+extra data sent in the \ac{name} handshake, and the latency of
+handshake both with and without
+\bryan{A bit unclear, given that most params don't apply. Need to more precisely define the baseline.} \jay{Not sure I understand}
+the \ac{name} \ac{tls} extension. We
+tested this both over the internet (by connecting to a virtual private server \jay{with latency varying between 30 to 300 ms, based upon network conditions}, referred to as \emph{hophop}), as well as over the local loopback
+interface (referred to as \emph{localhost}) \bryan{why is the local loopback one interesting?}.
+\jay{[TODO: Restructure this] The tests over the internet to \emph{hophop} provide an indication of the effect of the extension on ``real world'' servers, which are usually accessed over WAN, whereas the \emph{localhost} tests provide a lower bound on time added due to sending/receiving/processing extra data.}
+A total of 15385 TLS connections were established for our testing \jay{5768 over hophop, 9617 over localhost}.
 
-\steve{Fig. XX(a)-(c)} shows the results for the various configurations we
-tested. \steve{Different observations about how much caching helps, realistic
-  estimate of how much extra time we're looking at, and a comparison with Smart
-  HTTPS, which always tries HTTPS and falls back to HTTP.}
+Our results, shown in Figure~\ref{fig:evaltlsext}, show that in
+comparison to the mean time elapsed, there is an approximately 5\%
+increase in connection establishment time \jay{For hophop, we get an
+  additional 11ms on average; for localhost, we get an additional
+  1.2ms}.
+%
+However, since our \ac{tls} extension does not add any extra
+round-trips to the handshake, the time added is small, especially in
+comparison to random measurement fluctuations, when we look at
+confidence intervals within one standard deviation from the mean
+(shown as error bars in Figure~\ref{fig:evaltlsext}).
+
+The extra data sent in the \ac{name} handshake is directly dependent
+on the size and number of certificate chains, as well as the number of
+proofs sent. In particular, the extra data sent from client to server
+is 1 byte, and the extra data sent from server to client is
+$(2 + (292 \times \text{\#proofs}) +
+(\sum_{\text{chain}}\texttt{sizeof}(\text{chain})))$ bytes. \jay{Here,
+  the chains can be serialized using whichever serialization format is
+  preferred. For simplicity in implementation, we used PEM.}
 
 %\subsection{Log Aggregator}
 
