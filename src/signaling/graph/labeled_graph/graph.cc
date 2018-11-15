@@ -95,7 +95,6 @@ const LabeledGraph::LabelMap& LabeledGraph::get_label_counts() const
 
 void LabeledGraph::set_accept(Node* node, bool accept)
 {
-  std::cerr << "set_accept: " << node << std::endl;
   if (node == nullptr || nodes_.find(node) == nodes_.end()) {
     return;
   }
@@ -115,10 +114,8 @@ LabeledGraph::NodeHandle LabeledGraph::add_node(Node* source,
 
 void LabeledGraph::remove_node(Node* node)
 {
-  std::cerr << "remove_node: " << node << std::endl;
   // Only remove a node if it is in the graph.
   if (node == nullptr || !has_node(node)) {
-    std::cerr << "  remove_node: null or non-member" << std::endl;
     return;
   }
 
@@ -128,8 +125,6 @@ void LabeledGraph::remove_node(Node* node)
     in_edges.emplace_back(in_edge);
   }
   for (const auto& [label, parent]: in_edges){
-    std::cerr << "  remove_node: remove edge " << label << " from " << parent
-              << std::endl;
     remove_edge(parent, label);
   }
 
@@ -138,11 +133,8 @@ void LabeledGraph::remove_node(Node* node)
     out_labels.emplace_back(out_edge);
   }
   for (const auto& [label, child]: out_labels) {
-    std::cerr << "  remove_node: remove edge " << label << " to " << child
-              << std::endl;
     remove_edge(node, label);
     if (child->get_in_degree() == 0) {
-      std::cerr << "  remove_node: recursing" << std::endl;
       remove_node(child);
     }
   }
@@ -153,34 +145,26 @@ void LabeledGraph::remove_node(Node* node)
 void LabeledGraph::add_edge(Node* source, Node* destination,
                             const std::string& label)
 {
-  std::cerr << "add_edge: " << source << ", " << destination << ", " << label
-            << std::endl;
   // If either the source or destination are not in the graph, do nothing.
   if (source == nullptr || destination == nullptr) {
-    std::cerr << "Can't create edge with null pointer" << std::endl;
     return;
   }
   if (nodes_.find(source) == nodes_.end()) {
-    std::cerr << "Source " << source << " not in node set" << std::endl;
     return;
   }
   if (nodes_.find(destination) == nodes_.end()) {
-    std::cerr << "Dest " << destination << " not in node set" << std::endl;
     return;
   }
   // If the outgoing label exists at the source, remove it to ensure that the
   // destination of that edge is updated correctly.
   Node* existing_child = nullptr;
   if (source->has_out_label(label)) {
-    std::cerr << "Removing existing label " << label << " from " << source
-              << std::endl;
     existing_child = source->follow_out_edge(label);
     remove_edge(source, label);
   }
   source->add_out_edge(label, destination);
   destination->add_in_edge(label, source);
   if (existing_child != nullptr && existing_child->get_in_degree() == 0) {
-    std::cerr << "add_edge: remove displaced child node" << std::endl;
     remove_node(existing_child);
   }
   // Update the number of edges, since it has to be done manually.
@@ -202,19 +186,14 @@ void LabeledGraph::remove_edge(Node* source, const std::string& label)
 {
   // Do nothing if the source is null or does not have the label.
   if (source == nullptr || !has_node(source)) {
-    std::cerr << "  remove_edge: null or non-member source" << std::endl;
     return;
   }
 
   // Remove the edge from both incident nodes' edge maps.
   auto dest = source->follow_out_edge(label);
   if (dest == nullptr || !has_node(dest)) {
-    std::cerr << "  remove_edge: null or non-member dest" << std::endl;
     return;
   }
-
-  std::cerr << "remove_edge: " << source << ", " << dest << ", " << label
-            << std::endl;
 
   remove_raw_edge(source, dest, label);
 }
@@ -222,7 +201,6 @@ void LabeledGraph::remove_edge(Node* source, const std::string& label)
 LabeledGraph::NodeHandle LabeledGraph::add_unattached_node()
 {
   auto new_node = new Node;
-  std::cerr << "add_unattached_node: " << new_node << std::endl;
   nodes_.emplace(new_node);
   return new_node;
 }
@@ -230,7 +208,6 @@ LabeledGraph::NodeHandle LabeledGraph::add_unattached_node()
 void LabeledGraph::remove_raw_node(Node* node)
 {
   if (!has_node(node)) {
-    std::cerr << "remove_raw_node: non-member node" << std::endl;
     return;
   }
   if (node->get_accept()) {
@@ -245,20 +222,7 @@ void LabeledGraph::remove_raw_edge(Node* source, Node* dest,
                                    const std::string& label)
 {
   if (source == nullptr || dest == nullptr) {
-    std::cerr << "remove_raw_edge: incident node is null" << std::endl;
     return;
-  }
-  if (!has_node(source)) {
-    std::cerr << "remove_raw_edge: non-member source node" << std::endl;
-  }
-  if (!has_node(dest)) {
-    std::cerr << "remove_raw_edge: non-member dest node" << std::endl;
-  }
-  if(!source->has_out_edge(label, dest)) {
-    std::cerr << "remove_raw_edge: out-edge not found" << std::endl;
-  }
-  if(!dest->has_in_edge(label, source)) {
-    std::cerr << "remove_raw_edge: in-edge not found" << std::endl;
   }
   if (has_node(source) && source->has_out_edge(label, dest)) {
     remove_raw_out_edge(source, label);
@@ -276,8 +240,6 @@ void LabeledGraph::remove_raw_edge(Node* source, Node* dest,
 void LabeledGraph::remove_raw_in_edge(Node* node, Node* parent,
                                       const std::string& label)
 {
-  std::cerr << "remove_raw_in_edge: " << parent << ", " << node << ", " << label
-            << std::endl;
   node->remove_in_edge(label, parent);
   --dest_counts_[node];
   if (dest_counts_[node] == 0) {
@@ -287,8 +249,6 @@ void LabeledGraph::remove_raw_in_edge(Node* node, Node* parent,
 
 void LabeledGraph::remove_raw_out_edge(Node* node, const std::string& label)
 {
-  std::cerr << "remove_raw_out_edge: " << node << ", " << label
-            << std::endl;
   node->remove_out_edge(label);
   --source_counts_[node];
   if (source_counts_[node] == 0) {

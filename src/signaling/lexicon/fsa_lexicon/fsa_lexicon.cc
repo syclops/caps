@@ -52,10 +52,8 @@ void FSALexicon::add_file(std::istream& instream)
 
 void FSALexicon::add_string(const std::string& str)
 {
-  std::cerr << "******************************add_string: " << str << std::endl;
   // If the string is already in the lexicon, do nothing.
   if (has_string(str)) {
-    std::cerr << "add_string: string already present" << std::endl;
     return;
   }
 
@@ -65,7 +63,6 @@ void FSALexicon::add_string(const std::string& str)
     // If the current node does not have an edge labeled c, replace nodes
     // starting from the current node and add a new outgoing edge.
     if (!current_node->has_out_label(char_label)) {
-      std::cerr << " add_string: branching at " << current_node << std::endl;
       if (current_node->get_out_degree() > 0) {
         replace_or_register(current_node);
       }
@@ -75,7 +72,6 @@ void FSALexicon::add_string(const std::string& str)
     }
 
     // Advance the node by following the appropriate edge.
-    std::cerr << " add_string: following " << char_label << std::endl;
     current_node = current_node->follow_out_edge(char_label);
   }
 
@@ -208,10 +204,6 @@ void FSALexicon::compact()
 
       // Delete the marked edges from the graph.
       for (const auto& [source, label]: deletion_list) {
-        if (!graph_.has_node(source)) {
-          std::cerr << "compact: delete marked edge from non-member"
-                    << std::endl;
-        }
         graph_.remove_edge(source, label);
       }
     }
@@ -235,7 +227,6 @@ void FSALexicon::compact_long_edges()
                       label);
     }
     for (const auto& node: component.nodes()) {
-      std::cerr << "compact_long_edges: remove node" << std::endl;
       graph_.remove_node(const_cast<Node*>(node));
     }
   }
@@ -296,17 +287,13 @@ void FSALexicon::set_accept(Node* node, bool accept)
 
 void FSALexicon::replace_or_register(Node* node)
 {
-  std::cerr << "replace_or_register " << node << std::endl;
   // If the child node with the lexicographically last label itself has child
   // nodes, then replace or register those nodes first.
   auto last_child = node->get_out_edges().crbegin();
   // Copy the label and child node pointer because the label will get deleted
   // if the child node is replaced.
   auto [child_label, child_node] = *last_child;
-  std::cerr << "  replace_or_register: checking edge " << child_label
-            << std::endl;
   if (child_node->get_out_degree() > 0) {
-    std::cerr << "  replace_or_register: recursing" << std::endl;
     replace_or_register(child_node);
   }
 
@@ -314,8 +301,6 @@ void FSALexicon::replace_or_register(Node* node)
   // If an equivalent node is found but it is not the child node, then replace
   // the child node. Otherwise, add the child node to the register.
   if (registered_node != register_.end() && child_node != *registered_node) {
-    std::cerr << "  replace_or_register: replace " << child_node << " with "
-              << *registered_node << std::endl;
     graph_.remove_node(child_node);
     edit_node(node,
               [&, child_label=child_label](Node* source_node) {
@@ -323,8 +308,6 @@ void FSALexicon::replace_or_register(Node* node)
                   child_label);
               });
   } else {
-    std::cerr << "  replace_or_register: register node " << child_node
-              << std::endl;
     register_.insert(child_node);
   }
 }
