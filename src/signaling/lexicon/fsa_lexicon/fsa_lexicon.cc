@@ -47,7 +47,7 @@ void FSALexicon::add_file(std::istream& instream)
 {
   Lexicon::add_file(instream);
   replace_or_register(graph_.get_root());
-  register_ = {};
+  FSALexicon::Register{}.swap(register_);
 }
 
 void FSALexicon::add_string(const std::string& str)
