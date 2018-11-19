@@ -157,7 +157,7 @@ class FSAEncoder
     BitVectorType buffer;
     buffer.push_back(node->get_accept());
     for (const auto& [label, parent]: node->get_out_edges()) {
-      auto edge_encoding = encode_edge(node, parent, label);
+      auto&& edge_encoding = encode_edge(node, parent, label);
       buffer.push_back(*edge_encoding);
     }
     return buffer;

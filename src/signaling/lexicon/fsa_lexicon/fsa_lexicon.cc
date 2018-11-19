@@ -126,17 +126,25 @@ std::set<std::string> FSALexicon::dump_strings() const
   return visitor->get_result();
 }
 
-void FSALexicon::compact()
+void FSALexicon::compact(size_t level)
 {
+  if (level == 0) {
+    return;
+  }
+
   // Compact long paths of 1-in, 1-out nodes.
   compact_long_edges();
 
+  if(level < 2) {
+    return;
+  }
+
   // Select all nodes that have an in-degree or out-degree of 1 and are not the
   // source or sink node.
-  auto select_candidate = [](const Node* node) {
+  auto select_candidate = [level](const Node* node) {
       return !node->get_accept()
              && node->get_in_degree() > 0 && node ->get_out_degree() > 0
-             && node->get_in_degree() < 3 && node->get_out_degree() < 3
+             && node->get_in_degree() < level && node->get_out_degree() < level
              && (node->get_in_degree() == 1 || node->get_out_degree() == 1);
   };
 
@@ -222,12 +230,16 @@ void FSALexicon::compact_long_edges()
     }
   }
   for (const auto& component: make_connected_components(candidates)) {
+    std::cerr << "component!" << std::endl;
     for (const auto& [source, dest, label]: get_transitive_paths(component)) {
+      std::cerr << source << ", " << dest << ", " << label << std::endl;
       graph_.add_edge(const_cast<Node*>(source), const_cast<Node*>(dest),
                       label);
     }
     for (const auto& node: component.nodes()) {
-      graph_.remove_node(const_cast<Node*>(node));
+      if (graph_.has_node(const_cast<Node*>(node))) {
+        graph_.remove_node(const_cast<Node*>(node));
+      }
     }
   }
 }

@@ -39,6 +39,7 @@ make_connected_components(ConnectedComponent::NodeSet nodes)
     while (!queue.empty()) {
       auto node = queue.front();
       queue.pop();
+      component.insert(node);
 
       for (const auto& [label, parent]: node->get_in_edges()) {
         // Skip if the parent is already in the component or upstream set. No

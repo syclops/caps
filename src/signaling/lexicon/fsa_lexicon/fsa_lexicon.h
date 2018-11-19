@@ -54,7 +54,7 @@ class FSALexicon: public Lexicon
 
   void dump(std::ostream& outstream) const override;
 
-  void compact();
+  void compact(size_t level);
 
   void compact_long_edges();
 

@@ -409,6 +409,58 @@ TEST_F(GoogleLexicon, AddString7)
   EXPECT_EQ(7, label_map.at("."));
 }
 
+TEST_F(GoogleLexicon, AddAllStrings)
+{
+  std::stringstream stream;
+  for (const auto& str: domains_) {
+    stream << str << std::endl;
+  }
+  lexicon_.add_file(stream);
+  EXPECT_EQ(39, lexicon_.get_graph().get_num_nodes());
+  EXPECT_EQ(42, lexicon_.get_graph().get_num_edges());
+  EXPECT_EQ(2, lexicon_.get_graph().get_num_accept());
+  EXPECT_TRUE(lexicon_.get_register().empty());
+  const auto& label_map = lexicon_.get_graph().get_label_counts();
+  EXPECT_EQ(2, label_map.at("a"));
+  EXPECT_EQ(2, label_map.at("c"));
+  EXPECT_EQ(3, label_map.at("e"));
+  EXPECT_EQ(6, label_map.at("g"));
+  EXPECT_EQ(1, label_map.at("h"));
+  EXPECT_EQ(1, label_map.at("i"));
+  EXPECT_EQ(1, label_map.at("k"));
+  EXPECT_EQ(4, label_map.at("l"));
+  EXPECT_EQ(2, label_map.at("m"));
+  EXPECT_EQ(8, label_map.at("o"));
+  EXPECT_EQ(1, label_map.at("u"));
+  EXPECT_EQ(4, label_map.at("w"));
+  EXPECT_EQ(7, label_map.at("."));
+}
+
+TEST_F(GoogleLexicon, AddAndCompress)
+{
+  std::stringstream stream;
+  for (const auto& str: domains_) {
+    stream << str << std::endl;
+  }
+  lexicon_.add_file(stream);
+  lexicon_.compact_long_edges();
+  EXPECT_EQ(8, lexicon_.get_graph().get_num_nodes());
+  EXPECT_EQ(11, lexicon_.get_graph().get_num_edges());
+  EXPECT_EQ(2, lexicon_.get_graph().get_num_accept());
+  EXPECT_TRUE(lexicon_.get_register().empty());
+  const auto& label_map = lexicon_.get_graph().get_label_counts();
+  EXPECT_EQ(1, label_map.at("a.google."));
+  EXPECT_EQ(1, label_map.at("c"));
+  EXPECT_EQ(1, label_map.at("h"));
+  EXPECT_EQ(1, label_map.at("mail"));
+  EXPECT_EQ(1, label_map.at("om"));
+  EXPECT_EQ(2, label_map.at("w"));
+  EXPECT_EQ(1, label_map.at("ww"));
+  EXPECT_EQ(1, label_map.at("."));
+  EXPECT_EQ(1, label_map.at("uk.co.google"));
+  EXPECT_EQ(1, label_map.at(".google."));
+}
+
 //class NodeHashTest: public testing::Test
 //{
 // protected:
