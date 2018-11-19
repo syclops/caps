@@ -188,7 +188,7 @@ int main(int argc, char* argv[])
 
   if (parsed.path_compact) {
     FunctionTimer<void, FSALexicon&> compact_timer([](FSALexicon& lexicon) {
-      lexicon.compact(0);
+      lexicon.compact(3);
     });
     std::cout << "Compacting lexicon..." << std::flush;
     compact_timer.run(lexicon);
