@@ -16,7 +16,7 @@
 // Include headers from other projects.
 
 Node::Node()
-  : accept_{false}, in_edges_{}, out_edges_{}
+  : in_edges_{}, out_edges_{}, accept_{false}
 {
   // Nothing to do here.
 }

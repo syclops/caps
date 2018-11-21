@@ -51,10 +51,10 @@ class TransitivePathVisitor: public ConstEdgeVisitor<OutEdgeTraits>
 
  private:
 
-  NodeHandle source_;
-  const ConnectedComponent& component_;
   std::vector<Path> paths_;
   std::unordered_map<NodeHandle, std::set<std::string>> transitive_paths_;
+  NodeHandle source_;
+  const ConnectedComponent& component_;
 
 };
 

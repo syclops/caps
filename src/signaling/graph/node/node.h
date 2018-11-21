@@ -170,9 +170,9 @@ class Node
   ReverseIterable<OutEdgeSet> get_reverse_out_edges() const;
 
  private:
-  bool accept_;
   InEdgeSet in_edges_;
   OutEdgeSet out_edges_;
+  bool accept_;
 };
 
 /**

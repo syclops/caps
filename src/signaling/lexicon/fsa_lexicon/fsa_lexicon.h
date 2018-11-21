@@ -40,6 +40,16 @@ class FSALexicon: public Lexicon
 
   FSALexicon();
 
+  FSALexicon(const FSALexicon&) = delete;
+
+  FSALexicon(FSALexicon&&) = default;
+
+  FSALexicon& operator=(const FSALexicon&) = delete;
+
+  FSALexicon& operator=(FSALexicon&&) = default;
+
+  ~FSALexicon() = default;
+
   //////////////////////////////////////////////////////////////////////////////
   // Operations
   //////////////////////////////////////////////////////////////////////////////

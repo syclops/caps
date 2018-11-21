@@ -18,6 +18,8 @@
 #include "../coder/string_coder.h"
 #include "../coder/binary_coder.h"
 
+// TODO: add enum to represent different encoding strategies.
+
 /**
  * Base class for a generic FSA encoder.
  *

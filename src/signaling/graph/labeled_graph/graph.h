@@ -129,14 +129,14 @@ class LabeledGraph
 
   void remove_raw_out_edge(Node* node, const std::string& label);
 
-  Node* root_;
-  size_t num_accept_;
-  size_t num_edges_;
-  bool compacted_;
   NodeSet nodes_;
   NodeMap source_counts_;
   NodeMap dest_counts_;
   LabelMap label_counts_;
+  Node* root_;
+  size_t num_accept_;
+  size_t num_edges_;
+  bool compacted_;
 
 };
 

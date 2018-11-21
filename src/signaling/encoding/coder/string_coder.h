@@ -113,8 +113,8 @@ class StringCoder: public Coder<StringType, EncodingType>
 
  private:
 
-  constexpr static char LAST_CHAR_BIT = static_cast<char>(0x80);
   const CharCoder<EncodingType> char_coder_;
+  constexpr static char LAST_CHAR_BIT = static_cast<char>(0x80);
 
 };
 

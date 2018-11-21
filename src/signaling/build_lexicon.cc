@@ -12,7 +12,6 @@
 #include "common/measure_time.h"
 #include "encoding/fsa_encoder/fsa_encoder.h"
 #include "encoding/fsa_encoder/fsa_huffman_encoder.h"
-#include "encoding/fsa_encoder/fsa_huffman_encoder.h"
 #include "encoding/bitvector_io.h"
 
 #include <cxxopts.hpp>

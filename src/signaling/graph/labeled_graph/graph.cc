@@ -15,15 +15,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 LabeledGraph::LabeledGraph()
-  : root_{new Node}, num_accept_{0}, num_edges_{0}, compacted_{false}, nodes_{},
-    source_counts_{}, dest_counts_{}, label_counts_{}
+  : nodes_{}, source_counts_{}, dest_counts_{}, label_counts_{},
+    root_{new Node}, num_accept_{0}, num_edges_{0}, compacted_{false}
 {
   nodes_.emplace(root_);
 }
 
 LabeledGraph::LabeledGraph(const LabeledGraph& orig)
-  : root_{nullptr}, num_accept_{0}, num_edges_{0}, compacted_{false}, nodes_{},
-    source_counts_{}, dest_counts_{}, label_counts_{}
+  : nodes_{}, source_counts_{}, dest_counts_{}, label_counts_{}, root_{nullptr},
+    num_accept_{0}, num_edges_{0}, compacted_{false}
 {
   // Create a translation table of node pointers from the original graph.
   std::unordered_map<Node*, Node*> node_table;
