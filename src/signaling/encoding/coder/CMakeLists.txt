@@ -3,16 +3,13 @@
 
 add_library(coder INTERFACE)
 target_sources(coder INTERFACE ${CMAKE_CURRENT_LIST_DIR}/coder.h)
-target_link_libraries(coder
-    INTERFACE bitvector
-)
 
 add_library(signed_int_coder INTERFACE)
 target_sources(signed_int_coder
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}/signed_int_coder.h
 )
 target_link_libraries(signed_int_coder
-    INTERFACE coder bitvector
+    INTERFACE coder
 )
 
 add_library(unary_coder INTERFACE)
@@ -30,13 +27,13 @@ target_link_libraries(binary_coder
 add_library(gamma_coder INTERFACE)
 target_sources(gamma_coder INTERFACE ${CMAKE_CURRENT_LIST_DIR}/gamma_coder.h)
 target_link_libraries(gamma_coder
-    INTERFACE coder bitvector unary_coder binary_coder
+    INTERFACE coder unary_coder binary_coder
 )
 
 add_library(delta_coder INTERFACE)
 target_sources(delta_coder INTERFACE ${CMAKE_CURRENT_LIST_DIR}/delta_coder.h)
 target_link_libraries(delta_coder
-    INTERFACE coder bitvector gamma_coder binary_coder
+    INTERFACE coder gamma_coder binary_coder
 )
 
 add_library(char_coder INTERFACE)
@@ -56,5 +53,5 @@ target_sources(huffman_coder
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}/huffman_coder.h
 )
 target_link_libraries(huffman_coder
-    INTERFACE coder binary_coder
+    INTERFACE coder delta_coder string_coder
 )

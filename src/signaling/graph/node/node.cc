@@ -11,7 +11,6 @@
 #include <string>
 
 // Include other headers from this project.
-#include "../../common/contains.h"
 
 // Include headers from other projects.
 
@@ -38,7 +37,7 @@ size_t Node::get_out_degree() const noexcept
 
 bool Node::has_in_edge(const Label& label, Node* source) const
 {
-  return contains(in_edges_, std::make_pair(label, source));
+  return in_edges_.find(std::make_pair(label, source)) != in_edges_.end();
 }
 
 bool Node::has_out_edge(const Label& label, const Node* target) const

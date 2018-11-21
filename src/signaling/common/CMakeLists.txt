@@ -1,14 +1,11 @@
 # CAPS Common Utilities Configuration
 # Author: Steve Matsumoto <stephanos.matsumoto@sporic.me>
 
-add_library(contains INTERFACE)
-target_sources(contains INTERFACE ${CMAKE_CURRENT_LIST_DIR}/contains.h)
+add_library(defs INTERFACE)
+target_sources(defs INTERFACE ${CMAKE_CURRENT_LIST_DIR}/defs.h)
 
 add_library(compare INTERFACE)
 target_sources(compare INTERFACE ${CMAKE_CURRENT_LIST_DIR}/compare.h)
-
-add_library(hash INTERFACE)
-target_sources(hash INTERFACE ${CMAKE_CURRENT_LIST_DIR}/hash.h)
 
 add_library(io_option INTERFACE)
 target_sources(io_option INTERFACE ${CMAKE_CURRENT_LIST_DIR}/io_option.h)
@@ -27,5 +24,10 @@ target_sources(pointer_comparator
 add_library(reverse_iterable INTERFACE)
 target_sources(reverse_iterable INTERFACE ${CMAKE_CURRENT_LIST_DIR}/iterable.h)
 
+# The following is only used for debugging type information and should not be
+# included in any production code.
 add_library(type_debug INTERFACE)
 target_sources(type_debug INTERFACE ${CMAKE_CURRENT_LIST_DIR}/type_debug.h)
+
+add_subdirectory(bitvector)
+

@@ -14,7 +14,7 @@
 
 // Include other headers from this project.
 #include "coder.h"
-#include "../bitvector/bitvector.h"
+#include "../../common/bitvector/bitvector.h"
 
 // Include headers from other projects.
 

@@ -6,7 +6,8 @@ add_library(connected_component
     connected_component.cc
 )
 target_link_libraries(connected_component
-    PUBLIC node
+    PUBLIC node visitor
+    PRIVATE graph_search
 )
 
 add_library(transitive_path_visitor

@@ -7,9 +7,10 @@
 #include <fstream>
 #include <utility>
 
-#include "lexicon/fsa_lexicon/fsa_lexicon.h"
 #include "common/io_option.h"
 #include "common/measure_time.h"
+#include "common/bitvector/bitvector.h"
+#include "lexicon/fsa_lexicon/fsa_lexicon.h"
 #include "encoding/fsa_encoder/fsa_encoder.h"
 #include "encoding/fsa_encoder/fsa_huffman_encoder.h"
 #include "encoding/bitvector_io.h"

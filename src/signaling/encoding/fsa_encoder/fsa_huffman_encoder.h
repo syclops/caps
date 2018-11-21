@@ -10,7 +10,9 @@
 #include <string>
 
 // Include other headers from this project.
+#include "../../graph/labeled_graph/graph.h"
 #include "../../lexicon/fsa_lexicon/fsa_lexicon.h"
+#include "../coder/coder.h"
 #include "../coder/huffman_coder.h"
 #include "../coder/signed_int_coder.h"
 #include "fsa_encoder.h"

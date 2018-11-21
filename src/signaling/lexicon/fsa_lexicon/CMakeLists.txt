@@ -17,13 +17,15 @@ add_library(accept_string_visitor accept_string_visitor.h
     accept_string_visitor.cc
 )
 target_link_libraries(accept_string_visitor
-    PUBLIC node visitor
+    PUBLIC node
+    INTERFACE visitor
 )
 
 add_library(fsa_lexicon fsa_lexicon.h fsa_lexicon.cc)
 target_link_libraries(fsa_lexicon
-    PUBLIC node graph visitor accept_string_visitor
-    INTERFACE lexicon node_right_language
-    PRIVATE contains powerset connected_component
-            connected_component_utils graph_search
+    PUBLIC lexicon node_right_language
+    INTERFACE node visitor graph
+    PRIVATE powerset bitvector connected_component connected_component_utils
+            graph_search accept_string_visitor
+
 )

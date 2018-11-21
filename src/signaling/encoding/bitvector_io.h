@@ -13,7 +13,7 @@
 #include <iostream>
 
 // Include other headers from this project.
-#include "bitvector/bitvector.h"
+#include "../common/bitvector/bitvector.h"
 #include "coder/char_coder.h"
 
 // Include headers from other projects.

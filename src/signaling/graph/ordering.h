@@ -5,12 +5,14 @@
 #ifndef CAPS_ORDERING_H
 #define CAPS_ORDERING_H
 
+// Include C++ standard libraries.
 #include <functional>
 #include <unordered_set>
 
-#include "labeled_graph/graph.h"
-#include "node/node.h"
+// Include other headers from this project.
 #include "../common/iterable.h"
+#include "node/node.h"
+#include "labeled_graph/graph.h"
 
 namespace {
   using NodeHandle = const Node*;

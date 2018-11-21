@@ -15,8 +15,8 @@
 // Include other headers from this project.
 #include "char_coder.h"
 #include "coder.h"
-#include "../defs.h"
-#include "../bitvector/bitvector.h"
+#include "../../common/defs.h"
+#include "../../common/bitvector/bitvector.h"
 
 // Include headers from other projects.
 template <typename StringType = std::string,

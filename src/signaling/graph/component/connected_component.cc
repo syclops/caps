@@ -17,7 +17,6 @@
 #include <vector>
 
 // Include other header files from this project.
-#include "../../common/contains.h"
 #include "../traversal/graph_search.h"
 
 ConnectedComponent::ConnectedComponent(ConnectedComponent::NodeSet nodes)

@@ -16,11 +16,10 @@
 #include <unordered_map>
 
 // Include other headers from this project.
-#include "../lexicon.h"
 #include "../../graph/node/node.h"
-#include "../../graph/labeled_graph/graph.h"
 #include "../../graph/visitor/visitor.h"
-#include "../../common/contains.h"
+#include "../../graph/labeled_graph/graph.h"
+#include "../lexicon.h"
 #include "node_right_language.h"
 
 /**

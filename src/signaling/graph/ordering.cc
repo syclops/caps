@@ -2,10 +2,11 @@
 // Created by smaptas on 09/14/18.
 //
 
-#include <unordered_set>
-
+// Include header file.
 #include "ordering.h"
-#include "../common/contains.h"
+
+// Include C++ standard libraries.
+#include <unordered_set>
 
 ReverseIterable<Order> topological_order(const LabeledGraph& graph)
 {

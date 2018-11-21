@@ -3,11 +3,10 @@
 #include "graph.h"
 
 // Include C++ standard libraries.
+#include <set>
 #include <unordered_set>
 
 // Include other headers from this project.
-#include "../../common/contains.h"
-#include "../../common/hash.h"
 #include "../../common/type_debug.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -304,7 +303,7 @@ bool operator==(const LabeledGraph& lhs, const LabeledGraph& rhs)
          ++lhs_edge_itr, ++rhs_edge_itr) {
 
       // Add a pair of newly-visited nodes to the isomorphism table
-      if (!contains(node_table, lhs_edge_itr->second)) {
+      if (node_table.find(lhs_edge_itr->second) == node_table.end()) {
         node_table.emplace(lhs_edge_itr->second, rhs_edge_itr->second);
         queue.emplace(lhs_edge_itr->second, rhs_edge_itr->second);
       }

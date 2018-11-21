@@ -21,9 +21,8 @@
 #include <vector>
 
 // Include other headers from this project.
-#include "../../common/contains.h"
 #include "../../common/powerset.h"
-#include "../../encoding/bitvector/bitvector.h"
+#include "../../common/bitvector/bitvector.h"
 #include "../../graph/component/connected_component.h"
 #include "../../graph/component/connected_component_utils.h"
 #include "../../graph/traversal/graph_search.h"

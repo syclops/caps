@@ -10,11 +10,10 @@
 #include <memory>
 
 // Include other headers from this projects.
-#include "../../common/contains.h"
 #include "../../common/compare.h"
+#include "../../common/bitvector/bitvector.h"
 #include "../../graph/ordering.h"
 #include "../../lexicon/fsa_lexicon/fsa_lexicon.h"
-#include "../bitvector/bitvector.h"
 #include "../coder/string_coder.h"
 #include "../coder/binary_coder.h"
 
