@@ -38,9 +38,9 @@ void TransitivePathVisitor::finish()
 
 void TransitivePathVisitor::visit_node(const Node* node)
 {
-  std::cerr << "visit " << node << std::endl;
+//  std::cerr << "visit " << node << std::endl;
   if (node != nullptr && source_ == nullptr) {
-    std::cerr << "set source" << std::endl;
+//    std::cerr << "set source" << std::endl;
     source_ = node;
     transitive_paths_[source_].emplace();
   }
@@ -50,12 +50,12 @@ void TransitivePathVisitor::visit_edge(const Node* source,
                                        const Node* destination,
                                        const std::string& label)
 {
-  std::cerr << source << ", " << destination << ", " << label << std::endl;
+//  std::cerr << source << ", " << destination << ", " << label << std::endl;
   if (source == nullptr || destination == nullptr) {
     return;
   }
   for (const auto& path_label: transitive_paths_[source]) {
-    std::cerr << "add " << path_label + label << std::endl;
+//    std::cerr << "add " << path_label + label << std::endl;
     transitive_paths_[destination].emplace(path_label + label);
   }
 }
@@ -68,8 +68,8 @@ bool TransitivePathVisitor::should_visit_edge(const Node* source,
          && (component_.has_node(dest)
              || (component_.has_node(source)
                  && component_.has_downstream_node(dest)));
-  std::cerr << "should" << (b ? "" : "n't") << " visit " << source << ", "
-            << dest << std::endl;
+//  std::cerr << "should" << (b ? "" : "n't") << " visit " << source << ", "
+//            << dest << std::endl;
   return b;
 }
 
