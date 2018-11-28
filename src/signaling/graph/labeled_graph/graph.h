@@ -72,10 +72,6 @@ class LabeledGraph
 
   const NodeSet& get_nodes() const;
 
-  const NodeMap& get_source_counts() const;
-
-  const NodeMap& get_dest_counts() const;
-
   const LabelMap& get_label_counts() const;
 
   bool has_node(Node* node) const;
@@ -125,13 +121,7 @@ class LabeledGraph
 
   void remove_raw_edge(Node* source, Node* dest, const std::string& label);
 
-  void remove_raw_in_edge(Node* node, Node* parent, const std::string& label);
-
-  void remove_raw_out_edge(Node* node, const std::string& label);
-
   NodeSet nodes_;
-  NodeMap source_counts_;
-  NodeMap dest_counts_;
   LabelMap label_counts_;
   Node* root_;
   size_t num_accept_;

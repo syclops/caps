@@ -14,14 +14,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 LabeledGraph::LabeledGraph()
-  : nodes_{}, source_counts_{}, dest_counts_{}, label_counts_{},
+  : nodes_{}, label_counts_{},
     root_{new Node}, num_accept_{0}, num_edges_{0}, compacted_{false}
 {
   nodes_.emplace(root_);
 }
 
 LabeledGraph::LabeledGraph(const LabeledGraph& orig)
-  : nodes_{}, source_counts_{}, dest_counts_{}, label_counts_{}, root_{nullptr},
+  : nodes_{}, label_counts_{}, root_{nullptr},
     num_accept_{0}, num_edges_{0}, compacted_{false}
 {
   // Create a translation table of node pointers from the original graph.
@@ -75,16 +75,6 @@ bool LabeledGraph::get_compacted() const
 const LabeledGraph::NodeSet& LabeledGraph::get_nodes() const
 {
   return nodes_;
-}
-
-const LabeledGraph::NodeMap& LabeledGraph::get_source_counts() const
-{
-  return source_counts_;
-}
-
-const LabeledGraph::NodeMap& LabeledGraph::get_dest_counts() const
-{
-  return dest_counts_;
 }
 
 const LabeledGraph::LabelMap& LabeledGraph::get_label_counts() const
@@ -168,8 +158,6 @@ void LabeledGraph::add_edge(Node* source, Node* destination,
   }
   // Update the number of edges, since it has to be done manually.
   ++num_edges_;
-  ++source_counts_[source];
-  ++dest_counts_[destination];
   ++label_counts_[label];
 }
 
@@ -212,8 +200,6 @@ void LabeledGraph::remove_raw_node(Node* node)
   if (node->get_accept()) {
     --num_accept_;
   }
-  source_counts_.erase(node);
-  dest_counts_.erase(node);
   nodes_.erase(nodes_.find(node));
 }
 
@@ -224,34 +210,15 @@ void LabeledGraph::remove_raw_edge(Node* source, Node* dest,
     return;
   }
   if (has_node(source) && source->has_out_edge(label, dest)) {
-    remove_raw_out_edge(source, label);
+    source->remove_out_edge(label);
   }
   if (has_node(dest) && dest->has_in_edge(label, source)) {
-    remove_raw_in_edge(dest, source, label);
+    dest->remove_in_edge(label, source);
   }
   --num_edges_;
   --label_counts_[label];
   if (label_counts_[label] == 0) {
     label_counts_.erase(label);
-  }
-}
-
-void LabeledGraph::remove_raw_in_edge(Node* node, Node* parent,
-                                      const std::string& label)
-{
-  node->remove_in_edge(label, parent);
-  --dest_counts_[node];
-  if (dest_counts_[node] == 0) {
-    dest_counts_.erase(node);
-  }
-}
-
-void LabeledGraph::remove_raw_out_edge(Node* node, const std::string& label)
-{
-  node->remove_out_edge(label);
-  --source_counts_[node];
-  if (source_counts_[node] == 0) {
-    source_counts_.erase(node);
   }
 }
 
