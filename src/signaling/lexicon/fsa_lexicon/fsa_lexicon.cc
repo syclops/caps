@@ -230,9 +230,9 @@ void FSALexicon::compact_long_edges()
     }
   }
   for (const auto& component: make_connected_components(candidates)) {
-    std::cerr << "component!" << std::endl;
+//    std::cerr << "component!" << std::endl;
     for (const auto& [source, dest, label]: get_transitive_paths(component)) {
-      std::cerr << source << ", " << dest << ", " << label << std::endl;
+//      std::cerr << source << ", " << dest << ", " << label << std::endl;
       graph_.add_edge(const_cast<Node*>(source), const_cast<Node*>(dest),
                       label);
     }
