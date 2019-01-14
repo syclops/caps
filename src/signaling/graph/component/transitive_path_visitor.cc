@@ -31,7 +31,9 @@ void TransitivePathVisitor::finish()
 {
   for (const auto& downstream_node: component_.downstream_nodes()) {
     for (const auto& path_label: transitive_paths_[downstream_node]) {
-      paths_.emplace_back(source_, downstream_node, path_label);
+      if (source_ != downstream_node) {
+        paths_.emplace_back(source_, downstream_node, path_label);
+      }
     }
   }
 }
