@@ -134,6 +134,7 @@ class FSAEncoder
 
   virtual void add_header(BitVectorType& buffer)
   {
+    (void)buffer;
     // TODO
   }
 
