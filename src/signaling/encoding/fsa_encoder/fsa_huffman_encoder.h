@@ -86,6 +86,7 @@ class FSAHuffmanEncoder: public FSAEncoder<BitVectorType>
       for (const auto& [label, child]: source->get_out_edges()) {
         auto diff = FSAEncoder<BitVectorType>::node_to_order_.at(child)
           - FSAEncoder<BitVectorType>::node_to_order_.at(source.get());
+        diff = diff < 0 ? -diff : diff;
         if (diff_counts.find(diff) == diff_counts.end()) {
           diff_counts[diff] = 1;
         } else {
