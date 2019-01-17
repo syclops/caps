@@ -122,8 +122,8 @@ class FSAEncoder
       node_to_order_.emplace(node, static_cast<int>(order_number));
       order_to_node_.emplace(order_number, node);
       stack.pop();
-      for (const auto& [label, parent]: node->get_out_edges()) {
-        queue.emplace(parent, distance_map.at(parent));
+      for (const auto& [label, child]: node->get_out_edges()) {
+        queue.emplace(child, distance_map.at(child));
       }
       while (!queue.empty()) {
         stack.emplace(queue.top().first);
