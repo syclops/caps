@@ -17,6 +17,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -196,24 +197,23 @@ void FSALexicon::compact(size_t level)
                       label);
     }
 
-    // Remove all upstream edges of the component. After this, once the
-    // component goes out of scope, the nodes in it will be removed from the
-    // graph.
-    for (const auto& upstream_node: component.upstream_nodes()) {
+    // Remove all nodes in the component that are immediate children of the
+    // upstream node.
+    std::unordered_set<Node*> deletion_set;
 
-      // Mark any upstream edge for deletion. We do not delete immediately as
-      // that would invalidate the upstream node's out-edge iterators.
+    // Mark all children of upstream nodes for deletion if they are in the
+    // component. We use a set of nodes to be deleted to avoid double-deletion.
+    for (const auto& upstream_node: component.upstream_nodes()) {
       std::vector<std::pair<Node*, std::string>> deletion_list;
       for (const auto& [label, dest]: upstream_node->get_out_edges ()) {
         if (component.has_node(dest)) {
-          deletion_list.emplace_back(const_cast<Node*>(upstream_node), label);
+          deletion_set.emplace(dest);
         }
       }
+    }
 
-      // Delete the marked edges from the graph.
-      for (const auto& [source, label]: deletion_list) {
-        graph_.remove_edge(source, label);
-      }
+    for (const auto& node: deletion_set) {
+      graph_.remove_node(node);
     }
   }
 }
