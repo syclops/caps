@@ -106,6 +106,7 @@ class FSAEncoder
 
     // The DFS explores children by maximum distance from the sink node (desc.)
     auto distance_map = max_distances();
+    std::unordered_set<NodeHandle> visited;
 
     // Populate DFS stack with root node
     std::stack<NodeHandle> stack;
@@ -118,10 +119,16 @@ class FSAEncoder
     // Run the DFS.
     while (!stack.empty()) {
       auto node = stack.top();
+      stack.pop();
+      if (visited.find(node) != visited.end()) {
+        continue;
+      }
       auto order_number = node_to_order_.size();
+      std::cout << "node_to_order_[" << node << "] = " << order_number << std::endl;
       node_to_order_.emplace(node, static_cast<int>(order_number));
       order_to_node_.emplace(order_number, node);
-      stack.pop();
+      visited.emplace(node);
+      
       for (const auto& [label, child]: node->get_out_edges()) {
         queue.emplace(child, distance_map.at(child));
       }
