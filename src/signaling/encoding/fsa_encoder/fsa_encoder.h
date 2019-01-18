@@ -124,7 +124,7 @@ class FSAEncoder
         continue;
       }
       auto order_number = node_to_order_.size();
-      std::cout << "node_to_order_[" << node << "] = " << order_number << std::endl;
+      //std::cout << "node_to_order_[" << node->get_id() << "] = " << order_number << std::endl;
       node_to_order_.emplace(node, static_cast<int>(order_number));
       order_to_node_.emplace(order_number, node);
       visited.emplace(node);
