@@ -7,7 +7,7 @@
 #ifndef CAPS_NODE_H_
 #define CAPS_NODE_H_
 
-#define DEBUG
+//#define DEBUG
 
 // Include C++ standard libraries.
 #include <map>

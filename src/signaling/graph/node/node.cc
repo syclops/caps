@@ -108,7 +108,7 @@ std::string Node::get_id() const
 #ifdef DEBUG
   return std::to_string(id);
 #else
-  return std::to_string(this);
+  return std::to_string((long)this);
 #endif
 }
 
