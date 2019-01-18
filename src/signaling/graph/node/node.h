@@ -7,6 +7,8 @@
 #ifndef CAPS_NODE_H_
 #define CAPS_NODE_H_
 
+#define DEBUG
+
 // Include C++ standard libraries.
 #include <map>
 #include <memory>
@@ -168,6 +170,13 @@ class Node
    * @return
    */
   ReverseIterable<OutEdgeSet> get_reverse_out_edges() const;
+
+#ifdef DEBUG
+  unsigned int id;
+  static unsigned int id_ctr;
+#endif
+
+  std::string get_id() const;
 
  private:
   bool accept_;

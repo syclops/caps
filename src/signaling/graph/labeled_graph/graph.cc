@@ -4,6 +4,7 @@
 
 // Include C++ standard libraries.
 #include <unordered_set>
+#include <fstream>
 
 // Include other headers from this project.
 #include "../../common/contains.h"
@@ -196,6 +197,38 @@ void LabeledGraph::remove_edge(Node* source, const std::string& label)
   }
 
   remove_raw_edge(source, dest, label);
+}
+
+using namespace std;
+void LabeledGraph::print_graph(string filename) const {
+  unordered_set<NodeHandle> visited;
+  stack<NodeHandle> stack;
+  cout << "Writing graph to: " << filename << endl;
+
+  ofstream dot;
+  dot.open(filename);
+
+  stack.emplace(this->get_root());
+  dot << "digraph G {" << endl;
+  while (!stack.empty()) {
+    auto node = stack.top();
+    stack.pop();
+    if (visited.find(node) != visited.end()) {
+      continue;
+    }
+    visited.emplace(node);
+    for (const auto& [label, child]: node->get_out_edges()) {
+      dot << "\tn" << node->get_id() << " -> n" << child->get_id() << "[ label = \"" << label << "\"];" << endl;
+      stack.emplace(child);
+    }
+  }
+  dot << "}";
+  dot.close();
+
+  cout << "nodes_ are:\n";
+  for (auto const &node : nodes_) {
+    cout << "\t" << node->get_id() << ": #in = " << node->get_in_degree() << ", #out = " << node->get_out_degree() << endl;
+  }
 }
 
 LabeledGraph::NodeHandle LabeledGraph::add_unattached_node()

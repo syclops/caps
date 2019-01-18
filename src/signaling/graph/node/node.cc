@@ -19,6 +19,9 @@ Node::Node()
   : accept_{false}, in_edges_{}, out_edges_{}
 {
   // Nothing to do here.
+#ifdef DEBUG
+  id = Node::id_ctr++;
+#endif
 }
 
 bool Node::get_accept() const noexcept
@@ -94,6 +97,19 @@ const std::map<Node::Label, Node*>& Node::get_out_edges() const
 ReverseIterable<Node::InEdgeSet> Node::get_reverse_in_edges() const
 {
   return {in_edges_};
+}
+
+#ifdef DEBUG
+unsigned int Node::id_ctr = 0;
+#endif
+
+std::string Node::get_id() const
+{
+#ifdef DEBUG
+  return std::to_string(id);
+#else
+  return std::to_string(this);
+#endif
 }
 
 ReverseIterable<Node::OutEdgeSet> Node::get_reverse_out_edges() const

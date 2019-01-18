@@ -8,6 +8,7 @@
 #include <string>
 #include <unordered_map>
 #include <queue>
+#include <string>
 
 // Include other header files from this project.
 #include "../node/node.h"
@@ -116,6 +117,8 @@ class LabeledGraph
   NodeHandle add_edge(Node* source, const std::string& label);
 
   void remove_edge(Node* source, const std::string& label);
+
+  void print_graph(std::string filename) const;
 
  private:
 
