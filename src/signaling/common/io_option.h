@@ -33,7 +33,13 @@ auto input_option(FuncType f, const std::string& infile_name, Args... args)
     return f(std::cin, args...);
   } else {
     std::ifstream in_stream(infile_name);
-    return f(in_stream, args...);
+    if (!in_stream.good()) {
+      std::cerr << "\n\nERROR: Invalid input file: " << infile_name << ".  Using standard in instead." << std::endl;
+      return f(std::cin, args...);
+    } else {
+      return f(in_stream, args...);
+    }
+    
   }
 }
 
