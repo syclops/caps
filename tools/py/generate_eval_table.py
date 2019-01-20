@@ -77,7 +77,7 @@ def run_util_test(command_format, output_format, input, param, ext):
     }
     subprocess.run(command_format.format(**command_kwargs).split())
     output_file = output_format.format(**command_kwargs)
-    size = round(os.path.getsize(output_file) / 8e6)
+    size = round(os.path.getsize(output_file) / 1e6)
     os.remove(output_file)
     return size
 
