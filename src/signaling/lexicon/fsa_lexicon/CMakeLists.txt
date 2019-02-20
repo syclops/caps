@@ -17,8 +17,7 @@ target_link_libraries(node_right_language
 
 add_library(fsa_lexicon fsa_lexicon.h fsa_lexicon.cc)
 target_link_libraries(fsa_lexicon
-    PUBLIC node graph visitor accept_string_visitor
-    INTERFACE lexicon node_right_language
+    PUBLIC node graph visitor accept_string_visitor lexicon node_right_language
     PRIVATE contains powerset connected_component
             connected_component_utils graph_search
 )
