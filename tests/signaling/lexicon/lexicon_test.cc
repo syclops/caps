@@ -53,7 +53,7 @@ class LexiconPrefixTest: public LexiconStringTest<LexiconType>
 };
 
 
-TYPED_TEST_CASE(LexiconTest, Implementations);
+TYPED_TEST_SUITE(LexiconTest, Implementations);
 
 TYPED_TEST(LexiconTest, CreateEmptyLexicon)
 {
@@ -69,7 +69,7 @@ TYPED_TEST(LexiconTest, EmptyLexiconsEqual)
 }
 
 
-TYPED_TEST_CASE(LexiconStringTest, Implementations);
+TYPED_TEST_SUITE(LexiconStringTest, Implementations);
 
 TYPED_TEST(LexiconStringTest, AddString)
 {
@@ -97,7 +97,7 @@ TYPED_TEST(LexiconStringTest, AddStringPreservesEqual)
 }
 
 
-TYPED_TEST_CASE(LexiconPrefixTest, Implementations);
+TYPED_TEST_SUITE(LexiconPrefixTest, Implementations);
 
 TYPED_TEST(LexiconPrefixTest, AddString)
 {

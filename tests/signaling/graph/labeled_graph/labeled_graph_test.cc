@@ -10,8 +10,8 @@
 // Include C++ standard libraries.
 
 // Include other headers from this project.
-#include "../../../src/signaling/graph/labeled_graph/graph.h"
-#include "../../../src/signaling/graph/node/node.h"
+#include "../../../../src/signaling/graph/labeled_graph/graph.h"
+#include "../../../../src/signaling/graph/node/node.h"
 
 // Include header from other projects.
 #include "gtest/gtest.h"

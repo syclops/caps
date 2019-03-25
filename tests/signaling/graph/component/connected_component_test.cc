@@ -6,9 +6,9 @@
 #include <set>
 #include <vector>
 
-#include "../../../src/signaling/graph/node/node.h"
-#include "../../../src/signaling/graph/labeled_graph/graph.h"
-#include "../../../src/signaling/graph/component/connected_component.h"
+#include "../../../../src/signaling/graph/node/node.h"
+#include "../../../../src/signaling/graph/labeled_graph/graph.h"
+#include "../../../../src/signaling/graph/component/connected_component.h"
 
 #include "gtest/gtest.h"
 
@@ -162,7 +162,7 @@ TEST(ConnectedComponent, EmptyComponent)
 
 TEST(ConnectedComponent, OneNodeComponent)
 {
-  Node node;
+  auto node = new Node;
   ConnectedComponent::NodeSet nodes;
   nodes.insert(node);
   ConnectedComponent component{nodes};
@@ -171,17 +171,20 @@ TEST(ConnectedComponent, OneNodeComponent)
   EXPECT_EQ(0, component.downstream_size());
   EXPECT_EQ(0, component.num_edges());
   EXPECT_TRUE(component.label_counts().empty());
+  delete node;
 }
 
-void add_edge(Node& source, Node& destination, const std::string& label)
+void add_edge(Node* source, Node* destination, const std::string& label)
 {
-  source.add_out_edge(label, &destination);
-  destination.add_in_edge(label, &source);
+  source->add_out_edge(label, destination);
+  destination->add_in_edge(label, source);
 }
 
 TEST(ConnectedComponent, MiddleNodeComponent)
 {
-  Node parent, middle, child;
+  auto parent = new Node;
+  auto middle = new Node;
+  auto child = new Node;
   const std::string label{"a"};
   add_edge(parent, middle, label);
   add_edge(middle, child, label);
@@ -194,12 +197,18 @@ TEST(ConnectedComponent, MiddleNodeComponent)
   EXPECT_EQ(2, component.num_edges());
   EXPECT_FALSE(component.label_counts().empty());
   EXPECT_EQ(2, component.label_counts().at(label));
+  delete parent;
+  delete middle;
+  delete child;
 }
 
 TEST(ConnectedComponent, ComplexComponent)
 {
   const size_t num_nodes = 12;
-  std::vector<Node> node_list(num_nodes);
+  std::vector<Node*> node_list(num_nodes);
+  for (size_t i = 0; i < num_nodes; ++i) {
+    node_list[i] = new Node;
+  }
   add_edge(node_list[0], node_list[3], "a");
   add_edge(node_list[1], node_list[4], "b");
   add_edge(node_list[2], node_list[4], "c");
@@ -228,4 +237,7 @@ TEST(ConnectedComponent, ComplexComponent)
   EXPECT_TRUE(component.has_downstream_node(node_list[9]));
   EXPECT_TRUE(component.has_downstream_node(node_list[10]));
   EXPECT_TRUE(component.has_downstream_node(node_list[11]));
+  for (size_t i = 0; i < num_nodes; ++i) {
+    delete node_list[i];
+  }
 }

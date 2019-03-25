@@ -9,8 +9,8 @@
 #include <vector>
 
 // Include other headers from this project.
-#include "../../../src/signaling/encoding/integer.h"
-#include "../../../src/signaling/encoding/bitvector/bitvector.h"
+#include "../../../../src/signaling/encoding/integer.h"
+#include "../../../../src/signaling/encoding/bitvector/bitvector.h"
 
 // Include headers from other projects.
 #include "gtest/gtest.h"
