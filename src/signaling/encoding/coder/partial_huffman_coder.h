@@ -30,24 +30,29 @@ public:
 
 	template<typename MapType>
 	explicit PartialHuffmanCoder(const MapType& counts)
-		: encoding_map_{}, decoding_symbols_{}, decoding_indices_{},
-			decoding_codes_{}, max_length_{0}, string_coder_{}
+		: Parent::encoding_map_{}, 
+		  Parent::decoding_symbols_{}, 
+		  Parent::decoding_indices_{},
+		  Parent::decoding_codes_{}, 
+		  Parent::max_length_{0}, 
+		  Parent::string_coder_{}
 	{
 		create_codebook_generic(counts);
 	}
 
 
 protected:
+	using Parent = HuffmanCoder<SymbolType, EncodingType>;
 
 	template <typename MapType>
-	std::shared_ptr<HuffmanNode> make_tree(const MapType& counts)
+	std::shared_ptr<Parent::HuffmanNode> make_tree(const MapType& counts)
 	{
-		using PtrType = std::shared_ptr<HuffmanNode>;
-		std::priority_queue<PtrType, std::vector<PtrType>, HuffmanNodeComp> heap;
+		using PtrType = std::shared_ptr<Parent::HuffmanNode>;
+		std::priority_queue<PtrType, std::vector<PtrType>, Parent::HuffmanNodeComp> heap;
 		for (auto it: counts) {
 			const auto& [symbol, count] = it;
 			if (count == 1){
-				heap.push(std::make_shared<HuffmanNode>(symbol, count));
+				heap.push(std::make_shared<Parent::HuffmanNode>(symbol, count));
 			}
 		}
 		while (heap.size() > 1) {
@@ -55,16 +60,17 @@ protected:
 			heap.pop();
 			auto second = heap.top();
 			heap.pop();
-			heap.push(std::make_shared<HuffmanNode>(first, second));
+			heap.push(std::make_shared<Parent::HuffmanNode>(first, second));
 		}
 		return heap.top();
 	}
 
 	void encode_impl(const SymbolType& value, EncodingType* encoding) const override
 	{
-		if (encoding_map_.find(value)!=encoding_map_.end()){
+		if (Parent::encoding_map_.find(value)
+			!=Parent::encoding_map_.end()){
 			encoding->push_back(true);
-			encoding->push_back(encoding_map_.at(value));
+			encoding->push_back(Parent::encoding_map_.at(value));
 		}else{
 			encoding->push_back(false);
 			encoding->push_back(string_coder_.encode(value));
@@ -75,7 +81,7 @@ protected:
 		const EncodingType& buffer, size_t position) const override
 	{
 		if (buffer[position] == true){
-			return inc_size(HuffmanCoder<SymbolType, EncodingType>::decode_impl(buffer, position+1));
+			return inc_size(Parent::decode_impl(buffer, position+1));
 		}else{
 			return inc_size(string_coder_.decode(buffer, position+1));
 		}
