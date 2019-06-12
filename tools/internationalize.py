@@ -19,9 +19,9 @@ def get_outfile_obj(outfile):
 def read_file(infile, logfile, outfile):
     for line in fileinput.input(infile):
         try:
-            print(line.strip().encode('idna').decode('ascii'), outfile)
+            print(line.lower().strip().encode('idna').decode('ascii'), outfile)
         except UnicodeError:
-            print(line.strip(), logfile)
+            print(line.lower().strip(), logfile)
 
 
 def main():
