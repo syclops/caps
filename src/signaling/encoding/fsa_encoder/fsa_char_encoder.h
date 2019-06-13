@@ -21,7 +21,7 @@ class FSACharEncoder: public FSAEncoder<BitVectorType>
 public:
 	FSACharEncoder() = delete;
 
-	explicit FSAHuffmanEncoder(const FSALexicon& lexicon)
+	explicit FSACharEncoder(const FSALexicon& lexicon)
 		: FSAEncoder<BitVectorType>{lexicon}
 	{
 		auto label_coder = std::make_shared<SmallIntCoder<std::string, BitVectorType>>();
