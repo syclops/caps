@@ -35,7 +35,7 @@ class FSAPartialHuffmanEncoder: public FSAEncoder<BitVectorType>
     FSAEncoder<BitVectorType>::order_nodes();
 
     auto diff_counts = get_ordering_diff_counts(lexicon);
-    auto destination_coder = std::make_shared<PartialHuffmanCoder<int, BitVectorType>>(
+    auto destination_coder = std::make_shared<HuffmanCoder<int, BitVectorType>>(
       diff_counts);
     using DestCoderType = Coder<int, BitVectorType>;
     FSAEncoder<BitVectorType>::destination_coder_ =
@@ -56,7 +56,7 @@ class FSAPartialHuffmanEncoder: public FSAEncoder<BitVectorType>
     using DestAbstractType = Coder<DestType, BitVectorType>;
     using DestCoderType = SignedIntCoder<DestType, BitVectorType>;
     using DestBaseCoderType = DeltaCoder<DestType, BitVectorType>;
-    using DestHuffmanType = PartialHuffmanCoder<DestType, BitVectorType>;
+    using DestHuffmanType = HuffmanCoder<DestType, BitVectorType>;
 
     auto string_coder = std::make_shared<LabelCoderType>();
     auto label_codebook = std::static_pointer_cast<LabelHuffmanType>(

@@ -7,7 +7,7 @@
 #define CAPS_PARTIAL_HUFFMAN_H
 
 // Include C standard libraries. 
-#include <cstdio>
+#include <cstdlib>
 
 // Include C++ standard libraries. 
 #include <optional>
@@ -18,7 +18,6 @@
 
 // Include other headers from this project.
 #include "coder.h"
-#include "delta_coder.h"
 #include "string_coder.h"
 #include "huffman_coder.h"
 
@@ -30,49 +29,23 @@ public:
 
 	template<typename MapType>
 	explicit PartialHuffmanCoder(const MapType& counts)
-		: Parent::encoding_map_{}, 
-		  Parent::decoding_symbols_{}, 
-		  Parent::decoding_indices_{},
-		  Parent::decoding_codes_{}, 
-		  Parent::max_length_{0}, 
-		  Parent::string_coder_{}
+		: HuffmanCoder<SymbolType, EncodingType>(modify_counts<MapType>(counts)), 
+		  string_coder_{}
 	{
-		create_codebook_generic(counts);
+		// Nothing to do here. 
 	}
 
 
 protected:
-	using Parent = HuffmanCoder<SymbolType, EncodingType>;
-
-	template <typename MapType>
-	std::shared_ptr<Parent::HuffmanNode> make_tree(const MapType& counts)
-	{
-		using PtrType = std::shared_ptr<Parent::HuffmanNode>;
-		std::priority_queue<PtrType, std::vector<PtrType>, Parent::HuffmanNodeComp> heap;
-		for (auto it: counts) {
-			const auto& [symbol, count] = it;
-			if (count == 1){
-				heap.push(std::make_shared<Parent::HuffmanNode>(symbol, count));
-			}
-		}
-		while (heap.size() > 1) {
-			auto first = heap.top();
-			heap.pop();
-			auto second = heap.top();
-			heap.pop();
-			heap.push(std::make_shared<Parent::HuffmanNode>(first, second));
-		}
-		return heap.top();
-	}
 
 	void encode_impl(const SymbolType& value, EncodingType* encoding) const override
 	{
-		if (Parent::encoding_map_.find(value)
-			!=Parent::encoding_map_.end()){
-			encoding->push_back(true);
-			encoding->push_back(Parent::encoding_map_.at(value));
+		if (HuffmanCoder<SymbolType, EncodingType>::encoding_map_.find(value)
+			!=HuffmanCoder<SymbolType, EncodingType>::encoding_map_.end()){
+			encoding->push_back(static_cast<EncodingType>(true));
+			encoding->push_back(HuffmanCoder<SymbolType, EncodingType>::encoding_map_.at(value));
 		}else{
-			encoding->push_back(false);
+			encoding->push_back(static_cast<EncodingType>(false));
 			encoding->push_back(string_coder_.encode(value));
 		}
 	}
@@ -81,24 +54,35 @@ protected:
 		const EncodingType& buffer, size_t position) const override
 	{
 		if (buffer[position] == true){
-			return inc_size(Parent::decode_impl(buffer, position+1));
+			return inc_size(HuffmanCoder<SymbolType, EncodingType>::decode_impl(buffer, position+1));
 		}else{
 			return inc_size(string_coder_.decode(buffer, position+1));
 		}
 	}
 
-	StringCoder<EncodingType> string_coder_;
+	std::optional<std::pair<SymbolType, size_t>> inc_size
+			(const std::optional<std::pair<SymbolType, size_t>> decode_opt) const
+	{
+		if (!decode_opt.has_value()) return decode_opt;
+		else{
+			return std::make_pair(decode_opt->first, decode_opt->second+1);
+		}
+	}
+
+	StringCoder<> string_coder_;
 
 
 private:
-
-	auto inc_size(std::optional<std::pair<SymbolType, size_t>> decode_opt)
-	{
-		if (decode_opt==std::nullopt) return decode_opt;
-		else{
-			decode_opt->second++;
-			return decode_opt;
+	template <typename MapType>
+	const MapType& modify_counts(const MapType& counts){
+		static MapType counts2{};
+		for (auto it: counts) {
+			const auto& [symbol, count] = it;
+			if (count != 1){
+				counts2.insert(std::make_pair(symbol, count));
+			}
 		}
+		return static_cast<const MapType>(counts2);
 	}
 };
 
