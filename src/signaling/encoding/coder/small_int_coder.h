@@ -21,7 +21,7 @@
 
 // Include headers from other projects.
 template <typename StringType = std::string, 
-		  typename EncodingType>
+		  typename EncodingType = BitVector<>>
 class SmallIntCoder: public Coder<StringType, EncodingType>
 {
 public:
@@ -33,8 +33,6 @@ public:
 //		for(int i=0;i<256;i++) decode_table[i] = 0;
 //		small_int_num = 0;
 		create_small_int_table();
-		tmp = 0;
-		pos = 0;
 	}
 
 	inline bool valid_value(const StringType& value) const override
@@ -50,10 +48,10 @@ public:
 protected:
 
 	void encode_impl(const StringType& value, EncodingType* buffer) const override {
-		tmp = 0;
-		pos = 0;
+		unsigned char tmp = 0;
+		size_t pos = 0;
 		for(auto itr = value.begin(); itr != value.end(); ++itr){
-			unsigned char c = ctosi(*itr);
+			auto c = ctosi(*itr);
 			tmp |= c << pos;
 			if (pos + ENCODING_BITS >= BITS_IN_CHAR){
 				pos = pos + ENCODING_BITS - BITS_IN_CHAR;
@@ -72,7 +70,7 @@ protected:
 			pos = pos + ENCODING_BITS;
 		}
 //		char_coder_.encode(static_cast<char>(tmp), buffer);
-		for(int i=0;i<ENCODING_BITS;i++) buffer->push_back(true);
+		for(size_t i=0;i<ENCODING_BITS;i++) buffer->push_back(true);
 	}
 
 	std::optional<std::pair<StringType, size_t>> 
@@ -84,11 +82,11 @@ protected:
 				return std::nullopt;
 			}
 
-			unsigned char si = (decoded->first) & SMALL_INT_MASK;
+			auto si = (decoded->first) & SMALL_INT_MASK;
 			if (si==END_OF_STRING){
 				return std::make_optional(std::make_pair(value, value_size(value)));
 			}
-			unsigned char decoded_char = sitoc(si);
+			auto decoded_char = sitoc(si);
 			if (decoded_char==0){
 				return std::nullopt;
 			}
@@ -108,9 +106,6 @@ protected:
 		}
 	}
 
-	unsigned char tmp;
-	size_t pos;
-
 private:
 	const size_t ENCODING_BITS = 6;
 	const CharCoder<EncodingType> char_coder_;
@@ -121,14 +116,14 @@ private:
 	constexpr static unsigned char END_OF_STRING = static_cast<char>(0x3F);
 	constexpr static unsigned char SMALL_INT_MASK = static_cast<char>(0x3F);
 
-	unsigned char ctosi(unsigned char x){
+	unsigned char ctosi(const unsigned char x) const{
 //		if (encode_table[x]!=0) return encode_table[x];
 //		encode_table[x]=++small_int_num;
 //		decode_table[small_int_num]=x;
 		return encode_table[x];
 	}
 
-	unsigned char sitoc(unsigned char x){
+	unsigned char sitoc(const unsigned char x) const{
 		return decode_table[x];
 	}
 

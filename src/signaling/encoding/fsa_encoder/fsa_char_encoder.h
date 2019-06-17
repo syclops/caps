@@ -31,11 +31,35 @@ public:
 			std::static_pointer_cast<LabelCoderType>(label_coder);
 		FSAEncoder<BitVectorType>::order_nodes();
 
-		auto destination_coder = std::make_shared<HuffmanCoder<int, BitVectorType>>();
+		auto diff_counts = get_ordering_diff_counts(lexicon);
+		auto destination_coder = std::make_shared<HuffmanCoder<int, BitVectorType>>(
+		  diff_counts);
 		using DestCoderType = Coder<int, BitVectorType>;
 		FSAEncoder<BitVectorType>::destination_coder_ =
 			std::static_pointer_cast<DestCoderType>(destination_coder);
 	}
+
+
+protected:
+
+  std::unordered_map<int, int> get_ordering_diff_counts(
+    const FSALexicon& lexicon) const
+  {
+    std::unordered_map<int, int> diff_counts;
+    for (const auto& source: lexicon.get_graph().get_nodes()) {
+      for (const auto& [label, child]: source->get_out_edges()) {
+        auto diff = FSAEncoder<BitVectorType>::node_to_order_.at(child)
+          - FSAEncoder<BitVectorType>::node_to_order_.at(source.get());
+        diff = diff < 0 ? -diff : diff;
+        if (diff_counts.find(diff) == diff_counts.end()) {
+          diff_counts[diff] = 1;
+        } else {
+          ++diff_counts[diff];
+        }
+      }
+    }
+    return diff_counts;
+  }
 };
 
 #endif
