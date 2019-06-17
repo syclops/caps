@@ -13,6 +13,7 @@
 // Include other headers from this project.
 #include "../../lexicon/fsa_lexicon/fsa_lexicon.h"
 #include "../coder/small_int_coder.h"
+#include "../coder/huffman_coder.h"
 #include "fsa_encoder.h"
 
 template <typename BitVectorType>
@@ -30,7 +31,7 @@ public:
 			std::static_pointer_cast<LabelCoderType>(label_coder);
 		FSAEncoder<BitVectorType>::order_nodes();
 
-		auto destination_coder = std::make_shared<SmallIntCoder<int, BitVectorType>>();
+		auto destination_coder = std::make_shared<HuffmanCoder<int, BitVectorType>>();
 		using DestCoderType = Coder<int, BitVectorType>;
 		FSAEncoder<BitVectorType>::destination_coder_ =
 			std::static_pointer_cast<DestCoderType>(destination_coder);

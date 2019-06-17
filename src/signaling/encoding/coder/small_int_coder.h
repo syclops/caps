@@ -21,12 +21,12 @@
 
 // Include headers from other projects.
 template <typename StringType = std::string, 
-		  typename EncodingType = Bitvector<>>
-class SmallIntEncoder: public Coder<StringType, EncodingType>
+		  typename EncodingType>
+class SmallIntCoder: public Coder<StringType, EncodingType>
 {
 public:
 
-	SmallIntEncoder(): 
+	SmallIntCoder(): 
 		Coder<StringType, EncodingType>{}, char_coder_{}
 	{
 //		for(int i=0;i<256;i++) encode_table[i] = 0;
@@ -108,6 +108,9 @@ protected:
 		}
 	}
 
+	unsigned char tmp;
+	size_t pos;
+
 private:
 	const size_t ENCODING_BITS = 6;
 	const CharCoder<EncodingType> char_coder_;
@@ -129,8 +132,6 @@ private:
 		return decode_table[x];
 	}
 
-	unsigned char tmp;
-	size_t pos;
 };
 
 #endif //CAPS_SMALL_INT_CODER_H

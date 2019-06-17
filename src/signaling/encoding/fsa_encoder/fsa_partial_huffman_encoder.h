@@ -13,6 +13,7 @@
 // Include other headers from this project.
 #include "../../lexicon/fsa_lexicon/fsa_lexicon.h"
 #include "../coder/partial_huffman_coder.h"
+#include "../coder/huffman_coder.h"
 #include "../coder/signed_int_coder.h"
 #include "fsa_encoder.h"
 
