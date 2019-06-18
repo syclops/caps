@@ -27,20 +27,21 @@ class FSAPartialHuffmanEncoder: public FSAEncoder<BitVectorType>
   explicit FSAPartialHuffmanEncoder(const FSALexicon& lexicon)
     : FSAEncoder<BitVectorType>{lexicon}
   {
-    auto label_coder = std::make_shared<PartialHuffmanCoder<std::string,
-                                                     BitVectorType>>(
-      get_label_counts(lexicon));
-    using LabelCoderType = Coder<std::string, BitVectorType>;
-    FSAEncoder<BitVectorType>::label_coder_ =
-      std::static_pointer_cast<LabelCoderType>(label_coder);
     FSAEncoder<BitVectorType>::order_nodes();
-
     auto diff_counts = get_ordering_diff_counts(lexicon);
     auto destination_coder = std::make_shared<HuffmanCoder<int, BitVectorType>>(
       diff_counts);
     using DestCoderType = Coder<int, BitVectorType>;
     FSAEncoder<BitVectorType>::destination_coder_ =
       std::static_pointer_cast<DestCoderType>(destination_coder);
+
+    auto counts = get_new_counts(get_label_counts(lexicon));
+    auto label_coder = std::make_shared<PartialHuffmanCoder<std::string,
+                                                     BitVectorType>>(
+      counts);
+    using LabelCoderType = Coder<std::string, BitVectorType>;
+    FSAEncoder<BitVectorType>::label_coder_ =
+      std::static_pointer_cast<LabelCoderType>(label_coder);
   }
 
  protected:
@@ -74,10 +75,10 @@ class FSAPartialHuffmanEncoder: public FSAEncoder<BitVectorType>
     buffer.push_back(dest_codebook);
   }
 
-  virtual LabeledGraph::LabelMap get_label_counts(
+  const LabeledGraph::LabelMap& get_label_counts(
     const FSALexicon& lexicon) const
   {
-    return lexicon.get_graph().get_label_counts();
+    return const_cast<const LabeledGraph::LabelMap&>(lexicon.get_graph().get_label_counts());
   }
 
   std::unordered_map<int, int> get_ordering_diff_counts(
@@ -97,6 +98,14 @@ class FSAPartialHuffmanEncoder: public FSAEncoder<BitVectorType>
       }
     }
     return diff_counts;
+  }
+
+  LabeledGraph::LabelMap get_new_counts(const LabeledGraph::LabelMap& counts) const{
+    LabeledGraph::LabelMap counts2;
+    for (const auto& [symbol, count]: counts){
+      if (count!=1) counts2.emplace(symbol, count);
+    }
+    return counts2;
   }
 };
 

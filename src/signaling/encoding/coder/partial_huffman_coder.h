@@ -29,24 +29,37 @@ public:
 
 	template<typename MapType>
 	explicit PartialHuffmanCoder(const MapType& counts)
-		: HuffmanCoder<SymbolType, EncodingType>(modify_counts<MapType>(counts)), 
+		: HuffmanCoder<SymbolType, EncodingType>(counts), 
 		  string_coder_{}
 	{
 		// Nothing to do here. 
 	}
 
+	inline bool valid_value(const SymbolType& value) const override
+	{
+		return (HuffmanCoder<SymbolType, EncodingType>::valid_value(value)) || (string_coder_.valid_value(value));
+	}
+
+	inline size_t value_size(const SymbolType& value) const override
+	{
+		if ((HuffmanCoder<SymbolType, EncodingType>::encoding_map_.find(value))
+			!= (HuffmanCoder<SymbolType, EncodingType>::encoding_map_.end()))
+			return HuffmanCoder<SymbolType, EncodingType>::encoding_map_.at(value).size();
+		else
+			return string_coder_.value_size(value);
+	}
 
 protected:
 
 	void encode_impl(const SymbolType& value, EncodingType* encoding) const override
 	{
-		if (HuffmanCoder<SymbolType, EncodingType>::encoding_map_.find(value)
-			!=HuffmanCoder<SymbolType, EncodingType>::encoding_map_.end()){
-			encoding->push_back(static_cast<EncodingType>(true));
+		if ((HuffmanCoder<SymbolType, EncodingType>::encoding_map_.find(value))
+			!=(HuffmanCoder<SymbolType, EncodingType>::encoding_map_.end())){
+			encoding->push_back(true);
 			encoding->push_back(HuffmanCoder<SymbolType, EncodingType>::encoding_map_.at(value));
 		}else{
-			encoding->push_back(static_cast<EncodingType>(false));
-			encoding->push_back(string_coder_.encode(value));
+			encoding->push_back(false);
+			string_coder_.encode(value, encoding);
 		}
 	}
 
@@ -70,20 +83,6 @@ protected:
 	}
 
 	StringCoder<> string_coder_;
-
-
-private:
-	template <typename MapType>
-	const MapType& modify_counts(const MapType& counts){
-		static MapType counts2{};
-		for (auto it: counts) {
-			const auto& [symbol, count] = it;
-			if (count != 1){
-				counts2.insert(std::make_pair(symbol, count));
-			}
-		}
-		return static_cast<const MapType>(counts2);
-	}
 };
 
 
