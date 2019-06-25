@@ -18,7 +18,7 @@
 
 // Include other headers from this project.
 #include "coder.h"
-#include "string_coder.h"
+#include "small_int_coder.h"
 #include "huffman_coder.h"
 
 // Include headers from other projects.
@@ -30,14 +30,14 @@ public:
 	template<typename MapType>
 	explicit PartialHuffmanCoder(const MapType& counts)
 		: HuffmanCoder<SymbolType, EncodingType>(counts), 
-		  string_coder_{}
+		  small_int_coder_{}
 	{
 		// Nothing to do here. 
 	}
 
 	inline bool valid_value(const SymbolType& value) const override
 	{
-		return (HuffmanCoder<SymbolType, EncodingType>::valid_value(value)) || (string_coder_.valid_value(value));
+		return (HuffmanCoder<SymbolType, EncodingType>::valid_value(value)) || (small_int_coder_.valid_value(value));
 	}
 
 	inline size_t value_size(const SymbolType& value) const override
@@ -46,7 +46,7 @@ public:
 			!= (HuffmanCoder<SymbolType, EncodingType>::encoding_map_.end()))
 			return HuffmanCoder<SymbolType, EncodingType>::encoding_map_.at(value).size();
 		else
-			return string_coder_.value_size(value);
+			return small_int_coder_.value_size(value);
 	}
 
 protected:
@@ -59,7 +59,7 @@ protected:
 			encoding->push_back(HuffmanCoder<SymbolType, EncodingType>::encoding_map_.at(value));
 		}else{
 			encoding->push_back(false);
-			string_coder_.encode(value, encoding);
+			small_int_coder_.encode(value, encoding);
 		}
 	}
 
@@ -69,7 +69,7 @@ protected:
 		if (buffer[position] == true){
 			return inc_size(HuffmanCoder<SymbolType, EncodingType>::decode_impl(buffer, position+1));
 		}else{
-			return inc_size(string_coder_.decode(buffer, position+1));
+			return inc_size(small_int_coder_.decode(buffer, position+1));
 		}
 	}
 
@@ -82,8 +82,8 @@ protected:
 		}
 	}
 
-	StringCoder<> string_coder_;
+	SmallIntCoder<> small_int_coder_;
 };
 
 
-#endif
+#endif //CAPS_PARTIAL_HUFFMAN_CODER_H
