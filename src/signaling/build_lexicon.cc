@@ -11,8 +11,10 @@
 #include "common/io_option.h"
 #include "common/measure_time.h"
 #include "encoding/fsa_encoder/fsa_encoder.h"
+#include "encoding/fsa_encoder/fsa_char_encoder.h"
 #include "encoding/fsa_encoder/fsa_huffman_encoder.h"
-#include "encoding/fsa_encoder/fsa_huffman_encoder.h"
+#include "encoding/fsa_encoder/fsa_partial_huffman_encoder.h"
+#include "encoding/fsa_encoder/fsa_char_huffman_encoder.h"
 #include "encoding/bitvector_io.h"
 
 #include <cxxopts.hpp>
@@ -200,7 +202,7 @@ int main(int argc, char* argv[])
   using BVType = BitVector<>;
   using EncPtrType = std::unique_ptr<FSAEncoder<BVType>>;
   EncPtrType encoder{parsed.transition_compact
-                     ? new FSAHuffmanEncoder<BVType>(lexicon)
+                     ? new FSAPartialEncoder<BVType>(lexicon)
                      : new FSAEncoder<BVType>(lexicon)};
 
 //  auto encoder = parsed.transition_compact
