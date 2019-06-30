@@ -13,6 +13,7 @@
 // Include other headers from this project.
 #include "../../lexicon/fsa_lexicon/fsa_lexicon.h"
 #include "../coder/char_huffman_coder.h"
+#include "../coder/char_coder.h"
 #include "../coder/huffman_coder.h"
 #include "../coder/signed_int_coder.h"
 #include "fsa_encoder.h"
@@ -50,10 +51,10 @@ class FSACharHuffmanEncoder: public FSAEncoder<BitVectorType>
   {
 //    std::cerr << "Adding prefix" << std::endl;
     // Define type aliases.
-    using LabelType = std::string;
+    using LabelType = char;
     using LabelAbstractType = Coder<LabelType, BitVectorType>;
-    using LabelCoderType = StringCoder<LabelType, BitVectorType>;
-    using LabelHuffmanType = CharHuffmanCoder<LabelType, BitVectorType>;
+    using LabelCoderType = CharCoder<BitVectorType>;
+    using LabelHuffmanType = CharHuffmanCoder<std::string, BitVectorType>;
     using DestType = int;
     using DestAbstractType = Coder<DestType, BitVectorType>;
     using DestCoderType = SignedIntCoder<DestType, BitVectorType>;

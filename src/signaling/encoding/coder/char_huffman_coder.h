@@ -1,5 +1,5 @@
 /**
- * Char Huffman Coder, excluding strings that appear only once
+ * Char Huffman Coder
  * Author: Yucheng Dai <yuchengd@andrew.cmu.edu>
  */
 
@@ -23,13 +23,13 @@
 
 // Include headers from other projects.
 template <typename SymbolType, typename EncodingType>
-class CharHuffmanCoder: public HuffmanCoder<char, EncodingType>
+class CharHuffmanCoder: public Coder<std::string, EncodingType>
 {
 public:
 
 	template<typename MapType>
 	explicit CharHuffmanCoder(const MapType& counts)
-		: HuffmanCoder<char, EncodingType>(counts)
+		: huffman_coder_{counts}
 	{
 		// Nothing to do here. 
 	}
@@ -37,7 +37,7 @@ public:
 	inline bool valid_value(const SymbolType& value) const override
 	{
 		for(const auto& ch: value){
-			if (!HuffmanCoder<char, EncodingType>::valid_value(ch)) return false;
+			if (!huffman_coder_.valid_value(ch)) return false;
 		}
 		return true;
 	}
@@ -46,20 +46,26 @@ public:
 	{
 		size_t ans = 0;
 		for(const auto& ch: value){
-			ans += HuffmanCoder<char, EncodingType>::value_size(ch);
+			ans += huffman_coder_.value_size(ch);
 		}
-		ans += HuffmanCoder<char, EncodingType>::value_size(END_OF_STRING);
+		ans += huffman_coder_.value_size(END_OF_STRING);
 		return ans;
 	}
+
+  EncodingType get_codebook(
+    std::shared_ptr<Coder<char, EncodingType>> symbol_coder) const
+  {
+  	return huffman_coder_.get_codebook(symbol_coder);
+  }
 
 protected:
 
 	void encode_impl(const SymbolType& value, EncodingType* encoding) const override
 	{
 		for(const auto& ch: value){
-			encoding->push_back(HuffmanCoder<char, EncodingType>::encoding_map_.at(ch));
+			huffman_coder_.encode(ch, encoding);
 		}
-		encoding->push_back(HuffmanCoder<char, EncodingType>::encoding_map_.at(END_OF_STRING));
+		huffman_coder_.encode(END_OF_STRING, encoding);
 	}
 
 	std::optional<std::pair<SymbolType, size_t>> decode_impl(
@@ -67,7 +73,7 @@ protected:
 	{
 		SymbolType value{};
 		for (size_t i = position; i < buffer.size();) {
-			auto decoded = HuffmanCoder<char, EncodingType>::decode(buffer, i);
+			auto decoded = huffman_coder_.decode(buffer, i);
 			if (!decoded.has_value()) {
 				return std::nullopt;
 			}
@@ -80,6 +86,8 @@ protected:
 		}
 		return std::nullopt;
 	}
+
+	const HuffmanCoder<char, EncodingType> huffman_coder_;
 
 private:
 

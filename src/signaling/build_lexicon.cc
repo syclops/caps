@@ -202,7 +202,7 @@ int main(int argc, char* argv[])
   using BVType = BitVector<>;
   using EncPtrType = std::unique_ptr<FSAEncoder<BVType>>;
   EncPtrType encoder{parsed.transition_compact
-                     ? new FSAPartialEncoder<BVType>(lexicon)
+                     ? new FSACharHuffmanEncoder<BVType>(lexicon)
                      : new FSAEncoder<BVType>(lexicon)};
 
 //  auto encoder = parsed.transition_compact
