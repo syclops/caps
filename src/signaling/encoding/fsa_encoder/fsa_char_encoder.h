@@ -29,7 +29,7 @@ public:
 		using LabelCoderType = Coder<std::string, BitVectorType>;
 		FSAEncoder<BitVectorType>::label_coder_ =
 			std::static_pointer_cast<LabelCoderType>(label_coder);
-		FSAEncoder<BitVectorType>::order_nodes();
+/*		FSAEncoder<BitVectorType>::order_nodes();
 
 		auto diff_counts = get_ordering_diff_counts(lexicon);
 		auto destination_coder = std::make_shared<HuffmanCoder<int, BitVectorType>>(
@@ -37,9 +37,9 @@ public:
 		using DestCoderType = Coder<int, BitVectorType>;
 		FSAEncoder<BitVectorType>::destination_coder_ =
 			std::static_pointer_cast<DestCoderType>(destination_coder);
-	}
+*/	}
 
-
+/*
 protected:
 
   std::unordered_map<int, int> get_ordering_diff_counts(
@@ -59,7 +59,7 @@ protected:
       }
     }
     return diff_counts;
-  }
+  }*/
 };
 
-#endif
+#endif //CAPS_FSA_CHAR_ENCODER_H
