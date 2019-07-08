@@ -27,7 +27,7 @@ class SmallIntCoder: public Coder<StringType, EncodingType>
 public:
 
 	SmallIntCoder(): 
-		Coder<StringType, EncodingType>{}, char_coder_{}
+		Coder<StringType, EncodingType>{}
 	{
 //		for(int i=0;i<256;i++) encode_table[i] = 0;
 //		for(int i=0;i<256;i++) decode_table[i] = 0;
@@ -48,26 +48,12 @@ public:
 protected:
 
 	void encode_impl(const StringType& value, EncodingType* buffer) const override {
-		unsigned char tmp = 0;
-		size_t pos = 0;
 		for(auto itr = value.begin(); itr != value.end(); ++itr){
 			auto c = ctosi(*itr);
-			tmp |= c << pos;
-			if (pos + ENCODING_BITS >= BITS_IN_CHAR){
-				pos = pos + ENCODING_BITS - BITS_IN_CHAR;
-				char_coder_.encode(static_cast<char>(tmp), buffer);
-				tmp = c >> (BITS_IN_CHAR - pos);
-			}else{
-				pos = pos + ENCODING_BITS;
+			for(size_t i = 0; i < ENCODING_BITS; i++){
+				buffer->push_back((bool)(c&1));
+				c>>=1;
 			}
-		}
-		tmp |= END_OF_STRING << pos;
-		if (pos + ENCODING_BITS >= BITS_IN_CHAR){
-			pos = pos + ENCODING_BITS - BITS_IN_CHAR;
-			char_coder_.encode(static_cast<char>(tmp), buffer);
-			tmp = END_OF_STRING >> (BITS_IN_CHAR - pos);
-		}else{
-			pos = pos + ENCODING_BITS;
 		}
 //		char_coder_.encode(static_cast<char>(tmp), buffer);
 		for(size_t i=0;i<ENCODING_BITS;i++) buffer->push_back(true);
@@ -77,12 +63,15 @@ protected:
 		decode_impl(const EncodingType& buffer, const size_t position) const override {
 		std::string value;
 		for(size_t i = position; i < buffer.size(); i+= ENCODING_BITS){
-			auto decoded = char_coder_.decode(buffer, i);
-			if (!decoded.has_value()){
+			auto si = 0;
+			size_t j;
+			for(j = i; j < buffer.size() && j - i < ENCODING_BITS; j++){
+				si = (si << 1) + buffer[j];
+			}
+			if (j==buffer.size() && j - i < ENCODING_BITS){
 				return std::nullopt;
 			}
 
-			auto si = (decoded->first) & SMALL_INT_MASK;
 			if (si==END_OF_STRING){
 				return std::make_optional(std::make_pair(value, value_size(value)));
 			}
@@ -108,13 +97,13 @@ protected:
 
 private:
 	const size_t ENCODING_BITS = 6;
-	const CharCoder<EncodingType> char_coder_;
+//	const CharCoder<EncodingType> char_coder_;
 
 	unsigned char encode_table[256]; //char -> small int
 	unsigned char decode_table[256]; //small int -> char
 //	int small_int_num; //current small int reached
 	constexpr static unsigned char END_OF_STRING = static_cast<char>(0x3F);
-	constexpr static unsigned char SMALL_INT_MASK = static_cast<char>(0x3F);
+//	constexpr static unsigned char SMALL_INT_MASK = static_cast<char>(0x3F);
 
 	unsigned char ctosi(const unsigned char x) const{
 //		if (encode_table[x]!=0) return encode_table[x];
