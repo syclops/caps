@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <utility>
+#include <map>
 
 #include "lexicon/fsa_lexicon/fsa_lexicon.h"
 #include "common/io_option.h"
@@ -44,6 +45,17 @@ void print_lexicon_info(const FSALexicon& lexicon)
   std::cout << "Lexicon has " << lexicon.get_graph().get_num_nodes()
             << " nodes and " << lexicon.get_graph().get_num_edges() << " edges"
             << std::endl;
+  std::map<int, int> mp{};
+  for(auto& [label, count]: lexicon.get_graph().get_label_counts()){
+    if (mp.find(label.length())!=mp.end()){
+      mp.at(label.length()) += count;
+    }else{
+      mp.emplace(label.length(), count);
+    }
+  }
+  for(auto& [length, count]: mp){
+    std::cout << length << " : " << count << std::endl;
+  }
 }
 
 struct option_string
