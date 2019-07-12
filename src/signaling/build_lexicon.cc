@@ -48,9 +48,9 @@ void print_lexicon_info(const FSALexicon& lexicon)
   std::map<int, int> mp{};
   for(auto& [label, count]: lexicon.get_graph().get_label_counts()){
     if (mp.find(label.length())!=mp.end()){
-      mp.at(label.length()) += count;
+      mp.at(label.length())++;
     }else{
-      mp.emplace(label.length(), count);
+      mp.emplace(label.length(), 1);
     }
   }
   for(auto& [length, count]: mp){
