@@ -103,7 +103,8 @@ class FSAPartialHuffmanEncoder: public FSAEncoder<BitVectorType>
   LabeledGraph::LabelMap get_new_counts(const LabeledGraph::LabelMap& counts) const{
     LabeledGraph::LabelMap counts2;
     for (const auto& [symbol, count]: counts){
-      if (count!=1) counts2.emplace(symbol, count);
+      if (symbol.length()>=30) continue;
+      if (count>3) counts2.emplace(symbol, count);
     }
     return counts2;
   }
