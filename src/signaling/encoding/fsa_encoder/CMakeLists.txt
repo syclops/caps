@@ -31,3 +31,11 @@ target_link_libraries(fsa_partial_huffman_encoder
     INTERFACE fsa_encoder partial_huffman_coder fsa_lexicon graph bitvector contains
               compare
 )
+
+add_library(fsa_mixed_huffman_encoder INTERFACE)
+target_sources(fsa_mixed_huffman_encoder
+    INTERFACE ${CMAKE_CURRENT_LIST_DIR}/fsa_mixed_huffman_encoder.h)
+target_link_libraries(fsa_mixed_huffman_encoder
+    INTERFACE fsa_encoder partial_huffman_coder fsa_lexicon graph bitvector contains
+              compare
+)

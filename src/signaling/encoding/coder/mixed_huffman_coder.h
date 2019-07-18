@@ -1,10 +1,10 @@
 /**
- * Partial Huffman Coder, excluding strings that appear only once
+ * Mixed Huffman Coder
  * Author: Yucheng Dai <yuchengd@andrew.cmu.edu>
  */
 
-#ifndef CAPS_PARTIAL_HUFFMAN_H
-#define CAPS_PARTIAL_HUFFMAN_H
+#ifndef CAPS_MIXED_HUFFMAN_H
+#define CAPS_MIXED_HUFFMAN_H
 
 // Include C standard libraries. 
 #include <cstdlib>
@@ -18,26 +18,26 @@
 
 // Include other headers from this project.
 #include "coder.h"
-#include "small_int_coder.h"
+#include "char_huffman_coder.h"
 #include "huffman_coder.h"
 
 // Include headers from other projects.
 template <typename SymbolType, typename EncodingType>
-class PartialHuffmanCoder: public HuffmanCoder<SymbolType, EncodingType>
+class MixedHuffmanCoder: public HuffmanCoder<SymbolType, EncodingType>
 {
 public:
 
 	template<typename MapType>
-	explicit PartialHuffmanCoder(const MapType& counts)
-		: HuffmanCoder<SymbolType, EncodingType>(counts), 
-		  small_int_coder_{}
+	explicit MixedHuffmanCoder(const MapType& counts1, std::unordered_map<char, size_t> counts2)
+		: HuffmanCoder<SymbolType, EncodingType>(counts1), 
+		  char_huffman_coder_{counts2}
 	{
 		// Nothing to do here. 
 	}
 
 	inline bool valid_value(const SymbolType& value) const override
 	{
-		return (HuffmanCoder<SymbolType, EncodingType>::valid_value(value)) || (small_int_coder_.valid_value(value));
+		return (HuffmanCoder<SymbolType, EncodingType>::valid_value(value)) || (char_huffman_coder_.valid_value(value));
 	}
 
 	inline size_t value_size(const SymbolType& value) const override
@@ -46,7 +46,7 @@ public:
 			!= (HuffmanCoder<SymbolType, EncodingType>::encoding_map_.end()))
 			return 1+HuffmanCoder<SymbolType, EncodingType>::encoding_map_.at(value).size();
 		else
-			return 1+small_int_coder_.value_size(value);
+			return 1+char_huffman_coder_.value_size(value);
 	}
 
 protected:
@@ -59,7 +59,7 @@ protected:
 			encoding->push_back(HuffmanCoder<SymbolType, EncodingType>::encoding_map_.at(value));
 		}else{
 			encoding->push_back(false);
-			small_int_coder_.encode(value, encoding);
+			char_huffman_coder_.encode(value, encoding);
 		}
 	}
 
@@ -69,7 +69,7 @@ protected:
 		if (buffer[position] == true){
 			return inc_size(HuffmanCoder<SymbolType, EncodingType>::decode_impl(buffer, position+1));
 		}else{
-			return inc_size(small_int_coder_.decode(buffer, position+1));
+			return inc_size(char_huffman_coder_.decode(buffer, position+1));
 		}
 	}
 
@@ -82,8 +82,9 @@ protected:
 		}
 	}
 
-	SmallIntCoder<> small_int_coder_;
+	CharHuffmanCoder<SymbolType, EncodingType> char_huffman_coder_;
+	constexpr static char END_OF_STRING = static_cast<char>(0x80);
 };
 
 
-#endif //CAPS_PARTIAL_HUFFMAN_H
+#endif //CAPS_MIXED_HUFFMAN_H

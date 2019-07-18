@@ -95,4 +95,4 @@ private:
 };
 
 
-#endif //CAPS_CHAR_HUFFMAN_CODER_H
+#endif //CAPS_CHAR_HUFFMAN_H

@@ -70,6 +70,14 @@ target_link_libraries(partial_huffman_coder
     INTERFACE coder huffman_coder bitvector
 )
 
+add_library(mixed_huffman_coder INTERFACE)
+target_sources(mixed_huffman_coder
+    INTERFACE ${CMAKE_CURRENT_LIST_DIR}/mixed_huffman_coder.h
+)
+target_link_libraries(mixed_huffman_coder
+    INTERFACE coder huffman_coder bitvector
+)
+
 add_library(small_int_coder INTERFACE)
 target_sources(small_int_coder
     INTERFACE ${CMAKE_CURRENT_LIST_DIR}/small_int_coder.h
