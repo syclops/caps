@@ -53,8 +53,9 @@ public:
 		std::shared_ptr<Coder<SymbolType, EncodingType>> symbol_coder) const
 	{
 		EncodingType buffer;
-		buffer->push_back(HuffmanCoder<SymbolType, EncodingType>::get_codebook(symbol_coder));
-		buffer->push_back(char_huffman_coder_.get_codebook(symbol_coder));
+		buffer.push_back(HuffmanCoder<SymbolType, EncodingType>::get_codebook(symbol_coder));
+		buffer.push_back(char_huffman_coder_.get_codebook(symbol_coder));
+		return buffer;
 	}
 
 protected:
