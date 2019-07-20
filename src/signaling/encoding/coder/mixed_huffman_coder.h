@@ -49,6 +49,14 @@ public:
 			return 1+char_huffman_coder_.value_size(value);
 	}
 
+	EncodingType get_codebook(
+		std::shared_ptr<Coder<SymbolType, EncodingType>> symbol_coder) const
+	{
+		EncodingType buffer;
+		buffer->push_back(HuffmanCoder<SymbolType, EncodingType>::get_codebook(symbol_coder));
+		buffer->push_back(char_huffman_coder_.get_codebook(symbol_coder));
+	}
+
 protected:
 
 	void encode_impl(const SymbolType& value, EncodingType* encoding) const override
