@@ -18,6 +18,7 @@
 
 // Include other headers from this project.
 #include "coder.h"
+#include "char_coder.h"
 #include "char_huffman_coder.h"
 #include "huffman_coder.h"
 
@@ -54,7 +55,9 @@ public:
 	{
 		EncodingType buffer;
 		buffer.push_back(HuffmanCoder<SymbolType, EncodingType>::get_codebook(symbol_coder));
-		buffer.push_back(char_huffman_coder_.get_codebook(symbol_coder));
+		auto char_label_coder = std::make_shared<CharCoder<>>();
+		buffer.push_back(char_huffman_coder_.get_codebook(
+			std::static_pointer_cast<Coder<char, EncodingType>>(char_label_coder)));
 		return buffer;
 	}
 
