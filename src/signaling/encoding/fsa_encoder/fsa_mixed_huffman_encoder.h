@@ -65,14 +65,14 @@ class FSAMixedHuffmanEncoder: public FSAEncoder<BitVectorType>
     auto label_codebook = std::static_pointer_cast<LabelHuffmanType>(
         FSAEncoder<BitVectorType>::label_coder_)->get_codebook(
           std::static_pointer_cast<LabelAbstractType>(string_coder));
-//    std::cerr << label_codebook.size() << std::endl;
+    std::cout << label_codebook.size() << std::endl;
     buffer.push_back(label_codebook);
 
     auto dest_coder = std::make_shared<DestCoderType>(new DestBaseCoderType);
     auto dest_codebook = std::static_pointer_cast<DestHuffmanType>(
         FSAEncoder<BitVectorType>::destination_coder_)->get_codebook(
           std::static_pointer_cast<DestAbstractType>(dest_coder));
-//    std::cerr << dest_codebook.size() << std::endl;
+    std::cout << dest_codebook.size() << std::endl;
     buffer.push_back(dest_codebook);
   }
 
