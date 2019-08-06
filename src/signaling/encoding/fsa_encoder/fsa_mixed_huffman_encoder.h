@@ -45,6 +45,12 @@ class FSAMixedHuffmanEncoder: public FSAEncoder<BitVectorType>
       std::static_pointer_cast<LabelCoderType>(label_coder);
   }
 
+  size_t get_element_size(std::string symbol){
+    if (FSAEncoder<BitVectorType>::label_coder_->valid_value(symbol))
+      return FSAEncoder<BitVectorType>::label_coder_->value_size(symbol);
+    else return 0;
+  }
+
  protected:
 
   void add_prefix(BitVectorType& buffer) override
@@ -106,7 +112,7 @@ class FSAMixedHuffmanEncoder: public FSAEncoder<BitVectorType>
     std::unordered_map<char, size_t> counts2;
     for (const auto& [symbol, count]: counts){
       if (/*symbol.length()!=1 && count>3 && symbol.length()<=30*/
-        symbol.length()!=1 && count!=1) counts1.emplace(symbol, count);
+        count!=1) counts1.emplace(symbol, count);
       else{
         for(auto c: symbol){
           if (counts2.find(c)!=counts2.end()) counts2.at(c) += count;

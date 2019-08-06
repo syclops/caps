@@ -85,6 +85,9 @@ class FSAEncoder
 
   // TODO: add functions to get read-only instances of the lexicon, ordering,
   // and coders
+  virtual size_t get_element_size(std::string symbol){
+    return 0;
+  }
 
  protected:
 

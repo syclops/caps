@@ -218,6 +218,16 @@ int main(int argc, char* argv[])
                      ? new FSAMixedHuffmanEncoder<BVType>(lexicon)
                      : new FSAEncoder<BVType>(lexicon)};
 
+  EncPtrType encoder2{parsed.transition_compact
+                     ? new FSAHuffmanEncoder<BVType>(lexicon)
+                     : new FSAEncoder<BVType>(lexicon)};
+
+  int cnt=0;
+  for(auto& [symbol, count]: lexicon.get_graph().get_label_counts()){
+    if (encoder->get_element_size(symbol)<encoder2->get_element_size(symbol)) cnt++;
+  }
+  std::cout<<cnt<<std::endl;
+
 //  auto encoder = parsed.transition_compact
 //    ? FSAHuffmanEncoder<BitVector<>>{lexicon}
 //    : FSAEncoder<BitVector<>>{lexicon};
