@@ -41,6 +41,12 @@ class FSAHuffmanEncoder: public FSAEncoder<BitVectorType>
       std::static_pointer_cast<DestCoderType>(destination_coder);
   }
 
+  size_t get_element_size(std::string symbol){
+    if (FSAEncoder<BitVectorType>::label_coder_->valid_value(symbol))
+      return FSAEncoder<BitVectorType>::label_coder_->value_size(symbol);
+    else return 0;
+  }
+
  protected:
 
   void add_prefix(BitVectorType& buffer) override

@@ -46,7 +46,7 @@ void print_lexicon_info(const FSALexicon& lexicon)
   std::cout << "Lexicon has " << lexicon.get_graph().get_num_nodes()
             << " nodes and " << lexicon.get_graph().get_num_edges() << " edges"
             << std::endl;
-  std::map<int, int> mp{};
+/*  std::map<int, int> mp{};
   for(auto& [label, count]: lexicon.get_graph().get_label_counts()){
     if (mp.find(count)!=mp.end()){
       mp.at(count)++;
@@ -56,7 +56,7 @@ void print_lexicon_info(const FSALexicon& lexicon)
   }
   for(auto& [length, count]: mp){
     std::cout << length << " : " << count << std::endl;
-  }
+  }*/
 }
 
 struct option_string
@@ -222,11 +222,11 @@ int main(int argc, char* argv[])
                      ? new FSAHuffmanEncoder<BVType>(lexicon)
                      : new FSAEncoder<BVType>(lexicon)};
 
-  int cnt=0;
+  size_t cnt=0;
   for(auto& [symbol, count]: lexicon.get_graph().get_label_counts()){
     if (encoder->get_element_size(symbol)<encoder2->get_element_size(symbol)) cnt++;
   }
-  std::cout<<cnt<<std::endl;
+  std::cout<<"cnt: "<<cnt<<std::endl;
 
 //  auto encoder = parsed.transition_compact
 //    ? FSAHuffmanEncoder<BitVector<>>{lexicon}
