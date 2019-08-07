@@ -37,9 +37,18 @@ class FSAMixedHuffmanEncoder: public FSAEncoder<BitVectorType>
       std::static_pointer_cast<DestCoderType>(destination_coder);
 
     auto [counts1, counts2] = get_new_counts(get_label_counts(lexicon));
+    auto temp_char_coder = std::make_shared<CharHuffmanCoder<std::string,
+                                                     BitVectorType>>(counts2);
+    auto temp_string_coder = std::make_shared<HuffmanCoder<std::string,
+                                                     BitVectorType>>(get_label_counts(lexicon));
+    LabeledGraph::LabelMap counts3{};
+    for (auto& [symbol, count]: counts1){
+      if (temp_char_coder->value_size(symbol)>temp_string_coder->value_size(symbol)){
+        counts3.emplace(symbol, count);
+      }
+    }
     auto label_coder = std::make_shared<MixedHuffmanCoder<std::string,
-                                                     BitVectorType>>(
-      counts1, counts2);
+                                                     BitVectorType>>(counts3, counts2);
     using LabelCoderType = Coder<std::string, BitVectorType>;
     FSAEncoder<BitVectorType>::label_coder_ =
       std::static_pointer_cast<LabelCoderType>(label_coder);
