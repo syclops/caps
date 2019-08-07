@@ -222,11 +222,15 @@ int main(int argc, char* argv[])
                      ? new FSAHuffmanEncoder<BVType>(lexicon)
                      : new FSAEncoder<BVType>(lexicon)};
 
-  size_t cnt=0;
+  size_t cnt=0, saved=0;
   for(auto& [symbol, count]: lexicon.get_graph().get_label_counts()){
-    if (encoder->get_element_size(symbol)<encoder2->get_element_size(symbol)) cnt++;
+    if (encoder->get_element_size(symbol)<encoder2->get_element_size(symbol)){
+      cnt++;
+      saved += (encoder2->get_element_size(symbol)-encoder->get_element_size(symbol))*count;
+    }
   }
   std::cout<<"cnt: "<<cnt<<std::endl;
+  std::cout<<"saved: "<<saved<<std::endl;
 
 //  auto encoder = parsed.transition_compact
 //    ? FSAHuffmanEncoder<BitVector<>>{lexicon}
