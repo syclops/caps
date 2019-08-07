@@ -45,6 +45,13 @@ class FSAMixedHuffmanEncoder: public FSAEncoder<BitVectorType>
     for (auto& [symbol, count]: counts1){
       if (temp_char_coder->value_size(symbol)>temp_string_coder->value_size(symbol)){
         counts3.emplace(symbol, count);
+      }else{
+        for(auto c: symbol){
+          if (counts2.find(c)!=counts2.end()) counts2.at(c) += count;
+          else counts2.emplace(c, count);
+        }
+        if (counts2.find(END_OF_STRING)!=counts2.end()) counts2.at(END_OF_STRING)+=count;
+        else counts2.emplace(END_OF_STRING, count);
       }
     }
     auto label_coder = std::make_shared<MixedHuffmanCoder<std::string,
