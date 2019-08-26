@@ -176,6 +176,32 @@ tool_options parse_arguments(int argc, char* argv[])
   }
 }
 
+constexpr static char END_OF_STRING = static_cast<char>(0x80);
+
+std::pair<LabeledGraph::LabelMap, std::unordered_map<char, size_t>> get_new_counts(const LabeledGraph::LabelMap& counts){
+  LabeledGraph::LabelMap counts1;
+  std::unordered_map<char, size_t> counts2;
+  for (const auto& [symbol, count]: counts){
+    if (/*symbol.length()!=1 && count>3 && symbol.length()<=30*/
+      count!=1) counts1.emplace(symbol, count);
+    else{
+      for(auto c: symbol){
+        if (counts2.find(c)!=counts2.end()) counts2.at(c) += count;
+        else counts2.emplace(c, count);
+      }
+      if (counts2.find(END_OF_STRING)!=counts2.end()) counts2.at(END_OF_STRING)+=count;
+      else counts2.emplace(END_OF_STRING, count);
+    }
+  }
+  return std::make_pair(counts1, counts2);
+}
+
+const LabeledGraph::LabelMap& get_label_counts(
+  const FSALexicon& lexicon)
+{
+  return const_cast<const LabeledGraph::LabelMap&>(lexicon.get_graph().get_label_counts());
+}
+
 int main(int argc, char* argv[])
 {
   // Parse command-line arguments.
@@ -214,23 +240,25 @@ int main(int argc, char* argv[])
 
   using BVType = BitVector<>;
   using EncPtrType = std::unique_ptr<FSAEncoder<BVType>>;
-  EncPtrType encoder{parsed.transition_compact
-                     ? new FSAMixedHuffmanEncoder<BVType>(lexicon)
-                     : new FSAEncoder<BVType>(lexicon)};
-
-  EncPtrType encoder2{parsed.transition_compact
-                     ? new FSAHuffmanEncoder<BVType>(lexicon)
-                     : new FSAEncoder<BVType>(lexicon)};
+  auto [counts1, counts2] = get_new_counts(get_label_counts(lexicon));
+  auto temp_char_coder = std::make_shared<CharHuffmanCoder<std::string,
+                                                   BVType>>(counts2);
+  auto temp_string_coder = std::make_shared<HuffmanCoder<std::string,
+                                                   BVType>>(counts1);
 
   size_t cnt=0, saved=0;
-  for(auto& [symbol, count]: lexicon.get_graph().get_label_counts()){
-    if (encoder->get_element_size(symbol)<encoder2->get_element_size(symbol)){
+  for(auto [symbol, count]: counts1){
+    if (temp_char_coder->value_size(symbol)<temp_string_coder->value_size(symbol)){
       cnt++;
-      saved += (encoder2->get_element_size(symbol)-encoder->get_element_size(symbol))*count;
+      saved += (temp_string_coder->value_size(symbol)-temp_char_coder->value_size(symbol))*count;
     }
   }
   std::cout<<"cnt: "<<cnt<<std::endl;
   std::cout<<"saved: "<<saved<<std::endl;
+
+  EncPtrType encoder{parsed.transition_compact
+                     ? new FSAMixedHuffmanEncoder<BVType>(lexicon)
+                     : new FSAEncoder<BVType>(lexicon)};
 
 //  auto encoder = parsed.transition_compact
 //    ? FSAHuffmanEncoder<BitVector<>>{lexicon}
