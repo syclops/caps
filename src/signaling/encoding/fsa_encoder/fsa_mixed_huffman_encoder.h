@@ -42,7 +42,7 @@ class FSAMixedHuffmanEncoder: public FSAEncoder<BitVectorType>
     auto temp_string_coder = std::make_shared<HuffmanCoder<std::string,
                                                      BitVectorType>>(counts1);
     LabeledGraph::LabelMap counts3{};
-    size_t cnt=0, saved=0;
+//  size_t cnt=0, saved=0;
     for (auto& [symbol, count]: counts1){
       if (temp_char_coder->value_size(symbol)>temp_string_coder->value_size(symbol)){
         counts3.emplace(symbol, count);
@@ -53,12 +53,12 @@ class FSAMixedHuffmanEncoder: public FSAEncoder<BitVectorType>
         }
         if (counts2.find(END_OF_STRING)!=counts2.end()) counts2.at(END_OF_STRING)+=count;
         else counts2.emplace(END_OF_STRING, count);
-        cnt++;
-        saved+=(temp_string_coder->value_size(symbol)-temp_char_coder->value_size(symbol))*count;
+//      cnt++;
+//      saved+=(temp_string_coder->value_size(symbol)-temp_char_coder->value_size(symbol))*count;
       }
     }
-    std::cout<<"cnt: "<<cnt<<std::endl;
-    std::cout<<"saved: "<<saved<<std::endl;
+//  std::cout<<"cnt: "<<cnt<<std::endl;
+//  std::cout<<"saved: "<<saved<<std::endl;
     auto label_coder = std::make_shared<MixedHuffmanCoder<std::string,
                                                      BitVectorType>>(counts3, counts2);
     using LabelCoderType = Coder<std::string, BitVectorType>;
@@ -86,14 +86,14 @@ class FSAMixedHuffmanEncoder: public FSAEncoder<BitVectorType>
     auto label_codebook = std::static_pointer_cast<LabelHuffmanType>(
         FSAEncoder<BitVectorType>::label_coder_)->get_codebook(
           std::static_pointer_cast<LabelAbstractType>(string_coder));
-    std::cout << label_codebook.size() << std::endl;
+//  std::cout << label_codebook.size() << std::endl;
     buffer.push_back(label_codebook);
 
     auto dest_coder = std::make_shared<DestCoderType>(new DestBaseCoderType);
     auto dest_codebook = std::static_pointer_cast<DestHuffmanType>(
         FSAEncoder<BitVectorType>::destination_coder_)->get_codebook(
           std::static_pointer_cast<DestAbstractType>(dest_coder));
-    std::cout << dest_codebook.size() << std::endl;
+//  std::cout << dest_codebook.size() << std::endl;
     buffer.push_back(dest_codebook);
   }
 

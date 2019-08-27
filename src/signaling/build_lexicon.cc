@@ -245,7 +245,7 @@ int main(int argc, char* argv[])
                                                    BVType>>(counts2);
   auto temp_string_coder = std::make_shared<HuffmanCoder<std::string,
                                                    BVType>>(counts1);
-
+/*
   size_t cnt=0, saved=0;
   for(auto [symbol, count]: counts1){
     if (temp_char_coder->value_size(symbol)<temp_string_coder->value_size(symbol)){
@@ -255,7 +255,7 @@ int main(int argc, char* argv[])
   }
   std::cout<<"cnt: "<<cnt<<std::endl;
   std::cout<<"saved: "<<saved<<std::endl;
-
+*/
   EncPtrType encoder{parsed.transition_compact
                      ? new FSAMixedHuffmanEncoder<BVType>(lexicon)
                      : new FSAEncoder<BVType>(lexicon)};
