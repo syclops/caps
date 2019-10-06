@@ -8,3 +8,4 @@ Feedback from Paul:
 
 - Fig.1, could generalize the "Censys" label to "certificate crawler" or something better. Currently unclear what aspect of Censys is being referred to (certificate database?)
 
+- Explain why we don't just take the top X sites from Alexa 
