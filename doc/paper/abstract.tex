@@ -1,21 +1,21 @@
 Many recent proposals to increase the resilience of the Web PKI against
 misbehaving CAs face significant obstacles to deployment. These hurdles include
 (1) the requirement of drastic changes to the existing PKI players and their
-interactions through many new roles and protocols, (2) the lack of signaling
-mechanisms that protect against downgrade attacks, and (3) the presence of
-inflexible mechanisms that hinder recovery from misconfiguration or the loss or
-compromise of private keys. As a result, despite their contributions to
-improving the security of the Web PKI, few of these proposals have seen
-widespread deployment, and many lack a viable deployment strategy. To address
-this roadblock, we propose Certificates with Automated Policies and Signaling
-(CAPS), a system that enables a seamless and secure transition from today's
-insecure Web PKI. CAPS leverages the infrastructure of the existing Web PKI to
-overcome the aforementioned hurdles, and also enables the incremental deployment
-of present and future proposals to improve the Web PKI. Specifically, we use
-public data sources and compression techniques to represent the set of all HTTPS
-domains with 169 MB, protecting domains against TLS stripping attacks. We also
-implement CAPS and show that its overhead in connection establishment latency is
-approximately 5\% more than that of current TLS handshakes. Through our design
-and implementation of CAPS, we show that it is possible to strengthen the
-existing PKI, and to set the stage for deploying new and improved PKI proposals
-in a practical and feasible way, despite the weaknesses of the current Web PKI.
+interactions, (2) the lack of signaling mechanisms that protect against
+downgrade attacks, (3) the lack of an incremental deployment strategy, and (4)
+the use of inflexible mechanisms that hinder recovery from misconfiguration or
+from the loss or compromise of private keys.  As a result, few of these
+proposals have seen widespread deployment, despite their promise of a more
+secure Web PKI.  To address these roadblocks, we propose Certificates with
+Automated Policies and Signaling (CAPS), a system that leverages the
+infrastructure of the existing Web PKI to overcome the aforementioned hurdles.
+CAPS offers a seamless and secure transition away from today's insecure Web PKI
+and towards present and future proposals to improve the Web PKI.  Crucially,
+with CAPS, domains can take simple steps to protect themselves from MITM
+attacks in the presence of one or more misbehaving CAs, and yet the interaction
+between domains and CAs remains fundamentally the same.  We implement CAPS and
+show that it adds at most 5\% to connection establishment latency.  Through our
+design and implementation of CAPS, we show that it is possible to strengthen
+the existing PKI, and to set the stage for deploying new and improved PKI
+proposals in a practical and feasible way, despite the weaknesses of the
+current Web PKI.
