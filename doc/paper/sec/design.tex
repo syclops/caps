@@ -302,8 +302,8 @@ large set of names, much of the redundancy in \httpsset can be removed with this
 approach. Additionally, \acp{dafsa} can also be represented succinctly, using an
 approach we summarize below~\cite{daciuk2012smaller}. Given the characteristics
 of our input set as described in \autoref{sec:evaluation:implementation}, we
-make two additional design changes to our \ac{dafsa} representation that further
-reduce its size.
+make an additional design change to our \ac{dafsa} representation that further
+reduces its size.
 
 \paragraph{Formal \ac{dafsa} Definition}
 
@@ -360,29 +360,6 @@ label and destination state, strongly influence the size of the final bitvector.
 We thus focus on leveraging patterns in the underlying data to minimize the size
 of the \ac{dafsa} representation.
 
-\paragraph{Transition Compaction}
-
-We extend the design of prior work using \emph{transition compaction}, which
-aims to minimize the \ac{dafsa} representation by reducing the representation
-size of each transition. A transition in the representation consists of a symbol
-and destination state. Because we found that both the symbols and destination
-states had a long-tailed distribution as described below and in
-\autoref{sec:evaluation:implementation}, we chose to represent both of these
-items using variable-length encodings. We represent each unique symbol in the
-\ac{dafsa} with a Huffman code.
-
-We found that by creating an ordering over all of the states in the \ac{dafsa}
-and considering the difference between the source and destination states with
-respect to their positions in the ordering, we could achieve a more compact
-representation of the destination state on average. Specifically, we used a
-Huffman code to encode the destination state as a number of states forward or
-backward in the ordering. To do this, we started at the initial state \initstate
-and performed a depth-first search, choosing each branch based on the longest
-path that could be formed by following the given transition. This ensured that
-the maximum number of transitions went from a given state to its following state
-in the ordering, reducing the entropy of the distribution and thus minimizing
-the representation size of the destination state.
-
 \paragraph{Path Compaction}
 
 \begin{figure}
@@ -393,7 +370,7 @@ the representation size of the destination state.
   \label{fig:dafsa_compact}
 \end{figure}
 
-We also extend the design of prior work with \emph{path compaction}, which
+We analso extend the design of prior work with \emph{path compaction}, which
 minimizes the \ac{dafsa} representation by reducing the overall number of
 transitions. Intuitively, path compaction removes a connected set of states from
 the \ac{dafsa} and replaces transitions into or out of this set with transitions
@@ -470,10 +447,10 @@ is, paths of the form $(s_1, \sigma_1, \ldots, s_m)$ where for all $i$ such that
 $1 < i < m$, $s_i$ only had one incoming and one outgoing transition. Because
 building the \ac{dafsa} as described in prior work resulted in a significant
 number of isolated paths, performing path compaction with all such paths
-resulted in a size savings of \steve{XX\%} of the original \ac{dafsa} size.
+resulted in a size savings of nearly 10\% of the original \ac{dafsa} size.
 We also found that selecting a constant $\alpha$ and then selecting components
 consisting entirely of states that had one incoming transition and $\alpha$
-outgoing transitions (or vice versa) yielded more modest but still significant
+outgoing transitions (or vice versa) yielded more modest but still nontrivial
 size reductions for $\alpha = 2$ and $\alpha = 3$.
 
 \subsection{Building the \ac{name} Policy Database}

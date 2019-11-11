@@ -31,19 +31,15 @@ March 26, 2013 to July 3, 2018.
 \begin{figure*}
   \centering
   \subfloat[Certs.]{
-    \includegraphics[width=0.33\linewidth]{fig/cert_count_valid}
+    \includegraphics[width=0.5\linewidth]{fig/cert_count_valid}
     \label{fig:count:certs}
   }
   \subfloat[Names.]{
-    \includegraphics[width=0.33\linewidth]{fig/name_count_valid}
+    \includegraphics[width=0.5\linewidth]{fig/name_count_valid}
     \label{fig:count:names}
   }
-  \subfloat[Domains.]{
-    \includegraphics[width=0.33\linewidth]{fig/name_count_valid}
-    \label{fig:count:domains}
-  }
-  \caption{Certificates, names, and domains in the Web \ac{pki} as seen by
-  Censys and \ac{ct}. \steve{The domains graphic is a placeholder for now.}}
+  \caption{Number of certificates and names in the Web \ac{pki} as seen by
+  Censys and \ac{ct}.}
   \label{fig:count}
 \end{figure*}
 
@@ -70,7 +66,7 @@ method, we isolated a set of 64,050,329 ``valid'' names that we used for testing
 \subsection{Signaling Set Representation}
 \label{sec:evaluation:implementation}
 
-As described in \autoref{sec:design}, my motivation for using \iac{dafsa}-based
+As described in \autoref{sec:design}, our motivation for using \iac{dafsa}-based
 representation of the signaling set was twofold: first, the representation has
 no false positives or negatives, and second, it can be searched in its
 compressed state, leading to a lower memory usage requirement for clients. To
@@ -84,7 +80,7 @@ of July 3, 2018) with a compressed representation using Bloom filters, the
 compression utility zpaq,\footnote{While we tested compression with other
   utilities, zpaq had the smallest size. Thus we used zpaq for the experiment to
   compare a near-best-case compression scenario.} and various configurations of
-my \ac{dafsa}-based representation. we also compressed the \ac{dafsa}-based
+our \ac{dafsa}-based representation. we also compressed the \ac{dafsa}-based
 representation using zpaq to find the size of the \ac{dafsa}-based
 representation on disk (as it would be used uncompressed in memory).
 
@@ -97,7 +93,7 @@ compression methods, 1 and 5, where method 1 completes in a short amount of time
 (25 seconds) but compresses the input less while method 5 takes a long time (20
 minutes) but yields excellent compression. Furthermore, with zpaq method 5, we
 tested with 64 MiB and 2048 MiB blocks, where larger blocks typically yield
-better compression. Finally, with my \ac{dafsa}-based representation, which
+better compression. Finally, with our \ac{dafsa}-based representation, which
 extends previous work~\cite{daciuk2012smaller}, we tested a plain encoding as
 well as an encoding of a path-compressed \ac{dafsa}, and compressed each of
 these encodings with zpaq method 5 using both block sizes.
@@ -128,7 +124,7 @@ these encodings with zpaq method 5 using both block sizes.
     DAFSA w/ zpaq (method 5, 64 MiB blocks) & 184 \\
     DAFSA w/ zpaq (method 5, 2048 MiB blocks) & 145 \\
     DAFSA w/ PC, zpaq (method 5, 64 MiB blocks) & 139 \\
-    DAFSA w/ PC, zpaq (method 5, 2048 MiB blocks) & 138 \\    
+    DAFSA w/ PC, zpaq (method 5, 2048 MiB blocks) & 138 \\
     \bottomrule
   \end{tabularx}
   \label{tab:signaling}
@@ -141,33 +137,120 @@ have false positives, which would leadto those domains becoming inaccessible.
 While zpaq in any configuration does not have any false positives or false
 negatives and yields excellent compression, its in-memory representation of the
 signaling set would simply be the uncompressed set of domains, yielding a memory
-requirement of 1.5 GB. My \ac{dafsa}-based representation captures a ``sweet
+requirement of 1.5 GB. Our \ac{dafsa}-based representation captures a ``sweet
 spot'' between these two alternatives, offering no false positives and, in the
 best case, an on-disk representation of just 138 MB with an in-memory
 representation of 170 MB.
+
+For some clients, an initial download size of 138 MB may be too much. One
+approach that such clients can take to protect themselves would be to only track
+sites that have more than one certificate, thus minimizing disk and memory usage
+in exchange for protection against \ac{tls} stripping attacks. To estimate
+clients' memory and disk usage in this case, we subsampled the full set of names
+and computed the size of the \ac{dafsa} with path compaction (which represents
+best-case memory usage in \ac{name}) and the size of the zpaq-compressed
+\ac{dafsa} (which represents the best-case disk usage).
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{fig/sample}
+  \caption{Sizes of signaling set in various representation when sampled from
+  the full set of names. The labels above each distinct value on the $x$-axis
+  denotes the fraction of the full set that was sampled.}
+  \label{fig:sample}
+\end{figure}
+
+\autoref{fig:sample} shows the results of this experiment. If the fraction of
+domains that use multiple independent certificate chains for the same name is
+small, as we would anticipate, then clients who opt for this approach can
+significantly reduce their memory and disk usage in \ac{name}. However, with
+smaller fractions, we can see that the advantage of the \ac{dafsa}-based
+approach over a list of names decreases. This makes sense, given that the
+\ac{dafsa} is designed to take advantage of common substrings (especially
+prefixes and suffixes) in a set.
+
+\subsection{Signaling Set Updates}
+\label{sec:evaluation:updates}
+
+\begin{figure*}[t]
+  \centering
+  \subfloat[Size of different representations of added names over time.]{
+    \includegraphics[width=0.5\linewidth]{fig/added_name_set_size}
+    \label{fig:updates:added}
+  }
+  \subfloat[Size of different representations of deleted names over time.]{
+    \includegraphics[width=0.5\linewidth]{fig/deleted_name_set_size}
+    \label{fig:updates:deleted}
+  }
+  \caption{Size of update sets over time.}
+  \label{fig:updates}
+\end{figure*}
+
+Because the signaling set will be updated over time, we also carried out an
+experiment to determine the size of updates over time. An update to the
+signaling set consists of a set of names that have been added to the signaling
+set since the most recent version, as well as a set of names that have been
+deleted due to certificate expiration or revocation. We computed the set of
+added and deleted names for our range of scans, aggregating these sets by week.
+We then computed the sizes of these sets in four different representations:
+\begin{inparaenum}[(1)]
+\item as an uncompressed text file of name strings,
+\item as a compressed zpaq archive containing the above file,
+\item as \iac{dafsa} of the set of strings, and
+\item as a compressed zpaq archive containing the above \ac{dafsa}.
+\end{inparaenum}
+For each method, we used the variant that produced the smallest representation;
+for example, we used the zpaq method that produced the smallest archive (method
+5 with 64 MiB blocks) and our \ac{dafsa} representation used path compaction.
+
+\autoref{fig:updates} shows the results of our experiment. As
+\autoref{fig:count} would indicate, the size of the signaling set has increased
+over time, and thus the set of added names is consistently larger than the set
+of deleted names. Given the relatively modest sizes of these sets compared to
+that of the full signaling set, the most space-efficient method for representing
+and transmitting these updates to clients is actually a zpaq-compressed archive
+of the raw text file of names rather than \iac{dafsa}-based representation. From
+a technical perspective, this method of transmission is also advantageous:
+clients can simply add the set of added names to their existing \ac{dafsa}, and
+build (and subsequently add to) a new \ac{dafsa} for the set of deleted names.
+Our results show that updates (added and deleted names) are typically between 2
+and 3 MB per week, which is reasonable for most modern Web clients.
+
+Releasing signaling set updates each week means that some false positives and
+false negatives are possible in \ac{name}, albeit under limited circumstances.
+Specifically, false positives (which render a domain inaccessible) are possible
+for up to a week, but only if a domain chooses to no longer serve its site over
+\ac{https}, lets its certificates expire, and does not inform the log
+aggregators in advance. False negatives (which enable \ac{tls} stripping
+attacks) are possible for up to a week, but only if a domain newly deploys
+\ac{https} by having a certificate issued and then immediately begins serving
+its site. Thus, not only are these pitfalls unlikely in practice, with advance
+planning and minimal effort, domains can avoid both of these situations.
 
 \subsection{Connection Establishment}
 \label{sec:evaluation:performance}
 
 \begin{figure*}[thb]
   \centering
-  \subfloat[vs Number of Proofs Requested]{
-    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/0-time_elapsed_vs_num_proofs_requested}
+  \subfloat[Proof count]{
+    \includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/0-time_elapsed_vs_num_proofs_requested}
     \label{fig:evaltlsext:numproof}
   }
-  \subfloat[vs Number of Chains Sent]{
-    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/1-time_elapsed_vs_num_chains_sent}
+  \subfloat[Chain count]{
+    \includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/1-time_elapsed_vs_num_chains_sent}
     \label{fig:evaltlsext:numchain}
   }
-  \subfloat[vs Number of Certificates per Chain]{
-    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/2-time_elapsed_vs_num_certs_per_chain}
+  \quad
+  \subfloat[Chain length]{
+    \includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/2-time_elapsed_vs_num_certs_per_chain}
     \label{fig:evaltlsext:numcert}
   }
-  \subfloat[vs Average Size of Chain]{
-    \includegraphics[width=0.24\linewidth]{fig/eval_tls_ext/3-time_elapsed_vs_avg_chain_size}
+  \subfloat[Chain size]{
+    \includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/3-time_elapsed_vs_avg_chain_size}
     \label{fig:evaltlsext:sizechain}
   }
-  \caption{Time elapsed during connection establishment.}
+  \caption{Handshake latency in different scenarios. Error bars represent
+  standard error.}
   \label{fig:evaltlsext}
 \end{figure*}
 

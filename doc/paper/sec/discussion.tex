@@ -1,34 +1,83 @@
 \section{Discussion}
 \label{sec:discussion}
 
-\steve{TODO}
+In this section, we discuss \ac{name} in a broader context, examining its
+reliance on the integrity of its data sources and its performance in
+the face of increasing \ac{https} adoption. We conclude with a discussion of
+future work.
 
-%\textbf{Data Source Integrity.} \ac{name} relies on the integrity of the data
-%sources (in our current prototype, Censys, and in the long term, the \ac{ct}
-%logs). Therefore, \iac{ca} who issues and publicizes an unauthorized certificate
-%for a domain that does not deploy \ac{https} can cause the domain to be included
-%in the signal set and thus render the domain inaccessible. This fragility
-%effectively allows an adversary to ``poison the well'' that \ac{name} relies on,
-%and execute a denial-of-service attack of indefinite duration with just a single
-%unauthorized certificate.
+\paragraph{Data Source Integrity}
 
-%Unfortunately, recovering from such an attack requires immediate action. The
-%affected domain could request that the \ac{ca} revoke the certificate if the
-%\ac{ca} issued the certificate in error. If the \ac{ca} deliberately misissued
-%the certificate, the browser vendor could treat the certificate as revoked
-%(though such action is unlikely unless the domain is popular). The affected
-%domain could also upgrade to \ac{https}, obtaining enough certificates to
-%override the misissued certificate. In the event that the domain wishes to
-%remain without \ac{https}, we can allow domains to set a policy flag that
-%signals that the domain will communicate over HTTP. The domain, however, must
-%still send this policy and proof during connection establishment.
+\ac{name} relies on the integrity of the data sources (in our current prototype,
+Censys, and in the long term, the \ac{ct} logs). Therefore, \iac{ca} who issues
+and publicizes an unauthorized certificate for a domain that does not deploy
+\ac{https} can cause the domain to be included in the signal set and thus render
+the domain inaccessible. This fragility effectively allows an adversary to
+``poison the well'' that \ac{name} relies on, and execute a denial-of-service
+attack of indefinite duration with just a single unauthorized certificate.
 
-%\textbf{Size of domain names.}
-%\begin{compactitem}
-%\item What can we do about the large number of domain names?
-%\item Ideas
-  %\begin{compactitem}
-  %\item Have separate FSAs for top sites overall or by country (likely small
-    %changes over time)
-  %\end{compactitem}
-%\end{compactitem}
+Unfortunately, recovering from such an attack requires immediate action. The
+affected domain could request that the \ac{ca} revoke the certificate if the
+\ac{ca} issued the certificate in error. If the \ac{ca} deliberately misissued
+the certificate, the browser vendor could treat the certificate as revoked
+(though such action is unlikely unless the domain is popular). The affected
+domain could also upgrade to \ac{https}, obtaining enough certificates to
+override the misissued certificate. In the event that the domain wishes to
+remain without \ac{https}, we can allow domains to set a policy flag that
+signals that the domain will communicate over HTTP. The domain, however, must
+still send this policy and proof during connection establishment.
+
+Work by certificate logs to mitigate situations such as this are ongoing. Some
+\ac{ct} logs, for example, only accept certificates from certain \acp{ca}, and
+nearly all of them perform some level of certificate validation, including
+checking whether a certificate is anchored in a known root certificate. We
+expect an attack that involves poisoning data sources in this way to be possible
+but rare, and an attacker seeking to carry out \iac{mitm} in this way has a
+higher hurdle for the attack to succeed than in today's Web \ac{pki}.
+
+\paragraph{Increasing \ac{https} Adoption}
+
+In the past several years, Let's Encrypt and other similar efforts to increase
+the use of \ac{https} in the Internet has caused a marked increase in the number
+of domain names that are served over \ac{tls}, as shown in
+\autoref{sec:evaluation:https}. Due to the structure of DNS, it is impossible to
+know how many domain names there are overall, and thus difficult to determine a
+ceiling for the number of names known to serve content over \ac{https}.
+Therefore, it is possible that the signaling set may grow to a size that is
+untenable for increasingly many clients.
+
+That being said, the vast majority of sites that people visit have already
+deployed \ac{https}, meaning that the full signaling set may only be required to
+protect \emph{all possible} \ac{https} connections. We can thus mitigate the
+memory and disk usage for clients by splitting the signaling set into several
+\ac{dafsa} representations based on popularity. This approach may be dependent
+on a client's region or self-selected categories of interest. While we
+acknowledge that such an approach makes a tradeoff of overhead for security as
+in \autoref{sec:evaluation:updates}, it provides a strategy that we can employ
+in the event that \ac{https} deployment increases to the point of
+impracticality.
+
+\paragraph{Future Work}
+
+One avenue of future exploration that is currently ongoing is that of
+\emph{transition compaction}, which aims to minimize our \ac{dafsa}
+representation by reducing the representation size of each transition. A
+transition in the representation consists of a symbol and destination state. We
+have found that in the current signaling set representation, the symbols and
+destination states had a long-tailed distribution. Thus by using variable-length
+encodings, we can reduce the overall size of each transition. One
+straightforward way to do so is via Huffman encoding, but the long-tailed
+distribution results in a Huffman dictionary whose size is significant enough to
+neutralize any space savings that would result. We are currently exploring the
+use of selecting a subset of symbols to Huffman encode. For destination states,
+we can assign an ordering of states in the \ac{dafsa} such that the difference
+to each destination state in the ordering is small and use integer encoding to
+represent the location of these states. We are currently exploring the
+possibility of vertex separators in graphs to address this problem.
+
+We also plan to examine the use of multiple \acp{dafsa}, collecting data on
+domain names including relative popularity, region, and category. We can then
+construct multiple \ac{dafsa} according to our existing approach, and evaluate
+disk space, memory usage, and connection latency (particularly if we dynamically
+load \acp{dafsa}). We note that some of the necessary data is available from services
+as Alexa Web Information Services and DNS resolvers.

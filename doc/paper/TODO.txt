@@ -2,10 +2,4 @@ Feedback from Paul:
 
 - [9] can be updated to TLS 1.3
 
-- end of section 1: the contributions bullets seem to undersell many of the excellent points made in the Introduction
-
-- there are a few leftover instances of "My" and "my" later in the paper
-
-- Fig.1, could generalize the "Censys" label to "certificate crawler" or something better. Currently unclear what aspect of Censys is being referred to (certificate database?)
-
 - Explain why we don't just take the top X sites from Alexa 
