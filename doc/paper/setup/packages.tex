@@ -11,9 +11,54 @@
 \usepackage{tabularx}  % For space-filling table columns
 \usepackage{xspace}  % For spacing after user-defined commands and others
 
+\usepackage[square,comma,numbers,sort&compress]{natbib}      % Offers more control over citation appearance and bib spacing
 \usepackage[hyphens]{url}  % To make URLs display correctly in citations. The
                            % hyphens option allows line breaks after hyphens.
-\usepackage[draft]{hyperref}  % Hyperlinks in citations and references
 
 \setdefaultenum{\bf (1)}{\bf (a)}{\bf (i)}{\bf (A)}  % Ensures that
                                 % enumerations use bolded numbering
+
+%%%%%%%%% Create hyperlinks and bookmarks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PDF
+\usepackage{hyperref}
+\hypersetup{
+%\ifpdf
+%        pdftex,
+%\else
+%        dvipdf,
+%\fi
+  %pdftex,              % using ps2pdf vs pdftex
+  %ps2pdf,              % using ps2pdf vs pdftex
+        %hypertex,
+  colorlinks=true,     % color the words instead of use a colored box
+  urlcolor=blue,       % \href{...}{...} external (URL)
+%  filecolor=blue,      % \href{...} local file
+  linkcolor=blue,     % \ref{...} and \pageref{...}
+  citecolor=blue,     % \cite{}
+% letterpaper=true,
+  plainpages=false,
+%    plainpages          boolean         true
+%    Forces page anchors to be named by the arabic form of the page number,
+%    rather than the formatted form.
+  breaklinks=true,
+%    breaklinks          boolean         false
+%    Allows link text to break across lines; since this cannot be accommodated in
+%    PDF, it is only set true by default if the pdftex driver is used. This makes
+%    links on multiple lines into different PDF links to the same target.
+% pagebackref=true,
+%     Adds ?backlink? text to the end of each item in the bibliography, as a list
+%     of section numbers. This can only work properly if there is a blank line
+%     after each \bibitem.
+  bookmarksnumbered=true,
+%    bookmarksnumbered   boolean         false
+%    If Acrobat bookmarks are requested, include section numbers.
+  bookmarksopen=true,
+%    bookmarksopen       boolean         false
+%    If Acrobat bookmarks are requested, show them with all the subtrees expanded.
+  pdftitle={},
+  pdfauthor={},
+  pdfkeywords={},
+% pdfpagelabels=true,
+  pdfpagemode=UseOutlines  % None, UseThumbs, UseOutlines, FullScreen
+  }
+

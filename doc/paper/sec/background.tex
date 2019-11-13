@@ -1,7 +1,7 @@
 \section{Background and Related Work}
 \label{sec:background}
 
-In this section, we provide a brief overview of the related work in
+We provide a brief overview of the work related to the
 three problems we address in this paper: tracking Web certificates, enforcing
 the use of \ac{https}, and improving the certificate issuance and validation
 processes.
@@ -19,19 +19,18 @@ received in these handshakes, Censys provides a database of their contents as
 well as metadata such as whether the certificate would be considered valid in
 various Web browsers or operating systems.
 
-\acf{ct} is a project focused on widespread publicization of certificate
-issuance~\cite{rfc6962}. \ac{ct} introduces new roles to the \ac{ca}-based
-ecosystem, most notably \emph{certificate logs}, who record nearly\endnote{A
-  log records all certificates submitted with chains rooted in \iac{ca} trusted
-by the log.} all certificates encountered by Web users. Logs maintain an
-auditable, append-only, and tamper-proof database~\cite{crosby2009efficient} of
+\acf{ct} publicizes certificate issuance~\cite{rfc6962}. 
+\ac{ct} introduces new roles to the \ac{ca}-based
+ecosystem, most notably \emph{certificate logs}, 
+which log Web certificates issues by CAs or encountered by Web users.
+Logs maintain an auditable, append-only, and tamper-proof database~\cite{crosby2009efficient} of
 these certificates based on Merkle hash trees~\cite{merkle1988digital}. Web
-clients that support \ac{ct} reject any certificate without proof that it has
+clients that support \ac{ct} reject any certificate that lacks proof that it has
 been logged. Typically, \acp{ca} send certificates to a log before issuing them,
 and include a receipt from the log called a \emph{\ac{sct}} as an X.509
 extension in the issued certificate. However, anyone can submit certificates to
 a log, and clients can also accept \acp{sct} sent in an extension to the
-\ac{tls} handshake protocol.\endnote{Two extensions may be used: a
+\ac{tls} handshake protocol.\footnote{Two extensions may be used: a
 \iac{ct}-specific extension or the Certificate Status Request extension, also
 known as OCSP stapling~\cite{rfc6066}}
 
@@ -61,7 +60,7 @@ limited set of sites.
 
 \ac{https} Everywhere is a Web browser extension that rewrites HTTP requests to
 \ac{https} requests for certain sites confirmed to serve over
-\ac{https}.\endnote{\url{https://www.eff.org/https-everywhere/}} The extension
+\ac{https}.\footnote{\url{https://www.eff.org/https-everywhere/}} The extension
 uses a list of regular expressions as the base for its rules, which determine
 when to rewrite a request. Because additions to this list are typically
 suggested to the developers by members of the public, there may be a delay
@@ -76,7 +75,7 @@ covers a limited set of sites, though it covers a larger set of sites than does
 Smart \ac{https} is a Web browser extension that simply rewrites \emph{all} HTTP
 requests to \ac{https} requests, and only uses HTTP if it encounters an error
 during the \ac{https} connection
-attempt.\endnote{\url{https://mybrowseraddon.com/smart-https.html}} Smart
+attempt.\footnote{\url{https://mybrowseraddon.com/smart-https.html}} Smart
 \ac{https} does not distinguish between errors such as certificate errors or the
 page not being found; any error will cause a fallback to HTTP. If the extension
 encounters such an error, the site is added to a whitelist to avoid future
@@ -314,7 +313,7 @@ downgrade handshakes to the current, vulnerable \ac{pki}.
 %of the most popular sites that have deployed \ac{https}. These lists are
 %incomplete (covering only \steve{TODO: fill in} names in Chrome), and domains
 %must explicitly opt into adding themselves. As indicated by vendor-provided
-%guidelines,\endnote{\url{https://hstspreload.org/}} this process is prone to
+%guidelines,\footnote{\url{https://hstspreload.org/}} this process is prone to
 %mistakes by domain operators that lead to site inaccessibility.
 
 %As described in \steve{TODO: refer to previous section if mentioned elsewhere},
@@ -342,7 +341,7 @@ downgrade handshakes to the current, vulnerable \ac{pki}.
 %standardization in 2011 and DNSSEC's in 2005, only 5,885 DANE records for
 %\ac{https} and 1.67M verified DNSSEC zones out of more than 329M registered DNS
 %names overall~\cite{dnib-14-1}
-%exist.\endnote{\url{http://secspider.verisignlabs.com/stats.html}, retrieved 1
+%exist.\footnote{\url{http://secspider.verisignlabs.com/stats.html}, retrieved 1
 %August 2017} Changing these numbers would require significant deployment efforts
 %on the parts of domains, including registering domain names through the subset
 %of DNS registrars that offer DNSSEC, usually as a paid service.

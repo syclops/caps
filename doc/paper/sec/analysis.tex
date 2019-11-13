@@ -48,7 +48,7 @@ of $\policy - 1$ \acp{ca}, we know that the adversary controls \emph{at least}
 $\policy - 1$ private keys. From this assumption, however, we also know that the
 number of \emph{independent} certificate chains that the adversary can generate
 is \emph{at most} $\policy - 1$. It is straightforward to show this by induction
-on \policy, with $\policy = 2$ as the base case.\endnote{Note that the $\policy
+on \policy, with $\policy = 2$ as the base case.\footnote{Note that the $\policy
 = 1$ case is equivalent to the current Web \ac{pki} (i.e., the domain only
 provides a single certificate chain).} If the adversary generates $\policy - 1$
 independent certificate chains for $\pk_\adversary$ and sends these chains with
@@ -90,7 +90,7 @@ to consequences such as the revocation of the \ac{ca} certificate by its issuing
 \iac{ca} signing key can carry out this attack; while Let's Encrypt does provide
 free certificates through an automatic protocol, it imposes a rate limit per
 domain based on the Public Suffix
-List,\endnote{\url{https://publicsuffix.org/}} thus requiring an adversary
+List,\footnote{\url{https://publicsuffix.org/}} thus requiring an adversary
 without access to \iac{ca} signing key to obtain many domain names to carry out
 this attack.
 

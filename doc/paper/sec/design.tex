@@ -100,7 +100,7 @@ To allow domains to certify their public keys more securely than in the current
 \emph{\ac{name} policies}, which allows each domain to establish an
 \emph{authoritative public key} in the \emph{curent} Web \ac{pki}. \ac{name}
 policies take a simple and intuitive approach: \emph{treat whichever public key
-  is backed by the most independent certificate chains\endnote{This term means
+  is backed by the most independent certificate chains\footnote{This term means
   that the certificate chains share no public keys except at the leaf.} in the
 current \ac{pki} as authoritative in the improved \ac{pki}}. A domain wanting to
 increase client confidence in one of its public keys can then simply obtain more
@@ -110,7 +110,7 @@ independent certificates for that key, and the log aggregators will update their
 Intuitively, log aggregators simply send a signed pair $(\hostname, \policy)$
 where \hostname is a domain name and \policy is the \emph{\ac{name} policy
   value}, the number of independent certificate chains backing an authoritative
-  key for \hostname.\endnote{\hostname may have more than one authoritative
+  key for \hostname.\footnote{\hostname may have more than one authoritative
   key; if public keys $\pk_1$ and $\pk_2$ are both backed by three independent
 chains, for example, then both of their public keys are treated as authoritative
 for \hostname.} To prevent an adversary from downgrading handshakes in the
@@ -122,7 +122,7 @@ greater than 1.
 %highest number of observed independent certificate chains for a given domain,
 %then \emph{any} public key backed by $n$ chains can be used as that domain's in
 %the improved \ac{pki}. Thus, it is possible for a domain to have multiple public
-%keys in the improved \ac{pki}.\endnote{In practice, any improved \ac{pki} can
+%keys in the improved \ac{pki}.\footnote{In practice, any improved \ac{pki} can
 %enforce the use of a single public key by, for example, considering the first
 %key backed by $n$ chains as authoritative and using a ``cool-off period'' as in
 %AKI~\cite{kim2013accountable}.}
@@ -213,7 +213,7 @@ The signaling set represents
   public key in the Web \ac{pki}).
 \end{inparaenum}
 Formally, the signaling set is a pair $(\httpsset, \multicertset)$ where
-\httpsset and \multicertset are unordered sets of valid\endnote{A valid
+\httpsset and \multicertset are unordered sets of valid\footnote{A valid
   name is a Unicode or ASCII string up to 253 bytes in length overall, and
   has no label longer than 63 bytes~\cite{rfc1035}. We further added the
 requirement that the name has \iac{tld} that is a current global \ac{tld}
@@ -243,7 +243,7 @@ using information from public sources, namely,
 \item revocation information retrieved from OCSP responders~\cite{rfc6960}.
 \end{inparaenum}
 The log aggregator updates this database regularly (e.g., each day), thus
-maintaining a list of certificates valid on a given day.\endnote{A certificate
+maintaining a list of certificates valid on a given day.\footnote{A certificate
   is valid on a given day if the signature on the certificate is valid and if
   that day falls in the certificate's validity period as defined by its
 \texttt{notBefore} and \texttt{notAfter} fields~\cite{rfc5280}.}
@@ -346,7 +346,7 @@ work~\cite{daciuk2000incremental}. Though this previous work assumes transitions
 based on a single character, we consider the possibility of multi-character
 symbols and thus our symbol set $\symbolstrings = \bigcup_{i=0}^{253}
 \symbols^i$, where \symbols is the set of all ASCII characters allowed in domain
-names.\endnote{Recall that DNS names can be a maximum of 253 characters.}
+names.\footnote{Recall that DNS names can be a maximum of 253 characters.}
 
 We succinctly represent this \ac{dafsa} as a bitvector by following the
 high-level approach of previous work~\cite{daciuk2012smaller}. Intuitively, we
@@ -500,7 +500,7 @@ The log aggregator constructs this name-to-policy mapping each time it receives
 data from public sources (recall from \autoref{sec:design:signaling} that this
 occurs at regular, scheduled intervals). Once it has created the mapping, the log
 aggregator certifies the name--policy-value pairs in this mapping by
-timestamping and signing them.\endnote{For efficiency, the log aggregator can
+timestamping and signing them.\footnote{For efficiency, the log aggregator can
   sign a subset of pairs each day, and have each client consider a signature
   valid for multiple update intervals. For example, the log aggregator could
   sign a third of the pairs each day, and clients could treat a signed,

@@ -78,9 +78,9 @@ this bit, the remaining signaling information can be communicated as an
 extension to the \ac{tls} handshake. Because existing solutions for indicating
 \ac{https} deployment require the client to trust its first connection to the
 domain, they have lagged in deployment~\cite{rfc4033, rfc6698}, and add
-significant storage overhead\endnote{\url{https://www.eff.org/https-everywhere}}
+significant storage overhead\footnote{\url{https://www.eff.org/https-everywhere}}
 or connection
-latency.\endnote{\url{https://mybrowseraddon.com/smart-https.html}} Instead, we
+latency.\footnote{\url{https://mybrowseraddon.com/smart-https.html}} Instead, we
 use data compression techniques and compact data structures to locally store at
 each client a succinct summary of the \emph{entire} set of domains that deploy
 \ac{https}; with our techniques, it requires less than 200~MB 
@@ -123,7 +123,7 @@ Even without considering wholly new \acp{pki}, \ac{name} is attractive from a
 deployment standpoint. In particular, the administrative burden of deployment
 for domains is limited to purchasing additional certificates, and with the use
 of free certificate services like Let's
-Encrypt,\endnote{\url{https://letsencrypt.org/}} the financial burden can be
+Encrypt,\footnote{\url{https://letsencrypt.org/}} the financial burden can be
 minimized as well. Furthermore, \ac{name} is an opt-in system, meaning that only
 domains who choose to obtain additional certificates incur a cost. From its
 initial deployment, \ac{name} protects all domains from \ac{tls} stripping, and
