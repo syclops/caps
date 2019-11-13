@@ -24,22 +24,26 @@ various Web browsers or operating systems.
 ecosystem, most notably \emph{certificate logs}, 
 which log Web certificates issues by CAs or encountered by Web users.
 Logs maintain an auditable, append-only, and tamper-proof database~\cite{crosby2009efficient} of
-these certificates based on Merkle hash trees~\cite{merkle1988digital}. Web
-clients that support \ac{ct} reject any certificate that lacks proof that it has
-been logged. Typically, \acp{ca} send certificates to a log before issuing them,
-and include a receipt from the log called a \emph{\ac{sct}} as an X.509
-extension in the issued certificate. However, anyone can submit certificates to
-a log, and clients can also accept \acp{sct} sent in an extension to the
-\ac{tls} handshake protocol.\footnote{Two extensions may be used: a
+these certificates based on Merkle hash trees~\cite{merkle1988digital}. 
+Domains typically obtain a proof that their certificate
+has been logged, and they send that proof to clients during 
+the TLS handshake inside a \ac{tls} extension.\footnote{Two extensions may be used: a
 \iac{ct}-specific extension or the Certificate Status Request extension, also
 known as OCSP stapling~\cite{rfc6066}}
+CT-enabled clients reject certificates that are not accompanied by such a proof.
+%reject any certificate that lacks proof that it has
+%been logged. 
+%Typically, \acp{ca} send certificates to a log before issuing them,
+%and include a receipt from the log called a \emph{\ac{sct}} as an X.509
+%extension in the issued certificate. However, anyone can submit certificates to
+%a log, and clients can also accept \acp{sct} sent in an extension to the
+%\ac{tls} handshake protocol
 
 Censys and \ac{ct} can be used in conjunction to provide a reasonably complete
 view of the Web's \ac{https} ecosystem, particularly with regards to the number
-of \acsp{fqdn}~\cite{vandersloot2016towards}. While such coverage does miss some
-domains known to deploy \ac{https}, this global view has proved useful for
-applications such as efficiently representing the set of all revoked
-certificates~\cite{larisch2017crlite}.
+of \acsp{fqdn}~\cite{vandersloot2016towards}. 
+Previous work has used this view to efficiently represent 
+the set of all revoked certificates~\cite{larisch2017crlite}.
 
 \subsection{Enforcing \ac{https}}
 
@@ -92,7 +96,7 @@ providing alternate or additional mechanisms by which domains can authenticate
 their public keys to clients. We focus on two approaches: public-key pinning and
 log-based authentication.
 
-Public-key pinning is \iac{tofu} approach that, similarly to \ac{hsts}, allows a
+Public-key pinning is \iac{tofu} approach that, similar to \ac{hsts}, allows a
 domain to provide directives to clients during client validation of public keys.
 Rather than communicate simply that the client should use HTTPS, however,
 public-key pinning communicates a set of public keys that should be used when
@@ -105,10 +109,10 @@ checking public keys for the domain~\cite{marlinspike2013trust}. For security,
 these approaches deliberately make it difficult to prematurely remove or update
 a pin for a domain. This feature makes it easy for domains to become
 inaccessible due to misconfiguration or malicious behavior, and in 2017,
-\ac{hpkp} was slated for removal from Google Chrome, due in part to these
-pitfalls~\cite{palmer2017intent}. (\ac{tack} was never widely adopted.)
+\ac{hpkp} removed from Google Chrome, due in part to these
+pitfalls~\cite{palmer2017intent}. \ac{tack} was never widely adopted.
 
-Log-based authentication extends functionality of \ac{ct} to enable logs to
+Log-based authentication extends the functionality of \ac{ct} to enable logs to
 provide or authenticate public-key information for a domain.
 AKI~\cite{kim2013accountable}, its successor ARPKI~\cite{basin2014arpki}, and
 CIRT~\cite{ryan2014enhanced} have logs directly provide public-key information
@@ -123,7 +127,7 @@ changes to the certificate issuance process. In particular, these systems
 typically require multiple \acp{ca} to coordinate to issue a certificate, and in
 the event of misconfiguration or impersonation by an adversary, these systems,
 like public-key pinning, do not offer a quick, simple path for recovery.
-Furthermore, these systems propose limited deployment strategies, expecting all
+Furthermore, these systems offer limited deployment strategies, expecting all
 domains to switch to the new \ac{pki} at once or allowing adversaries to
 downgrade handshakes to the current, vulnerable \ac{pki}.
 
