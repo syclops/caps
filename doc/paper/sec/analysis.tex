@@ -13,8 +13,9 @@ used) make these weaknesses difficult or impossible to exploit.
 
 In making our main security claim, we assume that the client requests \numlas
 policy proofs and that the domain has a domain name of \domain and a policy
-value of \policy. We assume that both the client and domain follow the handshake
-protocol as described. We also assume that our adversary controls $\numlas - 1$
+value of \policy. 
+%We assume that both the client and domain follow the handshake protocol as described. 
+We also assume that our adversary controls $\numlas - 1$
 private keys of log aggregators and the private keys of $\policy - 1$ \acp{ca},
 and we assume that the adversary is the sole entity that controls the private
 key corresponding to a public key $\pk_\adversary$. We assume that the adversary
@@ -24,15 +25,15 @@ information it has using its private keys. We also assume that the adversary
 cannot obtain a certificate binding \domain to $\pk_\adversary$ from any \ac{ca}
 besides the ones it controls. Under these assumptions, we claim that the client
 will abort the handshake protocol if it receives any certificate chain
-containing $\pk_\adversary$ as the leaf public key. The truth of this claim
+containing $\pk_\adversary$ as the leaf public key. This claim 
 guarantees the security of \ac{name} because the adversary cannot mount a
 \ac{mitm} attack without the client completing the \ac{name} handshake based on
 a key that the adversary controls.
 
 We first show that the adversary cannot convince the client that that the domain
 has a policy value other than \policy. Because the client requests \numlas
-policy proofs for \domain, the client will abort the handshake if the extension
-data in the ServerHello message does not contain \numlas independent policy
+policy proofs for \domain, the client will abort the handshake if the 
+ServerHello message does not contain \numlas independent policy
 proofs. Because we assume that the adversary only has access to $\numlas - 1$
 log aggregator signing keys, we know that the adversary cannot use those keys to
 generate \numlas independent proofs. Specifically, if the adversary sends a set
@@ -40,23 +41,23 @@ of proofs and there are fewer than \numlas valid proofs, or if any of them fails
 to prove that \policy is the policy value for \domain, then the client will
 abort the handshake.
 
-Recall that the client determines \policy as the one plus the number of valid,
-independent certificate chains sent in the extension message. We show that the
-adversary cannot convince the client that the $\pk_\adversary$ is the domain's
-public key. From our assumption that the adversary can access the signing keys
-of $\policy - 1$ \acp{ca}, we know that the adversary controls \emph{at least}
-$\policy - 1$ private keys. From this assumption, however, we also know that the
-number of \emph{independent} certificate chains that the adversary can generate
+%Recall that the client determines \policy as the one plus the number of valid,
+%independent certificate chains sent in the extension message. We show that the
+%adversary cannot convince the client that the $\pk_\adversary$ is the domain's
+%public key. From our assumption that the adversary can access the signing keys
+%of $\policy - 1$ \acp{ca}, we know that the adversary controls \emph{at least}
+%$\policy - 1$ private keys. 
+
+From our assumption that the adversary can access the signing keys
+of $\policy - 1$ \acp{ca},
+we know that the number of \emph{independent} certificate chains that the adversary can generate
 is \emph{at most} $\policy - 1$. It is straightforward to show this by induction
 on \policy, with $\policy = 2$ as the base case.\footnote{Note that the $\policy
 = 1$ case is equivalent to the current Web \ac{pki} (i.e., the domain only
 provides a single certificate chain).} If the adversary generates $\policy - 1$
-independent certificate chains for $\pk_\adversary$ and sends these chains with
-the policy proofs in the extension message, then the client will proceed with
-the handshake. However, the adversary will be unable to generate a final
-independent certificate chain to send with the ServerCertificate message,
-causing the client to abort the handshake at that point.
-
+independent certificate chains for $\pk_\adversary$ and sends these chains to
+the client, the client will validate the chains, but abort the handshake when
+the $\policy^{th}$ independent chain never arrives.
 
 \subsection{Potential Weaknesses}
 \label{sec:analysis:weaknesses}
