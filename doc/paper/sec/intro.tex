@@ -40,7 +40,7 @@ preemptive, robust protection against misbehaving \acp{ca} and a feasible,
 secure deployment strategy. In particular, while systems like Google's \ac{ct}
 project~\cite{rfc6962} enjoy relatively widespread deployment, they only enable
 detection, not prevention, of unauthorized certificate issuance. Systems that do
-prevent unauthorized certificate issuance add new trusted
+prevent unauthorized certificate issuance either add new trusted
 parties~\cite{kim2013accountable}, require domains to deploy complex new
 infrastructure~\cite{rfc6698, szalachowski2014policert}, significantly increase
 latency and communication~\cite{yu2016dtki}, or require all domains to increase
@@ -48,7 +48,7 @@ their security level at once~\cite{basin2014arpki}. Many of these systems also
 require \acp{ca} to drastically change their operational processes or require
 domains to undergo a complex and error-prone deployment process in which
 mistakes are difficult to fix. For example, public-key pinning~\cite{rfc7469}
-had many misconfigurations that rendered domains inaccessible; as a result,
+resulted in many misconfigurations that rendered domains inaccessible; as a result,
 Google recently decided to remove support for it~\cite{palmer2017intent}.
 
 To address these shortcomings, we propose \ac{name}, a system that provides a
@@ -70,7 +70,7 @@ that have historically been reluctant to deploy major changes.
 First, because the Web \ac{pki} encompasses a vast set of domains with diverse
 security needs, few changes to the \ac{pki} will be universally adopted
 overnight. Thus we must have a \emph{signaling mechanism} to indicate which
-domains have adopted a new \ac{pki} enhancement. In part, we convey this signal
+domains have adopted a new \ac{pki} enhancement. \ac{name} conveys this signal
 with the use of a single bit that indicates whether a domain supports
 \ac{https}. Without this bit \ac{tls} stripping~\cite{marlinspike2009new} can
 occur, causing the client to ignore even the existing \ac{pki}. With the use of
@@ -83,7 +83,9 @@ or connection
 latency.\endnote{\url{https://mybrowseraddon.com/smart-https.html}} Instead, we
 use data compression techniques and compact data structures to locally store at
 each client a succinct summary of the \emph{entire} set of domains that deploy
-\ac{https}; with our techniques, it requires less than 200 MB.
+\ac{https}; with our techniques, it requires less than 200~MB 
+(and Section~\ref{sec:evaluation:implementation} discusses additional options 
+to reduce this overhead).
 
 We also observe that all known instances of \ac{ca} misbehavior up to this point
 have involved a single misbehaving \ac{ca}.  Hence, \ac{name} allows a domain to
@@ -128,22 +130,17 @@ initial deployment, \ac{name} protects all domains from \ac{tls} stripping, and
 it allows non-deploying domains to coexist with deploying domains without
 enabling downgrade attacks.
 
-In summary, we make the following contributions:
+In summary, we make the following contributions.
 \begin{compactitem}
-\item We show how we can use a global, near-complete view of certificates in the
-  Web \ac{pki}, as well as techniques from data compression and compact data
-  structures to succinctly represent the set of \emph{all} domains that serve
-  \ac{https} requests.
-\item We show how using the global view of certificates, along with the above
-  set and an authenticated database service, can be used to communicate the
-  maximum number of independent certificate chains observed for each domain in a
-  way that prevents \ac{tls} stripping and downgrade attacks while avoiding the
-  pitfalls of key pinning.
-\item We show that the above, which comprises \ac{name}, can be implemented in a
-  backwards-compatible way and be used to smoothly and securely transition to a
-  more resilient Web \ac{pki}.
-\item We demonstrate through an evaluation that the client-side overhead for
-  \ac{name} in terms of storage, memory, and connection establishment latency is
-  modest for the vast majority of use cases.
+\item We present the design on \ac{name}, which provides an incrementally deployable,
+      backwards compatible path to a more resilient Web PKI.
+\item We show how a security policy based on the number of independent certificate chains
+      a domain can obtain strikes the right balance between automation, 
+      resilience to attack, and robustness to domain errors (including private key loss).
+\item We combine a global view of Web certificates with techniques from data
+      compression and compact data structures to succinctly signal \ac{https} deployment
+\item We demonstrate through an implementation and evaluation that the client-side overhead for
+      \ac{name} in terms of storage, memory, and connection-establishment latency is
+      modest. 
 \end{compactitem}
 
