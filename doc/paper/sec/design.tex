@@ -401,17 +401,15 @@ to determine how we should select a set of nodes to ensure a minimal \ac{dafsa}
 representation.
 
 Given \iac{dafsa} $(\symbols, \states, \initstate, \transfunc, \finalstates)$,
-we define a \emph{walk} between $s_1$ and $s_m$ to be a sequence of alternating
+we define a \emph{path} between $s_1$ and $s_m$ to be a sequence of alternating
 states in \states and symbols in \symbols, written $(s_1, \sigma_1, \ldots,
-s_m)$, where for all $i$ where $1 \le i < m$, either $\transfunc(s_i, \sigma_i)
-= s_{i+1}$ or $\transfunc(s_{i+1}, \sigma_i) = s_i$ (i.e., a walk treats the DAFSA's
-edges as undirected).
-A walk where
-$\transfunc(s_i, \sigma_i) = s_{i+1}$ for all $i$ where $1 \le i < m$ is called
-a \emph{path} from $s_1$ to $s_m$. We say that a set of states $\stateset
+s_m)$, where for all $i$ where $1 \le i < m$, $\transfunc(s_i, \sigma_i)
+= s_{i+1}$.
+We say that a set of states $\stateset
 \subseteq \states$ is a \emph{connected component} if either $\stateset
 \subseteq \finalstates$ or $\stateset \cap \finalstates = \varnothing$, and for
-any two states $t, u \in \stateset$, there exists a walk between $t$ and $u$.
+any two states $t, u \in \stateset$, 
+any path between $t$ and $u$ contains only states in $\stateset$.
 The \emph{upstream states} of a connected component \stateset, written
 \upstream{\stateset}, is the set of all states $s \in \states \setminus
 \stateset$ for which there exists a state $t \in \stateset$ and a symbol
