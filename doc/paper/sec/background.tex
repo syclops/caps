@@ -10,7 +10,7 @@ processes.
 
 Censys is a project and now a company that seeks to provide insights into
 network devices and infrastructure using scans of the public IPv4 address
-space~\cite{durumeric2015search}. At its core, Censys processes data from
+space~\cite{durumeric2015search}. At its core, Censys uses and augments data from
 ZMap~\cite{durumeric2013zmap} and provides a search engine to users. In the
 context of the Web \ac{pki}, Censys provides records of periodic \ac{tls}
 handshake attempts to the entirety of the public IPv4 address space on port 443
@@ -22,12 +22,12 @@ various Web browsers or operating systems.
 \acf{ct} publicizes certificate issuance~\cite{rfc6962}. 
 \ac{ct} introduces new roles to the \ac{ca}-based
 ecosystem, most notably \emph{certificate logs}, 
-which log Web certificates issues by CAs or encountered by Web users.
+which log Web certificates issued by CAs or encountered by Web users.
 Logs maintain an auditable, append-only, and tamper-proof database~\cite{crosby2009efficient} of
 these certificates based on Merkle hash trees~\cite{merkle1988digital}. 
 Domains typically obtain a proof that their certificate
 has been logged, and they send that proof to clients during 
-the TLS handshake inside a \ac{tls} extension.\footnote{Two extensions may be used: a
+the TLS handshake inside a \ac{tls} extension.\footnote{Two extensions may be used: 
 \iac{ct}-specific extension or the Certificate Status Request extension, also
 known as OCSP stapling~\cite{rfc6066}}
 CT-enabled clients reject certificates that are not accompanied by such a proof.
@@ -40,8 +40,8 @@ CT-enabled clients reject certificates that are not accompanied by such a proof.
 %\ac{tls} handshake protocol
 
 Censys and \ac{ct} can be used in conjunction to provide a reasonably complete
-view of the Web's \ac{https} ecosystem, particularly with regards to the number
-of \acp{fqdn}~\cite{vandersloot2016towards}. 
+view of the Web's \ac{https} ecosystem, particularly the \acp{fqdn}~\cite{vandersloot2016towards}
+of sites deploying HTTPS.
 Previous work has used this view to efficiently represent 
 the set of all revoked certificates~\cite{larisch2017crlite}.
 
@@ -57,7 +57,7 @@ policy remains active) in the \ac{https} response headers. \ac{hsts} is
 \emph{\ac{tofu}}, meaning that the adversary can mount \iac{mitm} attack, but
 only when a client connects to a site over HTTP without a strict transport
 policy in place. To mitigate this vulnerability, Web browsers (mainly Chrome)
-maintain an \emph{\ac{hsts} preload list}, which are lists of names that the
+maintain an \emph{\ac{hsts} preload list}, which lists names that the
 browser will always contact via \ac{https}, even on first use. This approach,
 however, cannot scale as-is to all \ac{https} sites, and thus only protects a
 limited set of sites.
@@ -71,7 +71,7 @@ suggested to the developers by members of the public, there may be a delay
 between when a site newly deploys \ac{https} and when \ac{https} Everywhere
 begins enforcing rules for that site. Due to this delay and to similar
 scalability limits as with \ac{hsts} preloading, \ac{https} Everywhere only
-covers a limited set of sites, though it covers a larger set of sites than does
+covers a limited set of sites, though a larger set than does
 \ac{hsts} preloading.
 %\steve{Add a reference to a graphic in \autoref{sec:evaluation} that justifies
 %the claim in the previous sentence.}
@@ -83,7 +83,7 @@ attempt.\footnote{\url{https://mybrowseraddon.com/smart-https.html}} Smart
 \ac{https} does not distinguish between errors such as certificate errors or the
 page not being found; any error will cause a fallback to HTTP. If the extension
 encounters such an error, the site is added to a whitelist to avoid future
-request errors that would increase page load times for the end user. In addition
+request errors that would increase page load times. In addition
 to poor performance on the first connection to an HTTP site, the extension only
 maintains a list of encountered HTTP sites, making \iac{mitm} attack trivial. An
 adversary can simply intercept and block the \ac{https} request to cause Smart
@@ -104,12 +104,12 @@ authenticating a client public key. \ac{hpkp} allows a domain to specify hashes
 of public key information for one or more certificates in the domain's
 certificate chain, thus binding those keys to the domain name for use in future
 connections~\cite{rfc7469}. \ac{tack} allows a domain to specify a separate
-public key that the client should treat similarly to \iac{ca} public key when
-checking public keys for the domain~\cite{marlinspike2013trust}. For security,
+public key that the client should treat as a trust anchor (similar to a \iac{ca} public key) 
+when checking public keys for the domain~\cite{marlinspike2013trust}. For security,
 these approaches deliberately make it difficult to prematurely remove or update
 a pin for a domain. This feature makes it easy for domains to become
 inaccessible due to misconfiguration or malicious behavior, and in 2017,
-\ac{hpkp} removed from Google Chrome, due in part to these
+\ac{hpkp} was removed from Google Chrome, due in part to these
 pitfalls~\cite{palmer2017intent}. \ac{tack} was never widely adopted.
 
 Log-based authentication extends the functionality of \ac{ct} to enable logs to
@@ -124,11 +124,11 @@ by directly listing the public keys of a domain, or simply list a set of
 can provide strong security guarantees (ARPKI, for example, protects against
 \ac{mitm} attacks despite the failure of $n$ \acp{ca}), they require significant
 changes to the certificate issuance process. In particular, these systems
-typically require multiple \acp{ca} to coordinate to issue a certificate, and in
+typically require the coordination of multiple \acp{ca} to issue a certificate, and in
 the event of misconfiguration or impersonation by an adversary, these systems,
 like public-key pinning, do not offer a quick, simple path for recovery.
 Furthermore, these systems offer limited deployment strategies, expecting all
-domains to switch to the new \ac{pki} at once or allowing adversaries to
+domains to switch to the new \ac{pki} at once (i.e., on a ``flag day'') or allowing adversaries to
 downgrade handshakes to the current, vulnerable \ac{pki}.
 
 %%%%%%%%%%%%%%%
