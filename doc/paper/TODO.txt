@@ -1,4 +1,3 @@
 Feedback from Paul:
 
-- [9] can be updated to TLS 1.3
 
