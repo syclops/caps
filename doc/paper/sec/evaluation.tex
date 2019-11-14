@@ -108,8 +108,11 @@ no false positives or negatives, and second, it can be searched in its
 compressed state, leading to a lower memory usage requirement for clients. To
 evaluate the effectiveness of these design decisions against other alternatives,
 we conducted an experiment to measure the space requirements for the signaling
-set in various representations, both on disk (when transmitted to the client)
-and in memory (when being used by the client during certificate verification).
+set in various representations. 
+We measured both the fully compressed size 
+(which dictates bandwidth usage when transmitting
+the set to the client and the client's overhead storing it on disk)
+and the size in memory (when being used by the client during certificate verification).
 
 In particular, we compared the plaintext representation of the signaling set (as
 of July 3, 2018) with a compressed representation using Bloom filters, the
@@ -134,22 +137,30 @@ we tested a plain encoding as
 well as an encoding using our path-compressed \ac{dafsa}, and compressed each of
 these encodings with zpaq method 5 using both block sizes.
 
-The results are shown in \autoref{tab:signaling}. Bloom filters offer high
-compression even with a low false positive rate, and their in-memory
-representation is the same as their on-disk representation. However, they still
-have false positives, which would leadto those domains becoming inaccessible.
-While zpaq in any configuration does not have any false positives or false
-negatives and yields excellent compression, its in-memory representation of the
+The results are shown in \autoref{tab:signaling}. 
+Starting from an enormous plaintext corpus of over 1.5 GB,
+the various options all achieve impressive compression ratios.
+However, the results also indicate that to achieve a competitive size (i.e., 153~MB or less),
+Bloom filters would require an unacceptably high false 
+positive rate: one in every 10K sites would be falsely signaled
+as being under attack and hence would be rendered inaccessible.
+%Bloom filters offer high
+%compression even with a low false positive rate, and their in-memory
+%representation is the same as their on-disk representation. However, they still
+%have false positives, which would lead to those domains becoming inaccessible.
+While zpaq does not have any false positives or false
+negatives and yields excellent compression when run using method 5, 
+its in-memory representation of the
 signaling set would simply be the uncompressed set of domains, yielding a memory
-requirement of 1.5 GB. Our \ac{dafsa}-based representation captures a ``sweet
-spot'' between these two alternatives, offering no false positives and, in the
+requirement of 1.5~GB. Our \ac{dafsa}-based representation captures a ``sweet
+spot'' between these two alternatives, suffering no false positives or negatives and, in the
 best case, an on-disk representation of just 138 MB with an in-memory
 representation of 170 MB.
 
 For some clients, an initial download size of 138 MB may be too much. One
 approach that such clients can take to protect themselves would be to only track
-sites that have more than one certificate, thus minimizing disk and memory usage
-in exchange for protection against \ac{tls} stripping attacks. To estimate
+sites that have more than one certificate, thus reducing disk and memory usage
+at the cost of protection against \ac{tls} stripping attacks. To estimate
 clients' memory and disk usage in this case, we subsampled the full set of names
 and computed the size of the \ac{dafsa} with path compaction (which represents
 best-case memory usage in \ac{name}) and the size of the zpaq-compressed
@@ -158,17 +169,21 @@ best-case memory usage in \ac{name}) and the size of the zpaq-compressed
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{fig/sample}
-  \caption{Sizes of signaling set in various representation when sampled from
-  the full set of names. The labels above each distinct value on the $x$-axis
-  denotes the fraction of the full set that was sampled.}
+  \caption{Size of the signaling set in various representations when 
+           the names in the set are subsampled from the full set of names. 
+           The labels above each distinct value on the $x$-axis
+           denotes the fraction of the full set that was sampled.}
   \label{fig:sample}
 \end{figure}
 
 \autoref{fig:sample} shows the results of this experiment. If the fraction of
 domains that use multiple independent certificate chains for the same name is
 small, as we would anticipate, then clients who opt for this approach can
-significantly reduce their memory and disk usage in \ac{name}. However, with
-smaller fractions, we can see that the advantage of the \ac{dafsa}-based
+significantly reduce their memory and disk usage in \ac{name}. 
+For example, even if 10\% of all HTTPS websites deployed additional certificates,
+the compressed DAFSA representation would require less than 30~MB.
+Of course, at very low levels of adoption,
+the advantage of the \ac{dafsa}-based
 approach over a list of names decreases. This makes sense, given that the
 \ac{dafsa} is designed to take advantage of common substrings (especially
 prefixes and suffixes) in a set.
@@ -191,8 +206,8 @@ prefixes and suffixes) in a set.
 \end{figure*}
 
 Because the signaling set will be updated over time, we also carried out an
-experiment to determine the size of updates over time. An update to the
-signaling set consists of a set of names that have been added to the signaling
+experiment to determine the size of updates that will be sent to clients. 
+An update to the signaling set consists of a set of names that have been added to the signaling
 set since the most recent version, as well as a set of names that have been
 deleted due to certificate expiration or revocation. We computed the set of
 added and deleted names for our range of scans, aggregating these sets by week.
@@ -206,6 +221,7 @@ We then computed the sizes of these sets in four different representations:
 For each method, we used the variant that produced the smallest representation;
 for example, we used the zpaq method that produced the smallest archive (method
 5 with 64 MiB blocks) and our \ac{dafsa} representation used path compaction.
+We experimented with the full set of names.
 
 \autoref{fig:updates} shows the results of our experiment. As
 \autoref{fig:count} would indicate, the size of the signaling set has increased
@@ -218,18 +234,20 @@ a technical perspective, this method of transmission is also advantageous:
 clients can simply add the set of added names to their existing \ac{dafsa}, and
 build (and subsequently add to) a new \ac{dafsa} for the set of deleted names.
 Our results show that updates (added and deleted names) are typically between 2
-and 3 MB per week, which is reasonable for most modern Web clients.
+and 3~MB per week or $\sim$293-439~KB/day; by comparison, downloading the Google
+homepage requires approximately 400~KB.
 
-Releasing signaling set updates each week means that some false positives and
-false negatives are possible in \ac{name}, albeit under limited circumstances.
-Specifically, false positives (which render a domain inaccessible) are possible
-for up to a week, but only if a domain chooses to no longer serve its site over
-\ac{https}, lets its certificates expire, and does not inform the log
-aggregators in advance. False negatives (which enable \ac{tls} stripping
-attacks) are possible for up to a week, but only if a domain newly deploys
-\ac{https} by having a certificate issued and then immediately begins serving
-its site. Thus, not only are these pitfalls unlikely in practice, with advance
-planning and minimal effort, domains can avoid both of these situations.
+% BP: Why release once a week instead of every day?
+%Releasing signaling set updates each week means that some false positives and
+%false negatives are possible in \ac{name}, albeit under limited circumstances.
+%Specifically, false positives (which render a domain inaccessible) are possible
+%for up to a week, but only if a domain chooses to no longer serve its site over
+%\ac{https}, lets its certificates expire, and does not inform the log
+%aggregators in advance. False negatives (which enable \ac{tls} stripping
+%attacks) are possible for up to a week, but only if a domain newly deploys
+%\ac{https} by having a certificate issued and then immediately begins serving
+%its site. Thus, not only are these pitfalls unlikely in practice, with advance
+%planning and minimal effort, domains can avoid both of these situations.
 
 \subsection{Connection Establishment}
 \label{sec:evaluation:performance}
@@ -292,15 +310,16 @@ elapsed, there is an approximately 5\% increase in connection establishment
 time: an average of 11ms longer for hophop and 1.2ms for localhost. However,
 since our \ac{tls} extension does not add any extra round-trips to the
 handshake, the time added is small, especially in comparison to random
-measurement fluctuations, when we look at confidence intervals within one
-standard deviation from the mean (shown as error bars in the figures).
+measurement fluctuations (e.g., when we look at confidence intervals within one
+standard deviation from the mean --- shown as error bars in the figures).
 
 The extra data sent in the \ac{name} handshake is directly dependent on the size
 and number of certificate chains, as well as the number of proofs sent. In
 particular, the extra data sent from client to server is 1 byte, and the extra
 data sent from server to client is
 $(2 + (292 \times \text{\#proofs}) +
-(\sum_{\text{chain}}\texttt{sizeof}(\text{chain})))$ bytes. While this means
-that some connections may result in a great deal of extra data sent, we can
-expect that the vast majority of domains will not send additional certificate
-chains and the overhead will remain small.
+(\sum_{\text{chain}}\texttt{sizeof}(\text{chain})))$ bytes. 
+%While this means
+%that some connections may result in a great deal of extra data sent, we can
+%expect that the vast majority of domains will not send additional certificate
+%chains and the overhead will remain small.

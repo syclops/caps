@@ -6,28 +6,26 @@ reliance on the integrity of its data sources and its performance in
 the face of increasing \ac{https} adoption. We conclude with a discussion of
 future work.
 
-\paragraph{Correlated CA Compromises}
-\bryan{More here}
-
 \paragraph{Data Source Integrity}
 \ac{name} relies on the integrity of the data sources (in our current prototype,
-Censys, and in the long term, the \ac{ct} logs). Therefore, \iac{ca} who issues
+Censys and \ac{ct}). Therefore, \iac{ca} who issues
 and publicizes an unauthorized certificate for a domain that does not deploy
 \ac{https} can cause the domain to be included in the signal set and thus render
 the domain inaccessible. This fragility effectively allows an adversary to
 ``poison the well'' that \ac{name} relies on, and execute a denial-of-service
-attack of indefinite duration with just a single unauthorized certificate.
+attack with just a single unauthorized certificate.
 
-Unfortunately, recovering from such an attack requires immediate action. The
+To recover from such an attack, the
 affected domain could request that the \ac{ca} revoke the certificate if the
 \ac{ca} issued the certificate in error. If the \ac{ca} deliberately misissued
 the certificate, the browser vendor could treat the certificate as revoked
 (though such action is unlikely unless the domain is popular). The affected
 domain could also upgrade to \ac{https}, obtaining enough certificates to
-override the misissued certificate. In the event that the domain wishes to
-remain without \ac{https}, we can allow domains to set a policy flag that
-signals that the domain will communicate over HTTP. The domain, however, must
-still send this policy and proof during connection establishment.
+override the misissued certificate. 
+%In the event that the domain wishes to
+%remain without \ac{https}, we can allow domains to set a policy flag that
+%signals that the domain will communicate over HTTP. The domain, however, must
+%still send this policy and proof during connection establishment.
 
 Work by certificate logs to mitigate situations such as this are ongoing. Some
 \ac{ct} logs, for example, only accept certificates from certain \acp{ca}, and
@@ -46,17 +44,16 @@ know how many domain names there are overall, and thus difficult to determine a
 ceiling for the number of names known to serve content over \ac{https}.
 Therefore, it is possible that the signaling set may grow to a size that is
 untenable for increasingly many clients.
-
-That being said, the vast majority of sites that people visit have already
-deployed \ac{https}, meaning that the full signaling set may only be required to
-protect \emph{all possible} \ac{https} connections. We can thus mitigate the
-memory and disk usage for clients by splitting the signaling set into several
-\ac{dafsa} representations based on popularity. This approach may be dependent
-on a client's region or self-selected categories of interest. While we
-acknowledge that such an approach makes a tradeoff of overhead for security as
-in \autoref{sec:evaluation:updates}, it provides a strategy that we can employ
-in the event that \ac{https} deployment increases to the point of
-impracticality.
+However, this may also be offset by the upward trend in available bandwidth
+(e.g., the upcoming move to 5G).
+We could also mitigate the memory and disk usage for clients by splitting the 
+signaling set into several \ac{dafsa} representations based 
+on a client's region or self-selected categories of interest.
+We also considered splitting the DAFSA based on popularity,
+but conversations with Mozilla indicate this approach is not palatable
+as it is seen as perpetuating inequality on the Web;
+hence any solution needs to treat websites large and small 
+in an egalitarian fashion~\cite{privatecomm}.
 
 \paragraph{Future Work}
 One avenue of future exploration that is currently ongoing is that of
@@ -75,9 +72,9 @@ to each destination state in the ordering is small and use integer encoding to
 represent the location of these states. We are currently exploring the
 possibility of vertex separators in graphs to address this problem.
 
-We also plan to examine the use of multiple \acp{dafsa}, collecting data on
-domain names including relative popularity, region, and category. We can then
-construct multiple \ac{dafsa} according to our existing approach, and evaluate
-disk space, memory usage, and connection latency (particularly if we dynamically
-load \acp{dafsa}). We note that some of the necessary data is available from services
-as Alexa Web Information Services and DNS resolvers.
+%We also plan to examine the use of multiple \acp{dafsa}, collecting data on
+%domain names including relative popularity, region, and category. We can then
+%construct multiple \ac{dafsa} according to our existing approach, and evaluate
+%disk space, memory usage, and connection latency (particularly if we dynamically
+%load \acp{dafsa}). We note that some of the necessary data is available from services
+%as Alexa Web Information Services and DNS resolvers.
