@@ -1,9 +1,10 @@
-//
-// Created by smaptas on 09/14/18.
-//
+/**
+ * FSA Partial Huffman Encoder
+ * Author: Yucheng Dai <yuchengd@andrew.cmu.edu>
+ */
 
-#ifndef CAPS_FSA_HUFFMAN_ENCODER_H
-#define CAPS_FSA_HUFFMAN_ENCODER_H
+#ifndef CAPS_FSA_PARTIAL_HUFFMAN_ENCODER_H
+#define CAPS_FSA_PARTIAL_HUFFMAN_ENCODER_H
 
 // Include C++ standard libraries.
 #include <memory>
@@ -11,40 +12,36 @@
 
 // Include other headers from this project.
 #include "../../lexicon/fsa_lexicon/fsa_lexicon.h"
+#include "../coder/partial_huffman_coder.h"
 #include "../coder/huffman_coder.h"
 #include "../coder/signed_int_coder.h"
 #include "fsa_encoder.h"
 
 template <typename BitVectorType>
-class FSAHuffmanEncoder: public FSAEncoder<BitVectorType>
+class FSAPartialHuffmanEncoder: public FSAEncoder<BitVectorType>
 {
  public:
 
-  FSAHuffmanEncoder() = delete;
+  FSAPartialHuffmanEncoder() = delete;
 
-  explicit FSAHuffmanEncoder(const FSALexicon& lexicon)
+  explicit FSAPartialHuffmanEncoder(const FSALexicon& lexicon)
     : FSAEncoder<BitVectorType>{lexicon}
   {
-    auto label_coder = std::make_shared<HuffmanCoder<std::string,
-                                                     BitVectorType>>(
-      get_label_counts(lexicon));
-    using LabelCoderType = Coder<std::string, BitVectorType>;
-    FSAEncoder<BitVectorType>::label_coder_ =
-      std::static_pointer_cast<LabelCoderType>(label_coder);
     FSAEncoder<BitVectorType>::order_nodes();
-
     auto diff_counts = get_ordering_diff_counts(lexicon);
     auto destination_coder = std::make_shared<HuffmanCoder<int, BitVectorType>>(
       diff_counts);
     using DestCoderType = Coder<int, BitVectorType>;
     FSAEncoder<BitVectorType>::destination_coder_ =
       std::static_pointer_cast<DestCoderType>(destination_coder);
-  }
 
-  size_t get_element_size(std::string symbol){
-    if (FSAEncoder<BitVectorType>::label_coder_->valid_value(symbol))
-      return FSAEncoder<BitVectorType>::label_coder_->value_size(symbol);
-    else return 0;
+    auto counts = get_new_counts(get_label_counts(lexicon));
+    auto label_coder = std::make_shared<PartialHuffmanCoder<std::string,
+                                                     BitVectorType>>(
+      counts);
+    using LabelCoderType = Coder<std::string, BitVectorType>;
+    FSAEncoder<BitVectorType>::label_coder_ =
+      std::static_pointer_cast<LabelCoderType>(label_coder);
   }
 
  protected:
@@ -56,7 +53,7 @@ class FSAHuffmanEncoder: public FSAEncoder<BitVectorType>
     using LabelType = std::string;
     using LabelAbstractType = Coder<LabelType, BitVectorType>;
     using LabelCoderType = StringCoder<LabelType, BitVectorType>;
-    using LabelHuffmanType = HuffmanCoder<LabelType, BitVectorType>;
+    using LabelHuffmanType = PartialHuffmanCoder<LabelType, BitVectorType>;
     using DestType = int;
     using DestAbstractType = Coder<DestType, BitVectorType>;
     using DestCoderType = SignedIntCoder<DestType, BitVectorType>;
@@ -78,10 +75,10 @@ class FSAHuffmanEncoder: public FSAEncoder<BitVectorType>
     buffer.push_back(dest_codebook);
   }
 
-  virtual LabeledGraph::LabelMap get_label_counts(
+  const LabeledGraph::LabelMap& get_label_counts(
     const FSALexicon& lexicon) const
   {
-    return lexicon.get_graph().get_label_counts();
+    return const_cast<const LabeledGraph::LabelMap&>(lexicon.get_graph().get_label_counts());
   }
 
   std::unordered_map<int, int> get_ordering_diff_counts(
@@ -102,6 +99,15 @@ class FSAHuffmanEncoder: public FSAEncoder<BitVectorType>
     }
     return diff_counts;
   }
+
+  LabeledGraph::LabelMap get_new_counts(const LabeledGraph::LabelMap& counts) const{
+    LabeledGraph::LabelMap counts2;
+    for (const auto& [symbol, count]: counts){
+      if (symbol.length()>=30) continue;
+      if (count>3) counts2.emplace(symbol, count);
+    }
+    return counts2;
+  }
 };
 
-#endif //CAPS_FSA_HUFFMAN_ENCODER_H
+#endif //CAPS_FSA_PARTIAL_HUFFMAN_ENCODER_H

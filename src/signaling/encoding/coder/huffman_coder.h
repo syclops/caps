@@ -189,6 +189,8 @@ class HuffmanCoder: public Coder<SymbolType, EncodingType>
     decoding_indices_.reserve(max_length_);
     decoding_codes_.reserve(max_length_);
 
+    std::cout<<max_length_<<std::endl;
+
     for (auto pair: lengths) {
       auto symbol = pair.first;
       auto codeword_length = pair.second;

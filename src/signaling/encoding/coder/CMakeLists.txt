@@ -58,3 +58,30 @@ target_sources(huffman_coder
 target_link_libraries(huffman_coder
     INTERFACE coder binary_coder
 )
+
+#More Coder Configuration
+#Author: Yucheng Dai <yuchengd@andrew.cmu.edu>
+
+add_library(partial_huffman_coder INTERFACE)
+target_sources(partial_huffman_coder
+    INTERFACE ${CMAKE_CURRENT_LIST_DIR}/partial_huffman_coder.h
+)
+target_link_libraries(partial_huffman_coder
+    INTERFACE coder huffman_coder bitvector
+)
+
+add_library(mixed_huffman_coder INTERFACE)
+target_sources(mixed_huffman_coder
+    INTERFACE ${CMAKE_CURRENT_LIST_DIR}/mixed_huffman_coder.h
+)
+target_link_libraries(mixed_huffman_coder
+    INTERFACE coder huffman_coder bitvector
+)
+
+add_library(small_int_coder INTERFACE)
+target_sources(small_int_coder
+    INTERFACE ${CMAKE_CURRENT_LIST_DIR}/small_int_coder.h
+)
+target_link_libraries(small_int_coder
+    INTERFACE coder bitvector defs char_coder
+)
