@@ -1,17 +1,23 @@
 % Packages. Make sure your LaTeX distribution actually has the packages!
 \usepackage{acro}  % Acronyms
+\usepackage{algorithmic}  % Format algorithm pseudocode descriptions (EuroS&P)
 \usepackage{amsmath}  % cases environment
+\usepackage{amsfonts}  % Load AMS fonts (EuroS&P template)
 \usepackage{amssymb}  % useful symbols (varnothing)
 \usepackage{booktabs}  % Special top and bottom rules for tables
-\usepackage{color}  % Used to highlight comments
+\usepackage{bmpsize}  % Get bitmap size and resolutions (EuroS&P)
+\usepackage{cite}  % Compress and sort multi-citations (EuroS&P)
+%\usepackage{color}  % Used to highlight comments
 \usepackage{graphicx}  % To allow figures
-\usepackage{msc}  % Message sequence charts
+%\usepackage{msc}  % Message sequence charts
 \usepackage{paralist}  % For tighter lists
-\usepackage{subfig}  % For multiple subfigures
+%\usepackage{subfig}  % For multiple subfigures
 \usepackage{tabularx}  % For space-filling table columns
+\usepackage{textcomp}  % Various text symbols (EuroS&P)
+\usepackage{xcolor}  % Define colors for comments, etc.
 \usepackage{xspace}  % For spacing after user-defined commands and others
 
-\usepackage[tmargin=1in,bmargin=1in,lmargin=0.75in,rmargin=0.75in,columnsep=0.25in]{geometry}    % Exert more control over the margins
+%\usepackage[tmargin=1in,bmargin=1in,lmargin=0.75in,rmargin=0.75in,columnsep=0.25in]{geometry}    % Exert more control over the margins
 
 \usepackage[square,comma,numbers,sort&compress]{natbib}      % Offers more control over citation appearance and bib spacing
 \usepackage[hyphens]{url}  % To make URLs display correctly in citations. The
@@ -19,7 +25,6 @@
 
 \setdefaultenum{\bf (1)}{\bf (a)}{\bf (i)}{\bf (A)}  % Ensures that
                                 % enumerations use bolded numbering
-
 %%%%%%%%% Create hyperlinks and bookmarks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PDF
 \usepackage{hyperref}
@@ -63,4 +68,3 @@
 % pdfpagelabels=true,
   pdfpagemode=UseOutlines  % None, UseThumbs, UseOutlines, FullScreen
   }
-

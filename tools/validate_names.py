@@ -7,7 +7,7 @@ import fileinput
 import tlds
 
 
-def validate_name(name, reverse):
+def validate_name(name, tld_list):
     """
     Ensure that a name is a properly formatted DNS name.
 
@@ -21,21 +21,18 @@ def validate_name(name, reverse):
     """
     if '.' not in name or '/' in name or '@' in name:
         return False
-    if reverse:
-        return name.split('.')[0] in tlds.TLDS and '*' not in name[:-1]
-    else:
+    if tld_list is None:
         return name.split('.')[-1] in tlds.TLDS and '*' not in name[1:]
+    else:
+        pass  # TODO
 
 
-def process_file(infile, reverse):
-    for line in fileinput.input(infile):
+def process_file(tld_list):
+    for line in fileinput.input('-'):
         try:
-            name = line.strip().encode('idna').decode('utf-8').lower()
-            if validate_name(name, reverse):
-                if reverse:
-                    print(name)
-                else:
-                    print('.'.join(name.split('.')[::-1]))
+            name = line.strip().encode('idna').decode('ascii').lower()
+            if validate_name(name, tld_list):
+                print(name)
         except UnicodeError:
             continue
         except:
@@ -44,11 +41,9 @@ def process_file(infile, reverse):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('infile', type=str, default='-',
-                        help='Input file name (defaults to standard input)')
-    parser.add_argument('--reverse', action='store_true', help='Reverse ')
+    parser.add_argument('--tld-list', default=None, help='List of TLDs')
     args = parser.parse_args()
-    process_file(args.infile, args.reverse)
+    process_file(args.tld_list)
 
 if __name__ == '__main__':
     main()

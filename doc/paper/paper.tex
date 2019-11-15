@@ -1,25 +1,21 @@
-\documentclass[letterpaper,twocolumn,10pt]{article}
-\usepackage{epsfig}
+\documentclass[compsoc,conference,a4paper,10pt,times]{IEEEtran}
 
 \input{setup/main}
 
 \begin{document}
 
-% USENIX: don't want date printed
-\date{}
-
-% USENIX: make title bold and 14 pt font (Latex default is non-bold, 16 pt)
 \title{
-  \Large \bf
   CAPS: Smoothly Transitioning to a More Resilient Web PKI
 }
 \author{
+  Submission \#53
 }
 
 \maketitle
 
-\subsection*{Abstract}
-\input{abstract}
+\begin{abstract}
+  \input{abstract}
+\end{abstract}
 
 \input{sec/intro}
 
@@ -35,8 +31,7 @@
 
 \input{sec/conclusion}
 
-% USENIX: bibliography and endnote formatting
-{\footnotesize \bibliographystyle{acm}
-\bibliography{bib}}
+\bibliographystyle{IEEEtran}
+\bibliography{bib}
 
 \end{document}

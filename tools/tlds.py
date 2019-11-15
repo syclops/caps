@@ -1,6 +1,8 @@
 """ Collection of top-level Internet TLDs.
 """
 
+DATE='2019-07-03'
+
 TLDS = set([
     'aaa',
     'aarp',
@@ -168,7 +170,6 @@ TLDS = set([
     'boo',
     'book',
     'booking',
-    'boots',
     'bosch',
     'bostik',
     'boston',
@@ -243,6 +244,7 @@ TLDS = set([
     'ch',
     'chanel',
     'channel',
+    'charity',
     'chase',
     'chat',
     'cheap',
@@ -597,7 +599,6 @@ TLDS = set([
     'hr',
     'hsbc',
     'ht',
-    'htc',
     'hu',
     'hughes',
     'hyatt',
@@ -645,7 +646,6 @@ TLDS = set([
     'itau',
     'itv',
     'iveco',
-    'iwc',
     'jaguar',
     'java',
     'jcb',
@@ -748,6 +748,7 @@ TLDS = set([
     'living',
     'lixil',
     'lk',
+    'llc',
     'loan',
     'loans',
     'locker',
@@ -802,7 +803,6 @@ TLDS = set([
     'memorial',
     'men',
     'menu',
-    'meo',
     'merckmsd',
     'metlife',
     'mg',
@@ -1077,7 +1077,6 @@ TLDS = set([
     'sandvikcoromant',
     'sanofi',
     'sap',
-    'sapo',
     'sarl',
     'sas',
     'save',
@@ -1160,6 +1159,7 @@ TLDS = set([
     'soy',
     'space',
     'spiegel',
+    'sport',
     'spot',
     'spreadbetting',
     'sr',
@@ -1487,6 +1487,7 @@ TLDS = set([
     'xn--nyqy26a',
     'xn--o3cw4h',
     'xn--ogbpf8fl',
+    'xn--otu796d',
     'xn--p1acf',
     'xn--p1ai',
     'xn--pbt977c',
@@ -1543,4 +1544,6 @@ TLDS = set([
     'zm',
     'zone',
     'zuerich',
-    'zw'])
+    'zw',
+])
+

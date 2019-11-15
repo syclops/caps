@@ -452,15 +452,14 @@ $|\numpaths{C}| - |\numtrans{C}|$. By examining the distribution of symbols in
 \numtrans{S} and \numtrans{C}, as well as the concatenated symbols in
 \numpaths{C} (which we can find via depth-first search from \upstream{C}), we
 can compute the change in entropy in symbols and similarly for destination
-states, which we write as \symboldh and \destdh, respectively. If we know the
-original entropies \symbolh and \desth, then we can compute the difference in
+states, which we write as \symboldh and \destdh, respectively. Suppose that we know the
+original entropies \symbolh and \desth, and that we define $\dentropy = \symboldh +
+\destdh$ and $\entropy = \symbolh + \desth$. Then we can compute the difference in
 size between the two \acp{dafsa} as
-\begin{equation*}
-\begin{split}
-  |\numtrans{S}|\left(\symboldh + \destdh\right) + \\
-  \left(|\numpaths{C}| - |\numtrans{C}|\right)(\symbolh + \symboldh + \desth + \destdh)
-\end{split}
-\end{equation*}
+\begin{equation}
+  |\numtrans{S}| \dentropy + \left(|\numpaths{C}| - |\numtrans{C}|\right)
+  (\entropy + \dentropy)
+\end{equation}
 and only remove $C$ if this quantity is negative.
 
 We found several classes of components that, for our underlying set of domain
@@ -576,23 +575,24 @@ In an initial deployment, we expect that typically $k=1$,
 but allowing the use of larger values for $k$ provides resilience
 against compromised log aggregators.
 
-The domain then sends back a ServerHello message which contains \numlas
-recent policy proofs from \numlas distinct log aggregators, as well as \numlas
-certificate chains, which allows the client to verify the domain's policy
-value and the certificate chains that back this value.
-In more detail, a domain with hostname
-\hostname and policy value \policy selects a set of log aggregators
-$\{\logagg_1, \ldots, \logagg_\numlas\}$ and sends back
-in the ServerHello extension message:
-\begin{equation*}
-  \{\policyproof(\logagg_1, \hostname, \policy, \timestamp_1), \ldots,
-  \policyproof(\logagg_\numlas, \hostname, \policy, \timestamp_\numlas),
-\certchain_1, \ldots, \certchain_{\policy - 1}\}
-\end{equation*}
-where $\timestamp_i$ is the timestamp of the policy proof from $\logagg_i$ and
-$\certchain_j$ is a certificate chain for \hostname. In the extension message,
-the domain only sends $\policy - 1$ certificate chains because the remaining
-chain will be sent in the ServerCertificate message of the TLS handshake.
+The domain then sends back a ServerHello message which contains \numlas recent
+policy proofs from \numlas distinct log aggregators, as well as \numlas
+certificate chains, which allows the client to verify the domain's policy value
+and the certificate chains that back this value. Formally, suppose a domain has
+hostname \hostname and policy value \policy, and selects a set of log
+aggregators $\{\logagg_1, \ldots, \logagg_\numlas\}$. Let $\policyproofshort_i =
+\policyproof(\logagg_1, \hostname, \policy, \timestamp_i)$ for $1 \le i \le
+\numlas$, where $\timestamp_i$ is the timestamp of the policy proof from
+$\logagg_i$. Then, the domain sends the following back in the ServerHello
+extension message:
+\begin{equation}
+  \{\policyproofshort_1, \ldots, \policyproofshort_\numlas, \certchain_1,
+  \ldots, \certchain_{\policy - 1}\}
+\end{equation}
+where $\certchain_j$ is a certificate chain for \hostname. In the extension
+message, the domain only sends $\policy - 1$ certificate chains because the
+remaining chain will be sent in the ServerCertificate message of the TLS
+handshake.
 
 The client then checks that
 \begin{inparaenum}
