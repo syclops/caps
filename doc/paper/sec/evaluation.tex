@@ -361,19 +361,19 @@ sent in the \ac{name} handshake, and the latency of the handshake both with and
 without the \ac{name} \ac{tls} extension.
 
 We tested this both over the Internet (by connecting to a virtual private server
-with latency varying from 30 to 300 ms, referred to as \emph{hophop}), as well
+with latency varying from 30 to 300 ms, referred to as \emph{WAN}), as well
 as over the local loopback interface (referred to as \emph{localhost}). The
-tests over the internet to \emph{hophop} provide an indication of the effect of
+tests over the internet to \emph{WAN} provide an indication of the effect of
 the extension on ``real world'' servers, which are usually accessed over WAN,
 whereas the \emph{localhost} tests provide a lower bound on time added due to
 sending/receiving/processing extra data. A total of 15385 TLS connections were
-established for our testing: 5768 over hophop, 9617 over localhost.
+established for our testing: 5768 over WAN, 9617 over localhost.
 
 Our results, shown in Figures~\ref{fig:evaltlsext:numproof},
 \ref{fig:evaltlsext:numchain}, \ref{fig:evaltlsext:numcert}, and
 \ref{fig:evaltlsext:sizechain}, show that in comparison to the mean time
 elapsed, there is an approximately 5\% increase in connection establishment
-time: an average of 11ms longer for hophop and 1.2ms for localhost. However,
+time: an average of 11ms longer for WAN and 1.2ms for localhost. However,
 since our \ac{tls} extension does not add any extra round-trips to the
 handshake, the time added is small, especially in comparison to random
 measurement fluctuations (e.g., when we look at confidence intervals within one
