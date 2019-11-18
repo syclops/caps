@@ -19,12 +19,14 @@ enables the bootstrapping of more advanced policies
   \includegraphics[width=0.8\linewidth]{fig/arch}
   \caption{Overview of \ac{name} architecture (log auditors and monitors not
   shown). Dotted lines denote the browser and its components, and italic text
-denotes new entities or actions in \ac{name}.}
+denotes new entities or actions in \ac{name}.  As shown in the diagram,
+CAPS is currently implemented as a browser plug-in, but we envision it
+would become a standard browser component.
+  }
   \label{fig:overview}
 \end{figure*}
 
 \paragraph{Goals}
-
 \ac{name} primarily aims to enable a smooth transition from the Web's existing
 \ac{pki} to an \emph{improved \ac{pki}} (which can range from an extension of
 the existing \ac{pki} to a new \ac{pki} altogether). We assume that during this
@@ -39,7 +41,6 @@ loss, or private key compromise, and to minimize the changes to existing
 interactions between clients, domains, and \acp{ca}.
 
 \paragraph{Adversary Model}
-
 In designing \ac{name}, we consider a \iac{mitm} adversary. 
 %We assume the adversary has access to the
 %signing keys for $n$ \acp{ca} and can thus issue and revoke arbitrary
@@ -47,11 +48,10 @@ In designing \ac{name}, we consider a \iac{mitm} adversary.
 We assume that the adversary has full
 control of the network during the TLS handshake; that is, the adversary can
 intercept, drop, or modify all messages sent among all entities described
-below. We assume that the adversary cannot mount \iac{mitm} in the improved
+below. We assume that the adversary cannot successfully mount \iac{mitm} in the improved
 \ac{pki}, or break standard cryptographic primitives.
 
 \paragraph{Architecture}
-
 \autoref{fig:overview} illustrates the \ac{name} architecture and how \ac{name}
 achieves the goals stated above. Since \ac{name} transitions from the current
 Web \ac{pki}, it necessarily includes the entities in the current \ac{pki}:
@@ -86,16 +86,17 @@ through the standard \ac{tls} handshake, and vendors provide clients with browse
 software.
 
 % Signaling set overview
-To prevent an adversary from forcing an HTTP connection (and thus bypassing \ac{tls}
+To prevent an adversary from manipulating an attempted HTTPS connection into
+an HTTP connection (and thus bypassing \ac{tls}
 completely), the log aggregators use data from public logs to construct a
 \emph{signaling set}, which succinctly represents the set of all domains that
-deploy \ac{https}. The log aggregators build this set by downloading the set of
+support \ac{https}. The log aggregators build this set by downloading the set of
 all currently valid (i.e., non-expired) certificates from the logs and
 extracting all domains named in these certificates. The log aggregators then
 make this set, as well as updates to this set over time, available to client
 browsers.  When connecting to a server, the browser first checks whether
 the server is in the signaling set; if it is, then the browser will refuse
-to accept an HTTP connection.
+to engage in an HTTP connection.
 
 % Policy overview
 To allow domains to certify their public keys more securely than in the current
@@ -103,10 +104,10 @@ To allow domains to certify their public keys more securely than in the current
 \emph{\ac{name} policies}, which allows each domain to establish an
 \emph{authoritative public key} in the \emph{curent} Web \ac{pki}. \ac{name}
 policies take a simple and intuitive approach: \emph{treat whichever public key
-  is backed by the most independent certificate chains\footnote{This term means
+  is backed by the largest number of independent certificate chains\footnote{This term means
   that the certificate chains share no public keys except at the leaf.} in the
 current \ac{pki} as authoritative in the improved \ac{pki}}. A domain wanting to
-increase client confidence in one of its public keys can simply obtain more
+increase client confidence in one of its public keys can obtain additional 
 independent certificates for that key, and the log aggregators will
 automatically update their \ac{name} policies for that domain.
 
@@ -115,20 +116,22 @@ where \hostname is a domain name and \policy is the \emph{\ac{name} policy
   value}, i.e., the number of independent certificate chains backing an authoritative
   key for \hostname.\footnote{\hostname may have more than one authoritative
   key; if public keys $\pk_1$ and $\pk_2$ are both backed by three independent
-chains, for example, then both public keys are treated as authoritative
+chains then both public keys are treated as authoritative
 for \hostname.} To prevent an adversary from downgrading handshakes in the
 improved \ac{pki} to a handshake in the existing Web \ac{pki}, each log
 aggregator indicates which domains in its signaling set have a key policy value
 greater than 1.
 
-The current PKI actually supports two classes of certificates: 
-standard ``domain-validated'' (DV) certificates
+The current PKI actually supports three classes of certificates: 
+standard ``domain-validated'' (DV) certificates,
+``organization-validated'' (OV) certificates,
 and
 extended validation (EV) certificates.
-The latter require domains to undergo more rigorous screening.
-Hence, the actual \ac{name} policy value is a tuple $(\policy_{EV}, \policy_{DV})$.
+EV certificates require domains to undergo more rigorous screening than the other two.
+Hence, the actual \ac{name} policy value is a tuple $(\policy_{EV}, \policy_{DV} + \policy_{OV})$.
 For a given domain, \ac{name} will treat as authoritative the public
-key with the largest $\policy_{EV}$, with ties broken based on the largest $\policy_{DV}$.
+key with the largest $\policy_{EV}$, with ties broken based on the largest sum 
+of $\policy_{DV}$ and $\policy_{OV}$.
 
 %Our policy also implies that if $n$ is the
 %highest number of observed independent certificate chains for a given domain,
@@ -220,7 +223,7 @@ The signaling set represents
 \begin{inparaenum}
 \item a set of \acp{fqdn} (hereafter names) known to have deployed \ac{https}
   (by virtue of having a valid public-key certificate appear in a public log), and
-\item the subset of names that have adopted the improved \ac{pki} (by
+\item the subset of names that have adopted \ac{name} (by
   virtue of having multiple independent public-key certificates for the same
   public key).
 \end{inparaenum}
@@ -228,13 +231,13 @@ Formally, the signaling set is a pair $(\httpsset, \multicertset)$ where
 \httpsset and \multicertset are unordered sets of valid\footnote{A valid
   name is a Unicode or ASCII string up to 253 bytes in length overall,
   with no label longer than 63 bytes~\cite{rfc1035}. We further add the
-requirement that the name has a \iac{tld} that is a current global \ac{tld}
+requirement that the name has \iac{tld} that is a current global \ac{tld}
 according to ICANN.} names in ASCII and $\multicertset \subseteq
 \httpsset$. The set supports a query operation, formally defined as $\query:
 \strings \to \{\nohttps, \onecert, \multicert(n)\}$ where \strings is the set of
 all ASCII strings and \nohttps, \onecert, and $\multicert(n)$ are values indicating
 whether a string is a name known to have no \ac{https} certificate, one
-certificate, or $n\geq 1$ independent certificates, respectively.
+certificate, or $n\geq 2$ independent certificates, respectively.
 %Specifically, \query must satisfy
 %\begin{align*}
 %  \query(\hostname) = \nohttps &\iff \hostname \notin \httpsset \\
@@ -270,20 +273,19 @@ in this set to determine \multicertset, a procedure we describe in
 \autoref{sec:design:policy}. The log aggregator then creates a representation of
 the signaling set and makes it available to client browsers.
 
-Because the signaling set must be available to each client that supports the
-improved \ac{pki},
+Because the signaling set must be available to each client that supports \ac{name},
 %and may contain all names in DNS, 
 the log aggregator must succinctly represent this set to minimize the bandwidth and storage burdens on
 each client. However, simply minimizing the storage burden is insufficient;
 clients must store the signaling set in memory to minimize connection latency
 overhead. Thus the log aggregator must also represent this set in such a way
-that clients can query the set with minimal latency and memory.
+that clients can query the set with acceptably small latency and memory.
 
 We considered several approaches when determining how to represent the signaling
 set. A Bloom filter~\cite{bloom1970space} supports efficient set membership
 queries, but has false positives (which for this application would result in
 incorrectly flagging a site as under attack) and for the scale of data we
-consider, results in too large of a storage burden
+consider, results in too large a storage burden
 (\autoref{sec:evaluation:https}). A filter cascade~\cite{salikhov2014using}
 would eliminate false positives, but has the virtually impossible prerequisite
 of knowing all names in the DNS namespace, which requires the cooperation of all
@@ -338,7 +340,7 @@ to describe \acp{dafsa}. Formally, \iac{dafsa} is a tuple $(\symbols, \states,
 The \ac{dafsa} also has the restriction that the state transition function is
 \emph{acyclic}, that is, there is no sequence of states and symbols $(s_1,
 \ldots, s_n), (\sigma_1, \ldots, \sigma_n)$ where $\transfunc(s_i, \sigma_i) =
-s_{i+1}$ for each $i$ where $1 \le i < n$ and $\transfunc(s_n, \sigma_n) = s_1$.
+s_{i+1}$ for $1 \le i < n$ and $\transfunc(s_n, \sigma_n) = s_1$.
 
 We represent queries to the signaling set within the \ac{dafsa} as follows: let
 \states contain $\policy$ unique symbols $\multicertsymbol_\policy$ not present in \httpsset. 
