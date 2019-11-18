@@ -17,7 +17,7 @@ of domains may change in the future. Addressing both of these problems requires
 a complete and accurate view of the Web \ac{pki}, namely, the set of domains
 that are accessible over HTTPS.
 
-We can obtain a view of the Web \ac{pki} using data from public logs (\autoref{sec:design}). 
+We can obtain a view of the Web \ac{pki} using data from public logs (\autoref{sec:design:signaling}). 
 Specifically, we obtain public-key
 certificates from Censys~\cite{durumeric2015search} and logs in
 \ac{ct}~\cite{rfc6962}. From Censys, we collected 1,026 scans of the IPv4
@@ -88,7 +88,7 @@ names that we used for testing.
 \subsection{Signaling Set Representation}
 \label{sec:evaluation:implementation}
 
-As described in \autoref{sec:design}, our motivation for using \iac{dafsa}-based
+As described in \autoref{sec:design:signaling}, our motivation for using \iac{dafsa}-based
 representation of the signaling set was twofold: first, the representation has
 no false positives or negatives, and second, it can be searched in its
 compressed state, leading to a lower memory usage requirement for clients. To

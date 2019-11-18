@@ -1,17 +1,5 @@
-\section{Design of CAPS}
-\label{sec:design}
-
-Following an overview of \ac{name}'s design (\autoref{sec:design:overview}), we
-describe \ac{name} in detail, including how it signals which domains have
-deployed \ac{https} and improvements to the Web \ac{pki}
-(\autoref{sec:design:signaling}), how it provides stronger public-key
-authentication over the existing Web \ac{pki} (\autoref{sec:design:policy}), and
-how clients establish secure end-to-end connections with servers
-(\autoref{sec:design:handshake}). We conclude by describing how \ac{name} thus
-enables the bootstrapping of more advanced policies
-(\autoref{sec:design:bootstrapping}).
-
-\subsection{Overview}
+\section{CAPS Overview}
+%\subsection{Overview}
 \label{sec:design:overview}
 
 \begin{figure*}
@@ -219,6 +207,15 @@ of $\policy_{DV}$ and $\policy_{OV}$.
 %both the existing and improved \ac{pki}. We also assume that the adversary
 %cannot break cryptographic primitives.
 
+\section{\ac{name} Detailed Design}
+In this section, we describe \ac{name} in detail, including how it signals which domains have
+deployed \ac{https} and improvements to the Web \ac{pki}
+(\autoref{sec:design:signaling}), how it provides stronger public-key
+authentication over the existing Web \ac{pki} (\autoref{sec:design:policy}), and
+how clients establish secure end-to-end connections with servers
+(\autoref{sec:design:handshake}). We conclude by describing how \ac{name} thus
+enables the bootstrapping of more advanced policies
+(\autoref{sec:design:bootstrapping}).
 \subsection{Building the Signaling Set}
 \label{sec:design:signaling}
 
