@@ -74,6 +74,7 @@ because they are unlikely to succeed in practice or are catastrophic failures
 that can circumvent almost any practical defense.
 
 \paragraph{Resource Exhaustion}
+
 Log aggregators rely on public logs to obtain a complete view of certificates in
 the Web \ac{pki}. However, given the open nature of many of these logs (i.e.,
 the fact that anyone can submit certificates to them or otherwise make
@@ -97,6 +98,7 @@ without access to \iac{ca} signing key to obtain many domain names to carry out
 this attack.
 
 \paragraph{Malicious Browser Vendors}
+
 Adversary control of the browser vendor is a catastrophic failure that can
 enable a \ac{mitm} attack under almost any circumstances, since this allows the
 adversary to completely control the client's experience with the Web. In this
@@ -110,6 +112,7 @@ this scenario is severe enough that \ac{name} makes no security guarantees if it
 occurs.
 
 \paragraph{Correlated CA Compromises}
+
 Finally, our threat model assumes the adversary can compromise at most $\policy-1$
 CAs. Historically, all publicly known CA failures have been singletons (i.e.,
 separated in time and causation from other failures).  However, an adversary that discovered

@@ -27,6 +27,7 @@ would become a standard browser component.
 \end{figure*}
 
 \paragraph{Goals}
+
 \ac{name} primarily aims to enable a smooth transition from the Web's existing
 \ac{pki} to an \emph{improved \ac{pki}} (which can range from an extension of
 the existing \ac{pki} to a new \ac{pki} altogether). We assume that during this
@@ -41,6 +42,7 @@ loss, or private key compromise, and to minimize the changes to existing
 interactions between clients, domains, and \acp{ca}.
 
 \paragraph{Adversary Model}
+
 In designing \ac{name}, we consider a \iac{mitm} adversary. 
 %We assume the adversary has access to the
 %signing keys for $n$ \acp{ca} and can thus issue and revoke arbitrary
@@ -52,6 +54,7 @@ below. We assume that the adversary cannot successfully mount \iac{mitm} in the 
 \ac{pki}, or break standard cryptographic primitives.
 
 \paragraph{Architecture}
+
 \autoref{fig:overview} illustrates the \ac{name} architecture and how \ac{name}
 achieves the goals stated above. Since \ac{name} transitions from the current
 Web \ac{pki}, it necessarily includes the entities in the current \ac{pki}:
