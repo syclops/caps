@@ -1,7 +1,7 @@
 \section{Evaluation}
 \label{sec:evaluation}
 
-Below, we evaluate \ac{name}' performance.
+Below, we evaluate \ac{name}' performance in our prototype implementation.
 We first describe the domains represented by the signaling set,
 including how we identified these domains. Next, we compare different approaches
 and optimizations for representing the signaling set. Finally, we describe the
@@ -21,11 +21,11 @@ We can obtain a view of the Web \ac{pki} using data from public logs (\autoref{s
 Specifically, we obtain public-key
 certificates from Censys~\cite{durumeric2015search} and logs in
 \ac{ct}~\cite{rfc6962}. From Censys, we collected 1,026 scans of the IPv4
-address space over a period ranging from September 12, 2015 to July 3, 2018.
+address space from September 12, 2015 to July 3, 2018.
 From \ac{ct}, we collected all entries from known \ac{ct} logs that were not
 disqualified or unreachable as of July 3,
 2018,\footnote{\url{https://www.certificate-transparency.org/known-logs}} which
-totaled approximately 1.74B certificates from 26 logs over a period ranging from
+totaled approximately 1.74B certificates from 26 logs from
 March 26, 2013 to July 3, 2018.
 
 %\begin{figure*}
@@ -66,18 +66,18 @@ of all certificates that were valid on that day and had an associated
 certificate chain rooted in one of the three major root certificate stores,
 determined by Apple, Microsoft, or Mozilla. In the Censys dataset, because we
 observed a great deal of churn (i.e., certificates disappearing and appearing in
-consecutive scans), we considered a certificate as in the active set from the
+consecutive scans), we included a certificate in the active set from the
 time it was first observed in our data until its expiration. We then consider
 the number of unique, valid domain names, which we use to build the signaling
 set.
 
 Figures \autoref{fig:count:certs} and \autoref{fig:count:names} show the number of
-domain names observed by Censys, \ac{ct}, and their overlap over time. Our results show that
-there are far more certificates (and consequently names and domains) observed by
+domain names observed by Censys, \ac{ct}, and their overlap over time. Our results show 
+far more certificates (and consequently names and domains) observed by
 \ac{ct} than by Censys. It is not clear whether the names seen in \ac{ct} simply
 never deployed HTTPS in the wild or whether Censys was not observing certain
 certificates.  One likely contributing factor is the increasing prevelance of 
-Server Name Indication (SNI), which would cause Censys' probes to be rejected
+Server Name Indication (SNI)~\cite{rfc6066}, which would cause Censys' probes to be rejected
 when they do not include the correct server name.
 To resolve these issues into a suitable signaling set, we performed a scan of
 port 443 using ZGrab~\cite{durumeric2015search} for all domain names we
@@ -102,12 +102,11 @@ and the size in memory (when being used by the client during certificate verific
 
 In particular, we compared the plaintext representation of the signaling set (as
 of July 3, 2018) with a compressed representation using Bloom filters, the
-generic compression utility zpaq,\footnote{While we tested compression with other
+generic compression utility zpaq~\cite{zpaq},\footnote{While we tested compression with other
   utilities, zpaq had the smallest size. Thus we used zpaq for the experiment to
   compare a near-best-case compression scenario.} and various configurations of
 our \ac{dafsa}-based representation. We also compressed the \ac{dafsa}-based
-representation using zpaq to find the size of the \ac{dafsa}-based
-representation on disk and in transit. 
+representation using zpaq to find its size on disk and in transit. 
 
 We specifically tested a Bloom filter with false positive rates of 0.001\%,
 0.01\%, and 0.1\%. Since the number of domain names is on the order of
@@ -127,7 +126,7 @@ these encodings with zpaq method 5 using both block sizes.
 
 \begin{table}[tbp]
   \centering
-  \caption{Size of \ac{name} signaling set on
+  \caption{Size (on-disk or in transit) of \ac{name} signaling set on
     July 3, 2018 (\numnames{} names) with various compression approaches. The
     representation size in memory is not shown.}
   \begin{tabular}{|lr|}

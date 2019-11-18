@@ -16,26 +16,30 @@ policy proofs and that the domain has a domain name of \domain and a policy
 value of \policy. 
 %We assume that both the client and domain follow the handshake protocol as described. 
 We also assume that our adversary controls $\numlas - 1$
-private keys of log aggregators and the private keys of $\policy - 1$ \acp{ca},
-and we assume that the adversary is the sole entity that controls the private
-key corresponding to a public key $\pk_\adversary$. We assume that the adversary
+private keys of log aggregators and the private keys of $\policy - 1$ \acp{ca}.
+The adversary can also, of course, create its own public key pairs, e.g., 
+$(\pk_\adversary, \pk_\adversary^{-1})$.
+%and we assume that the adversary is the sole entity that controls the private
+%key corresponding to a public key $\pk_\adversary$. 
+We assume that the adversary
 can intercept, suppress, replay, and modify any handshake message sent between
-the client and domain, and can sign any message it can construct with the
-information it has using its private keys. We also assume that the adversary
+the client and domain, and can use its private keys to 
+sign any message it can construct with the
+information it obtains. We also assume that the adversary
 cannot obtain a certificate binding \domain to $\pk_\adversary$ from any \ac{ca}
-besides the ones it controls. Under these assumptions, we claim that the client
+besides the ones it controls. Under these assumptions, we claim that a \ac{name}-enabled client
 will abort the handshake protocol if it receives any certificate chain
 containing $\pk_\adversary$ as the leaf public key. This claim 
-guarantees the security of \ac{name} because the adversary cannot mount a
-\ac{mitm} attack without the client completing the \ac{name} handshake based on
-a key that the adversary controls.
+supports the security of \ac{name} because to mount a successful MITM attack,
+the adversary must convince the client to complete the \ac{name} handshake
+based on a key that the adversary controls.
 
 We first show that the adversary cannot convince the client that that the domain
 has a policy value other than \policy. Because the client requests \numlas
 policy proofs for \domain, the client will abort the handshake if the 
 ServerHello message does not contain \numlas independent policy
 proofs. Because we assume that the adversary only has access to $\numlas - 1$
-log aggregator signing keys, we know that the adversary cannot use those keys to
+log aggregator signing keys, the adversary cannot use those keys to
 generate \numlas independent proofs. Specifically, if the adversary sends a set
 of proofs and there are fewer than \numlas valid proofs, or if any of them fails
 to prove that \policy is the policy value for \domain, then the client will
@@ -64,7 +68,8 @@ the $\policy^{th}$ independent chain never arrives.
 
 Our main security claim shows that under our assumptions, the adversary cannot
 mount a successful \ac{mitm} attack on a client and domain. Therefore, we can
-conclude that the failure of log aggregators or \acp{ca} are not sufficient to
+conclude that the failure of $\numlas - 1$ log aggregators or $\policy - 1$ \acp{ca} 
+are not sufficient to
 enable a \ac{mitm} attack. However, we did not describe the consequence of
 misbehavior by the other parties shown in \autoref{fig:overview}: the data
 sources (namely, public logs) or the browser vendor. We now show that while
@@ -77,7 +82,7 @@ that can circumvent almost any practical defense.
 
 Log aggregators rely on public logs to obtain a complete view of certificates in
 the Web \ac{pki}. However, given the open nature of many of these logs (i.e.,
-the fact that anyone can submit certificates to them or otherwise make
+the fact that many parties can submit or otherwise make
 certificates available to them), an adversary may take advantage of this
 openness to force the log aggregators to increase their resource consumption.
 For example, an adversary who controls \iac{ca} signing key can issue millions
@@ -85,7 +90,7 @@ of certificates and make them available to the logs, causing the log aggregators
 to store these certificates when updating their respective policy databases.
 
 While \ac{name} provides no mechanism to stop this behavior, the issuance of
-these certificates produces non-repudiable proof of the adversary's behavior,
+these certificates produces traceable evidence of the adversary's behavior,
 and the requirement that newly-issued certificates be logged increases the
 likelihood of someone detecting this behavior. This detection would likely lead
 to consequences such as the revocation of the \ac{ca} certificate by its issuing
@@ -106,10 +111,10 @@ scenario, the adversary can arbitrarily deviate from the \ac{tls} or \ac{name}
 handshakes, insert its own root certificates, or display arbitrary pages. Even
 with \ac{name}, an adversary-controlled vendor can also intercept and modify the
 result of queries to the signaling set or rewrite HTTPS requests to HTTP
-requests, rendering \ac{name}'s protection against downgrade attacks useless.
+requests, defeating \ac{name}'s protection against downgrade attacks.
 While some countermeasures such as OS-level protections may protect the client,
-this scenario is severe enough that \ac{name} makes no security guarantees if it
-occurs.
+we suggest that defenses against PKI failures (whether \ac{name} or others)
+are unlikely to stop powerful client-side adversaries.
 
 \paragraph{Correlated CA Compromises}
 

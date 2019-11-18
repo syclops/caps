@@ -343,17 +343,18 @@ The \ac{dafsa} also has the restriction that the state transition function is
 s_{i+1}$ for $1 \le i < n$ and $\transfunc(s_n, \sigma_n) = s_1$.
 
 We represent queries to the signaling set within the \ac{dafsa} as follows: let
-\states contain $\policy$ unique symbols $\multicertsymbol_\policy$ not present in \httpsset. 
+\states contain $\policy$ unique symbols $\multicertsymbol_1\dots\multicertsymbol_\policy$ 
+which are not present in any name in \httpsset. 
 Then, if there exists a sequence of
 states and symbols $(s_0, \ldots, s_n), (\sigma_1, \ldots, \sigma_n)$ that
 satisfies
 \begin{inparaenum}
 \item $\transfunc(s_i, \sigma_{i+1}) = s_{i+1}$ for each $i$ where $0 \le i < n$,
 \item $\sigma_1 \| \dots \| \sigma_{n-1} = \hostname$, 
-\item $\sigma_n = \multicertsymbol_\policy$, and
+\item $\sigma_n = \multicertsymbol_m$, and
 \item $s_n \in \finalstates$,
 \end{inparaenum}
-we say that $\query(\hostname) = \multicert(\policy)$.
+we say that $\query(\hostname) = \multicert(m)$.
 Otherwise, if
 \begin{inparaenum}
 \item $\transfunc(s_i, \sigma_{i+1}) = s_{i+1}$ for each $i$ where $0 \le i < n$,
@@ -367,9 +368,11 @@ then $\query(\hostname) = \onecert$. Otherwise, $\query(\hostname) = \nohttps$.
 We begin by building the \ac{dafsa} as described in previous
 work~\cite{daciuk2000incremental}. Though this previous work assumes transitions
 based on a single character, we consider the possibility of multi-character
-symbols and thus our symbol set $\symbolstrings = \bigcup_{i=0}^{253}
-\symbols^i$, where \symbols is the set of all ASCII characters allowed in domain
-names.\footnote{Recall that DNS names can be a maximum of 253 characters.}
+symbols and thus our symbol set consists of strings of symbols of
+length up to 253 characters\footnote{Recall that DNS names can be a maximum of 253 characters.}:
+$\symbolstrings = \bigcup_{i=0}^{253} \symbols^i$, 
+where \symbols is the set of all ASCII characters allowed in domain names,
+and $\symbols^i$ indicates strings of length $i$.
 
 We succinctly represent this \ac{dafsa} as a bitvector by following the
 high-level approach of previous work~\cite{daciuk2012smaller}. Intuitively, we
@@ -450,7 +453,7 @@ that start or end in $X$, that is, the number of triples $(s, t, \sigma)$ where
 $\transfunc(s, \sigma) = t$ and $s$ or $t$ (or both) is in $X$. For a connected
 component $C$, let \numpaths{C} denote the set of paths through $C$. Then the
 change in the number of edges by removing $C$ through path compaction is
-$|\numpaths{C}| - |\numtrans{C}|$. By examining the distribution of symbols in
+$|\numpaths{C}| - |\numtrans{C}|$. By collecting the distribution of symbols in
 \numtrans{S} and \numtrans{C}, as well as the concatenated symbols in
 \numpaths{C} (which we can find via depth-first search from \upstream{C}), we
 can compute the change in entropy in symbols and similarly for destination
@@ -458,10 +461,10 @@ states, which we write as \symboldh and \destdh, respectively. Suppose that we k
 original entropies \symbolh and \desth, and that we define $\dentropy = \symboldh +
 \destdh$ and $\entropy = \symbolh + \desth$. Then we can compute the difference in
 size between the two \acp{dafsa} as
-\begin{equation}
+\begin{equation*}
   |\numtrans{S}| \dentropy + \left(|\numpaths{C}| - |\numtrans{C}|\right)
   (\entropy + \dentropy)
-\end{equation}
+\end{equation*}
 and only remove $C$ if this quantity is negative.
 
 We found several classes of components that, for our underlying set of domain
@@ -481,7 +484,7 @@ size reductions for $\alpha = 2$ and $\alpha = 3$.
 \subsection{Building the \ac{name} Policy Database}
 \label{sec:design:policy}
 
-The policy database represents a binding between a name and a policy, that
+The \ac{name} \emph{policy database} represents a binding between a name and a policy, that
 is, the number of independent certificate chains that a client
 should expect during a handshake with a server corresponding to the name.
 To construct and maintain this database, each log aggregator must keep track of
@@ -514,8 +517,9 @@ ensure that the log aggregator has a list of currently valid certificates. The
 log aggregator can then use the database to construct a mapping of names to
 policies. Specifically, the aggregator creates a graph of certificate
 fingerprints as shown in \autoref{fig:chain}, and computes the \emph{policy
-value}, the minimum number of \ac{ca} public keys that must be compromised to
-fraudulently issue this certificate. The policy value can be computed using a
+value}, the minimum number of \ac{ca} public keys that must be compromised 
+for a \ac{name}-enabled browser to accept a fraudulent certificate for this site. 
+The policy value can be computed using a
 straightforward approach (e.g., computing a minimal vertex separator), allowing
 the log aggregator to easily construct a mapping of certificate fingerprints to
 policy values. The log aggregator can then perform a series of simple join
@@ -534,16 +538,17 @@ timestamp pair as valid for at least three days.}
 
 With the policy databases of the log aggregators, a domain can provide the
 information necessary for clients to establish the domain's authoritative public
-key in the improved \ac{pki}. The domain periodically downloads the latest
+key. The domain periodically downloads the latest
 \emph{policy proofs}, which are signed and timestamped name-policy pairs, from
 each of the log aggregators. For a name \hostname, a policy value \policy, a
 timestamp \timestamp, and a log aggregator \logagg, we specify the policy proof
 to be
-\begin{equation}
-  \policyproof(\logagg, \hostname, \policy, \timestamp) = \left\{\timestamp,
-  \pk_{\logagg}, \signature(\pk_{\logagg}^{-1}, \hostname \concat \policy
-\concat \timestamp)\right\}
-\end{equation}
+\begin{align*}
+  %data &= \logagg \concat \hostname \concat \timestamp \concat \policy \\
+  \policyproof(\logagg, \hostname, \policy, \timestamp) &= 
+  \left\{data, \signature(\pk_{\logagg}^{-1}, data)\right\} \mbox{ where} \\
+  data &= \logagg \concat \pk_{\logagg} \concat \hostname \concat \timestamp \concat \policy \\
+\end{align*}
 where $\pk_{\logagg}$ and $\pk_{\logagg}^{-1}$ denote respectively the public
 and private keys of \logagg, and $\signature(K, m)$ denotes a signature on $m$
 with private key $K$. The domain keeps these proofs for use in the handshake
@@ -552,7 +557,7 @@ described below.
 \subsection{Connection Establishment}
 \label{sec:design:handshake}
 
-To establish a connection to a domain, a client first queries the 
+To establish a connection to a domain, a client (e.g., browser) first queries the 
 signaling set for the domain's name.
 %Due to the way that querying occurs in the
 %\ac{dafsa}-based implementation of the signaling set, the client can observe the
@@ -577,10 +582,10 @@ In an initial deployment, we expect that typically $k=1$,
 but allowing the use of larger values for $k$ provides resilience
 against compromised log aggregators.
 
-The domain then sends back a ServerHello message which contains \numlas recent
+The domain then sends back a ServerHello message that contains \numlas recent
 policy proofs from \numlas distinct log aggregators, as well as \numlas
 certificate chains, which allows the client to verify the domain's policy value
-and the certificate chains that back this value. Formally, suppose a domain has
+and the certificate chains supporting this value. Formally, suppose a domain has
 hostname \hostname and policy value \policy, and selects a set of log
 aggregators $\{\logagg_1, \ldots, \logagg_\numlas\}$. Let $\policyproofshort_i =
 \policyproof(\logagg_1, \hostname, \policy, \timestamp_i)$ for $1 \le i \le
@@ -600,7 +605,8 @@ The client then checks that
 \begin{inparaenum}
 \item the signature on each policy proof is valid,
 \item the timestamp for each policy proof is sufficiently recent,
-\item the name in each policy proof is the domain's name,
+\item the name in each policy proof matches the domain name to which 
+      the browser is connecting,
 \item the policy value for each policy is one more than the number of
   certificate chains sent in the domain's extension message, and
 \item each certificate chain is valid as specified in the X.509v3
@@ -616,7 +622,9 @@ in the ServerCertificate message and perform all other checks required by the
 \label{sec:design:bootstrapping}
 
 Once an authoritative public key for a domain has been established through the
-\ac{name} handshake, signatures made by the corresponding private key can be
+\ac{name} handshake, signatures made by the corresponding private key are useful 
+beyond simply improving the domain's security in the current \ac{pki}.
+In particular, a signature from the authoritative public key can be
 used to verify the binding between a domain and a richer set of policies. For
 example, in systems such as ARPKI~\cite{basin2014arpki} and
 PoliCert~\cite{szalachowski2014policert}, these policies can specify a set of
@@ -634,5 +642,3 @@ a domain can simply obtain \policy + 1 new, independent certificate chains.
 This contrasts with previous proposals, which often rely on heavyweight
 processes that involve manual \ac{ca} intervention.
 
-The authoritative public key can also be used directly, as
-a way of providing clients with more confidence in the current \ac{pki}.
