@@ -37,7 +37,15 @@ but rare and noticeable, and an attacker seeking to carry out \iac{mitm} in this
 higher hurdle for the attack to succeed than in today's Web \ac{pki}.
 
 \paragraph{The Role of Log Aggregator}
-\bryan{TODO}
+
+In our design of \ac{name}, we have described the log aggregators as independent entities.
+However, we believe that the most realistic deployment route would likely be for
+each browser vendor to act as an aggregator, at least for clients with their browser.
+Today, browser vendors already take an active role in ``policing'' the Web PKI,
+for instance by directly revoking compromised certificates via browser updates.
+Thus, they have an incentive to support a move to a more resilient PKI.  
+They are also already a fundamental part of the Web's TCB,
+and hence expanding on that role may be preferable to adding a new party.
 
 \paragraph{Increasing \ac{https} Adoption}
 
