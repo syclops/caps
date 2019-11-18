@@ -360,10 +360,10 @@ sent in the \ac{name} handshake, and the latency of the handshake both with and
 without the \ac{name} \ac{tls} extension.
 
 We tested this both over the Internet (by connecting to a virtual private server
-with latency varying from 30 to 300 ms, referred to as \emph{WAN}), as well
-as over the local loopback interface (referred to as \emph{localhost}). The
-tests over the internet to \emph{WAN} provide an indication of the effect of
-the extension on ``real world'' servers, which are usually accessed over WAN,
+with latency varying from 30 to 300 ms \jay{remove this: ``, referred to as \emph{WAN}''?}), as well
+as over the local loopback interface \jay{remove this: ``(referred to as \emph{localhost})''?}. The
+tests over the internet (\emph{WAN}) provide an indication of the effect of
+the extension on ``real world'' servers, \jay{remove this: ``which are usually accessed over WAN,''}
 whereas the \emph{localhost} tests provide a lower bound on time added due to
 sending/receiving/processing extra data. A total of 15385 TLS connections were
 established for our testing: 5768 over WAN, 9617 over localhost.

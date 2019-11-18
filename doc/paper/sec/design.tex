@@ -232,7 +232,7 @@ Formally, the signaling set is a pair $(\httpsset, \multicertset)$ where
   name is a Unicode or ASCII string up to 253 bytes in length overall,
   with no label longer than 63 bytes~\cite{rfc1035}. We further add the
 requirement that the name has \iac{tld} that is a current global \ac{tld}
-according to ICANN.} names in ASCII and $\multicertset \subseteq
+according to ICANN.} names in ASCII \jay{What about Unicode? We mention it in the footnote, but nothing since then about it.} and $\multicertset \subseteq
 \httpsset$. The set supports a query operation, formally defined as $\query:
 \strings \to \{\nohttps, \onecert, \multicert(n)\}$ where \strings is the set of
 all ASCII strings and \nohttps, \onecert, and $\multicert(n)$ are values indicating
@@ -479,7 +479,7 @@ results in a size savings of nearly 10\% of the original \ac{dafsa} size.
 We also found that selecting a constant $\alpha$ and then selecting components
 consisting entirely of states that had one incoming transition and $\alpha$
 outgoing transitions (or vice versa) yielded more modest but still nontrivial
-size reductions for $\alpha = 2$ and $\alpha = 3$.
+size reductions for $\alpha = 2$ and $\alpha = 3$. \jay{do we want to specify how much?}
 
 \subsection{Building the \ac{name} Policy Database}
 \label{sec:design:policy}
