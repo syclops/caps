@@ -28,12 +28,12 @@ override the misissued certificate.
 %signals that the domain will communicate over HTTP. The domain, however, must
 %still send this policy and proof during connection establishment.
 
-Work by certificate logs to mitigate situations such as this are ongoing. Some
+Enhancements to certificate logs to mitigate situations such as this are ongoing. Some
 \ac{ct} logs, for example, only accept certificates from certain \acp{ca}, and
 nearly all of them perform some level of certificate validation, including
 checking whether a certificate is anchored in a known root certificate. We
 expect an attack that involves poisoning data sources in this way to be possible
-but rare, and an attacker seeking to carry out \iac{mitm} in this way has a
+but rare and noticeable, and an attacker seeking to carry out \iac{mitm} in this way has a
 higher hurdle for the attack to succeed than in today's Web \ac{pki}.
 
 \paragraph{The Role of Log Aggregator}
@@ -41,9 +41,9 @@ higher hurdle for the attack to succeed than in today's Web \ac{pki}.
 
 \paragraph{Increasing \ac{https} Adoption}
 
-In the past several years, Let's Encrypt and other similar efforts to increase
+In the past several years, Let's Encrypt and similar efforts to increase
 the use of \ac{https} in the Internet has caused a marked increase in the number
-of domain names that are served over \ac{tls}, as shown in
+of domain names served over \ac{tls}, as shown in
 \autoref{sec:evaluation:https}. Due to the structure of DNS, it is impossible to
 know how many domain names there are overall, and thus difficult to determine a
 ceiling for the number of names known to serve content over \ac{https}.
@@ -57,7 +57,7 @@ on a client's region or self-selected categories of interest.
 We also considered splitting the DAFSA based on popularity,
 but conversations with Mozilla indicate this approach is not palatable
 as it is seen as perpetuating inequality on the Web;
-hence any solution needs to treat websites large and small 
+hence any solution should ideally treat websites large and small 
 in an egalitarian fashion~\cite{privatecomm}.
 
 \paragraph{Future Work}
@@ -74,7 +74,7 @@ distribution results in a Huffman dictionary whose size is significant enough to
 neutralize any space savings that would result. We are currently exploring the
 use of selecting a subset of symbols to Huffman encode. For destination states,
 we can assign an ordering of states in the \ac{dafsa} such that the difference
-to each destination state in the ordering is small and use integer encoding to
+to each destination state in the ordering is small, and we can then use integer encoding to
 represent the location of these states. We are currently exploring the
 possibility of vertex separators in graphs to address this problem.
 

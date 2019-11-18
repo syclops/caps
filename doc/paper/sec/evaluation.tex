@@ -189,14 +189,14 @@ best-case memory usage in \ac{name}) and the size of the zpaq-compressed
   \caption{Size of the signaling set in various representations when 
            the names in the set are subsampled from the full set of names. 
            The labels above each distinct value on the $x$-axis
-           denotes the fraction of the full set that was sampled.}
+           denote the fraction of the full set that was sampled.}
   \label{fig:sample}
 \end{figure}
 
-\autoref{fig:sample} shows the results of this experiment. If the fraction of
+\autoref{fig:sample} shows the results. If the fraction of
 domains that use multiple independent certificate chains for the same name is
-small, as we would anticipate, then clients who opt for this approach can
-significantly reduce their memory and disk usage in \ac{name}. 
+small, as we would anticipate, then \ac{name} clients 
+significantly reduce their memory and disk usage. 
 For example, even if 10\% of all HTTPS websites deployed additional certificates,
 the compressed DAFSA representation would require less than 30~MB.
 Of course, at very low levels of adoption,
@@ -239,8 +239,8 @@ prefixes and suffixes) in a set.
 
 Because the signaling set will be updated over time, we also carried out an
 experiment to determine the size of updates that will be sent to clients. 
-An update to the signaling set consists of a set of names that have been added to the signaling
-set since the most recent version, as well as a set of names that have been
+An update to the signaling set consists of the names added to the signaling
+set since the most recent version, as well the names 
 deleted due to certificate expiration or revocation. We computed the set of
 added and deleted names for our range of scans, aggregating these sets by week.
 We then computed the sizes of these sets in four different representations:
@@ -255,12 +255,12 @@ for example, we used the zpaq method that produced the smallest archive (method
 5 with 64 MiB blocks) and our \ac{dafsa} representation used path compaction.
 We experimented with the full set of names.
 
-\autoref{fig:updates} shows the results of our experiment. As
+\autoref{fig:updates} shows the results. As
 \autoref{fig:count} would indicate, the size of the signaling set has increased
 over time, and thus the set of added names is consistently larger than the set
 of deleted names. Given the relatively modest sizes of these sets compared to
 that of the full signaling set, the most space-efficient method for representing
-and transmitting these updates to clients is actually a zpaq-compressed archive
+and transmitting these updates to clients is a zpaq-compressed archive
 of the raw text file of names rather than \iac{dafsa}-based representation. From
 a technical perspective, this method of transmission is also advantageous:
 clients can simply add the set of added names to their existing \ac{dafsa}, and
@@ -343,7 +343,7 @@ homepage requires approximately 400~KB.
 
 To measure the performance of connection establishment in \ac{name}, we
 implemented the handshake as a custom \ac{tls} extension in the OpenSSL library.
-For concrete evaluation of this extension, we use nginx and curl with minor
+For concrete evaluation of this extension, we use \texttt{nginx} and \texttt{curl} with minor
 modifications to use our \ac{tls} extension.
 
 Additionally, we constructed sample sets of domain names based on four parameters:
@@ -368,12 +368,12 @@ whereas the \emph{localhost} tests provide a lower bound on time added due to
 sending/receiving/processing extra data. A total of 15385 TLS connections were
 established for our testing: 5768 over WAN, 9617 over localhost.
 
-Our results, shown in Figures~\ref{fig:evaltlsext:numproof},
+Our results in Figures~\ref{fig:evaltlsext:numproof},
 \ref{fig:evaltlsext:numchain}, \ref{fig:evaltlsext:numcert}, and
-\ref{fig:evaltlsext:sizechain}, show that in comparison to the mean time
+\ref{fig:evaltlsext:sizechain} show that in comparison to the mean time
 elapsed, there is an approximately 5\% increase in connection establishment
-time: an average of 11ms longer for WAN and 1.2ms for localhost. However,
-since our \ac{tls} extension does not add any extra round-trips to the
+time: an average of 11ms longer for WAN and 1.2ms for localhost. 
+Since our \ac{tls} extension does not add any extra round-trips to the
 handshake, the time added is small, especially in comparison to random
 measurement fluctuations (e.g., when we look at confidence intervals within one
 standard deviation from the mean --- shown as error bars in the figures).
