@@ -38,8 +38,7 @@ In designing \ac{name}, we consider a \iac{mitm} adversary.
 We assume that the adversary has full
 control of the network during the TLS handshake; that is, the adversary can
 intercept, drop, or modify all messages sent among all entities described
-below. We assume that the adversary cannot successfully mount \iac{mitm} in the improved
-\ac{pki}, or break standard cryptographic primitives.
+below. We assume that the adversary cannot break standard cryptographic primitives.
 
 \paragraph{Architecture}
 
@@ -90,17 +89,18 @@ the server is in the signaling set; if it is, then the browser will refuse
 to engage in an HTTP connection.
 
 % Policy overview
-To allow domains to certify their public keys more securely than in the current
+To allow domains more control over their public keys than in the current
 \ac{pki}, log aggregators use data from public logs to construct a set of
 \emph{\ac{name} policies}, which allows each domain to establish an
-\emph{authoritative public key} in the \emph{curent} Web \ac{pki}. \ac{name}
+\emph{authoritative public key} in the \emph{current} Web \ac{pki}. \ac{name}
 policies take a simple and intuitive approach: \emph{treat whichever public key
-  is backed by the largest number of independent certificate chains\footnote{This term means
-  that the certificate chains share no public keys except at the leaf.} in the
-current \ac{pki} as authoritative in the improved \ac{pki}}. A domain wanting to
-increase client confidence in one of its public keys can obtain additional 
-independent certificates for that key, and the log aggregators will
-automatically update their \ac{name} policies for that domain.
+  is backed by the largest number of independent certificate
+  chains\footnote{This term means that the certificate chains share no public
+keys except at the leaf.} in the current \ac{pki} as authoritative in \ac{name}
+and the improved \ac{pki}}. A domain wanting to increase client confidence in
+one of its public keys can obtain additional independent certificates for that
+key, and the log aggregators will automatically update their \ac{name} policies
+for that domain.
 
 Intuitively, log aggregators simply send a signed pair $(\hostname, \policy)$
 where \hostname is a domain name and \policy is the \emph{\ac{name} policy
@@ -113,16 +113,15 @@ improved \ac{pki} to a handshake in the existing Web \ac{pki}, each log
 aggregator indicates which domains in its signaling set have a key policy value
 greater than 1.
 
-The current PKI actually supports three classes of certificates: 
-standard ``domain-validated'' (DV) certificates,
-``organization-validated'' (OV) certificates,
-and
-extended validation (EV) certificates.
-EV certificates require domains to undergo more rigorous screening than the other two.
-Hence, the actual \ac{name} policy value is a tuple $(\policy_{EV}, \policy_{DV} + \policy_{OV})$.
-For a given domain, \ac{name} will treat as authoritative the public
-key with the largest $\policy_{EV}$, with ties broken based on the largest sum 
-of $\policy_{DV}$ and $\policy_{OV}$.
+The current PKI actually supports three classes of certificates: standard
+domain-validated (DV) certificates, organization-validated (OV) certificates,
+and extended validation (EV) certificates. EV certificates require domains to
+undergo more rigorous screening than the other two.
+Hence, the actual \ac{name} policy value is a tuple $(\policy_{EV},
+\policy_{!EV})$. For a given domain, \ac{name} will treat as authoritative the
+public key with the largest $\policy_{EV}$, with ties broken based on the
+largest value of $\policy_{!EV}$, which represents the policy value of all
+non-EV certificates for the domain.
 
 %Our policy also implies that if $n$ is the
 %highest number of observed independent certificate chains for a given domain,
@@ -228,24 +227,22 @@ The signaling set represents
   public key).
 \end{inparaenum}
 Formally, the signaling set is a pair $(\httpsset, \multicertset)$ where
-\httpsset and \multicertset are unordered sets of valid\footnote{A valid
-  name is a Unicode or ASCII string up to 253 bytes in length overall,
-  with no label longer than 63 bytes~\cite{rfc1035}. We further add the
-requirement that the name has \iac{tld} that is a current global \ac{tld}
-according to ICANN.} names in ASCII \jay{What about Unicode? We mention it in the footnote, but nothing since then about it.} and $\multicertset \subseteq
-\httpsset$. The set supports a query operation, formally defined as $\query:
-\strings \to \{\nohttps, \onecert, \multicert(n)\}$ where \strings is the set of
-all ASCII strings and \nohttps, \onecert, and $\multicert(n)$ are values indicating
-whether a string is a name known to have no \ac{https} certificate, one
-certificate, or $n\geq 2$ independent certificates, respectively.
-%Specifically, \query must satisfy
-%\begin{align*}
-%  \query(\hostname) = \nohttps &\iff \hostname \notin \httpsset \\
-%  \query(\hostname) = \onecert &\iff \hostname \in \httpsset \setminus
-%    \multicertset \\
-%  \query(\hostname) = \multicert &\iff \hostname \in \multicertset
-%\end{align*}
-%for all $\hostname \in \strings$.
+\httpsset and \multicertset are unordered sets of valid names in
+ASCII\footnote{A valid name is a Unicode or ASCII string up to 253 bytes in
+  length overall, with no label longer than 63 bytes~\cite{rfc1035}. We further
+  add the requirement that the name has \iac{tld} that is a current global
+\ac{tld} according to ICANN. We use ASCII here because we can encode names in
+Punycode.} and $\multicertset \subseteq \httpsset$. The set supports a query
+operation, formally defined as $\query: \strings \to \{\nohttps, \onecert,
+\multicert(n)\}$ where \strings is the set of all ASCII strings and \nohttps,
+\onecert, and $\multicert(n)$ are values indicating whether a string is a name
+known to have no \ac{https} certificate, one certificate, or $n\geq 2$
+independent certificates, respectively.
+%Specifically, \query must satisfy \begin{align*} \query(\hostname) = \nohttps
+%&\iff \hostname \notin \httpsset \\ \query(\hostname) = \onecert &\iff
+%\hostname \in \httpsset \setminus \multicertset \\ \query(\hostname) =
+%\multicert &\iff \hostname \in \multicertset \end{align*} for all $\hostname
+%\in \strings$.
 
 To build its signaling set, a log aggregator must first determine \httpsset
 and \multicertset, which it can achieve using the set of all certificates in the
@@ -343,7 +340,7 @@ The \ac{dafsa} also has the restriction that the state transition function is
 s_{i+1}$ for $1 \le i < n$ and $\transfunc(s_n, \sigma_n) = s_1$.
 
 We represent queries to the signaling set within the \ac{dafsa} as follows: let
-\states contain $\policy$ unique symbols $\multicertsymbol_1\dots\multicertsymbol_\policy$ 
+\symbols contain $\policy$ unique symbols $\multicertsymbol_1\dots\multicertsymbol_\policy$ 
 which are not present in any name in \httpsset. 
 Then, if there exists a sequence of
 states and symbols $(s_0, \ldots, s_n), (\sigma_1, \ldots, \sigma_n)$ that
@@ -383,8 +380,8 @@ represented by an encoding of the label $\sigma$ and the destination state $t$.
 We observe that in this construction, the overall number of outgoing
 transitions, as well as the size of the representation of each transition's
 label and destination state, strongly influence the size of the final bitvector.
-We thus focus on leveraging patterns in the underlying data to minimize the size
-of the \ac{dafsa} representation.
+We thus focus on leveraging patterns in the underlying data to minimize the
+overall size of the \ac{dafsa} representation.
 
 \paragraph{Path Compaction}
 
@@ -444,9 +441,10 @@ Specifically, when removing \stateset, we transform the \ac{dafsa} $(\symbols,
 Our goal is to select components that result in the greatest reduction in size.
 To determine the size reduction of removing a connected component, we must
 consider both the reduction in the number of edges in the \ac{dafsa} as well as
-any changes to the symbol and destination state entropy, as removing a component
-would cause the distributions underlying these values to change. To quantify
-this change, we define several helpful variables.
+any changes to the Shannon entropy of the distributions of symbols and
+destination states in the \ac{dafsa}, as removing a component would cause these
+distributions to change. To quantify this change, we define several helpful
+variables.
 
 For a set $X \subseteq\states$, let \numtrans{X} denote the set of transitions
 that start or end in $X$, that is, the number of triples $(s, t, \sigma)$ where
