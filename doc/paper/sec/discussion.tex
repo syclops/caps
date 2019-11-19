@@ -12,7 +12,8 @@ future work.
 Censys and \ac{ct}). Therefore, \iac{ca} who issues
 and publicizes an unauthorized certificate for a domain that does not deploy
 \ac{https} can cause the domain to be included in the signal set and thus render
-the domain inaccessible. This fragility effectively allows an adversary to
+the domain inaccessible. This fragility effectively allows an adversary who controls
+one or more private CA keys to
 ``poison the well'' that \ac{name} relies on, and execute a denial-of-service
 attack with just a single unauthorized certificate.
 
@@ -70,7 +71,7 @@ in an egalitarian fashion~\cite{privatecomm}.
 
 \paragraph{Future Work}
 
-One avenue of future exploration that is currently ongoing is that of
+One avenue of future exploration that is currently ongoing is 
 \emph{transition compaction}, which aims to minimize our \ac{dafsa}
 representation by reducing the representation size of each transition. A
 transition in the representation consists of a symbol and destination state. We

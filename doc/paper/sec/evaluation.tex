@@ -73,17 +73,20 @@ set.
 
 Figures \autoref{fig:count:certs} and \autoref{fig:count:names} show the number of
 domain names observed by Censys, \ac{ct}, and their overlap over time. Our results show 
-far more certificates (and consequently names and domains) observed by
-\ac{ct} than by Censys. It is not clear whether the names seen in \ac{ct} simply
-never deployed HTTPS in the wild or whether Censys was not observing certain
-certificates.  One likely contributing factor is the increasing prevelance of 
+that \ac{ct} observes vastly more certificates 
+(and consequently names and domains) 
+than Censys. 
+It is unclear what accounts for this large discrepancy.
+One possibility is that many certificates are simply never
+deployed in public-facing HTTPS sites.
+Another likely contributing factor is the increasing prevelance of 
 Server Name Indication (SNI)~\cite{rfc6066}, which would cause Censys' probes to be rejected
 when they do not include the correct server name.
 To resolve these issues into a suitable signaling set, we performed a scan of
 port 443 using ZGrab~\cite{durumeric2015search} for all domain names we
 extracted from Censys and \ac{ct}, and then we discarded any domain names that
 failed to respond. From this method, we isolated a set of 64,050,329 ``valid''
-names that we used for testing.
+names that we used for testing\bryan{We should relate this to the numbers from Censys and CT}.
 
 \subsection{Signaling Set Representation}
 \label{sec:evaluation:implementation}
@@ -175,10 +178,16 @@ best case, an on-disk representation of just 138 MB with an in-memory
 representation of 170 MB.
 
 For some clients, an initial download size of 138 MB may be too much. One
-approach that such clients can take to protect themselves would be to only track
-sites that have more than one certificate, thus reducing disk and memory usage
-at the cost of protection against \ac{tls} stripping attacks. To estimate
-clients' memory and disk usage in this case, we subsampled the full set of names
+approach that such clients might take to protect themselves would be to only track
+sites that have more than one certificate (i.e., sites with $\policy > 1$).
+This would ensure that such clients still benefit from greater resiliency
+against CA compromises, particularly for ``high-value'' domains that take the effort
+to obtain extra certificates. 
+For these clients, this optimization would reduce \ac{name}' disk and memory usage,
+but \ac{name} would no longer protect such clients 
+from \ac{tls} stripping attacks targeting
+``normal'' domains (those with a single certificate).
+To estimate clients' memory and disk usage in this case, we subsampled the full set of names
 and computed the size of the \ac{dafsa} with path compaction (which represents
 best-case memory usage in \ac{name}) and the size of the zpaq-compressed
 \ac{dafsa} (which represents the best-case disk usage).
@@ -360,10 +369,10 @@ sent in the \ac{name} handshake, and the latency of the handshake both with and
 without the \ac{name} \ac{tls} extension.
 
 We tested this both over the Internet (by connecting to a virtual private server
-with latency varying from 30 to 300 ms \jay{remove this: ``, referred to as \emph{WAN}''?}), as well
-as over the local loopback interface \jay{remove this: ``(referred to as \emph{localhost})''?}. The
+with latency varying from 30 to 300 ms), as well
+as over the local loopback interface. The
 tests over the internet (\emph{WAN}) provide an indication of the effect of
-the extension on ``real world'' servers, \jay{remove this: ``which are usually accessed over WAN,''}
+the extension on ``real world'' servers, 
 whereas the \emph{localhost} tests provide a lower bound on time added due to
 sending/receiving/processing extra data. A total of 15385 TLS connections were
 established for our testing: 5768 over WAN, 9617 over localhost.
