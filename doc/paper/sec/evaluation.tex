@@ -148,19 +148,20 @@ these encodings with zpaq method 5 using both block sizes.
     \midrule
     DAFSA & \fsalargesize \\
     DAFSA w/ path compaction (PC) & \fsamedsize \\
-    DAFSA w/ zpaq (method 5, 64 MiB blocks) & 184 \\
-    DAFSA w/ zpaq (method 5, 2048 MiB blocks) & 145 \\
-    DAFSA w/ PC, zpaq (method 5, 64 MiB blocks) & 139 \\
-    DAFSA w/ PC, zpaq (method 5, 2048 MiB blocks) & 138 \\
+    DAFSA w/ zpaq (method 5, 64 MiB blocks) & \fsazpaqlargesize \\
+    DAFSA w/ zpaq (method 5, 2048 MiB blocks) & \fsazpaqmedsize \\
+    DAFSA w/ PC, zpaq (method 5, 64 MiB blocks) & \fsapczpaqlargesize \\
+    DAFSA w/ PC, zpaq (method 5, 2048 MiB blocks) & \fsapczpaqmedsize \\
     \bottomrule
   \end{tabular}
   \label{tab:signaling}
 \end{table}
 
-The results are shown in \autoref{tab:signaling}. 
+The results are shown in \autoref{tab:signaling}.
 Starting from an enormous plaintext corpus of over 1.5 GB,
 the various options all achieve impressive compression ratios.
-However, the results also indicate that to achieve a competitive size (i.e., 153~MB or less),
+However, the results also indicate that to achieve a competitive size (i.e.,
+\bloomlargesize{}~MB or less),
 Bloom filters would require an unacceptably high false 
 positive rate: one in every 10K sites would be falsely signaled
 as being under attack and hence would be rendered inaccessible.
@@ -174,10 +175,10 @@ its in-memory representation of the
 signaling set would simply be the uncompressed set of domains, yielding a memory
 requirement of 1.5~GB. Our \ac{dafsa}-based representation captures a ``sweet
 spot'' between these two alternatives, suffering no false positives or negatives and, in the
-best case, an on-disk representation of just 138 MB with an in-memory
-representation of 170 MB.
+best case, an on-disk representation of just \fsapczpaqmedsize{}~MB with an in-memory
+representation of \fsamedsize{}~MB.
 
-For some clients, an initial download size of 138 MB may be too much. One
+For some clients, an initial download size of \fsapczpaqmedsize{}~MB may be too much. One
 approach that such clients might take to protect themselves would be to only track
 sites that have more than one certificate (i.e., sites with $\policy > 1$).
 This would ensure that such clients still benefit from greater resiliency
@@ -207,7 +208,7 @@ domains that use multiple independent certificate chains for the same name is
 small, as we would anticipate, then \ac{name} clients 
 significantly reduce their memory and disk usage. 
 For example, even if 10\% of all HTTPS websites deployed additional certificates,
-the compressed DAFSA representation would require less than 30~MB.
+the compressed DAFSA representation would require just under 33~MB.
 Of course, at very low levels of adoption,
 the advantage of the \ac{dafsa}-based
 approach over a list of names decreases. This makes sense, given that the
@@ -274,8 +275,8 @@ of the raw text file of names rather than \iac{dafsa}-based representation. From
 a technical perspective, this method of transmission is also advantageous:
 clients can simply add the set of added names to their existing \ac{dafsa}, and
 build (and subsequently add to) a new \ac{dafsa} for the set of deleted names.
-Our results show that updates (added and deleted names) are typically between 2
-and 3~MB per week or $\sim$293-439~KB/day; by comparison, downloading the Google
+Our results show that updates (added and deleted names) are typically less than
+3~MB per week or $\sim$439~KB/day; by comparison, downloading the Google
 homepage requires approximately 400~KB.
 
 % BP: Why release once a week instead of every day?
