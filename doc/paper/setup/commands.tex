@@ -1,9 +1,21 @@
 % User-defined commands go here.
 
-\newcommand{\steve}[1]{\textcolor{red}{[SM: #1]}}
-\newcommand{\jay}[1]{\textcolor{red}{[JB: #1]}}
-\newcommand{\bryan}[1]{\textcolor{red}{[BP: #1]}}
-\newcommand{\draft}[1]{\textcolor{blue}{[Draft text: #1]}}
+\newif\ifsubmit    % Flag for distinguishing submission commands
+\submittrue
+\submitfalse       % Comment out before submitting 
+
+\ifsubmit
+  \newcommand{\steve}[1]{}
+  \newcommand{\jay}[1]{}
+  \newcommand{\bryan}[1]{}
+  \newcommand{\draft}[1]{}
+\else
+  \newcommand{\steve}[1]{\textcolor{red}{[SM: #1]}}
+  \newcommand{\jay}[1]{\textcolor{red}{[JB: #1]}}
+  \newcommand{\bryan}[1]{\textcolor{red}{[BP: #1]}}
+  \newcommand{\draft}[1]{\textcolor{blue}{[Draft text: #1]}}
+\fi
+
 \newcommand{\emxs}[1]{\ensuremath{#1}\xspace}
 
 \newcommand{\adversary}{\emxs{M}}
