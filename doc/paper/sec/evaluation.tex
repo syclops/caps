@@ -71,45 +71,45 @@ time it was first observed in our data until its expiration. We then consider
 the number of unique, valid domain names, which we use to build the signaling
 set.
 
-Figures \autoref{fig:count:certs} and \autoref{fig:count:names} show the number of
-domain names observed by Censys, \ac{ct}, and their overlap over time. Our results show 
-that \ac{ct} observes vastly more certificates 
-(and consequently names and domains) 
-than Censys. 
-It is unclear what accounts for this large discrepancy.
-One possibility is that many certificates are simply never
-deployed in public-facing HTTPS sites.
-Another likely contributing factor is the increasing prevelance of 
-Server Name Indication (SNI)~\cite{rfc6066}, which would cause Censys' probes to be rejected
-when they do not include the correct server name.
-To resolve these issues into a suitable signaling set, we performed a scan of
-port 443 using ZGrab~\cite{durumeric2015search} for all domain names we
-extracted from Censys and \ac{ct}, and then we discarded any domain names that
-failed to respond. From this method, we isolated a set of 64,050,329 ``valid''
-names that we used for testing\bryan{We should relate this to the numbers from Censys and CT}.
+Figures \autoref{fig:count:certs} and \autoref{fig:count:names} show the number
+of domain names observed by Censys, \ac{ct}, and their overlap over time. Our
+results show that \ac{ct} observes vastly more certificates (and consequently
+names) than Censys. It is unclear what accounts for this large discrepancy. One
+possibility is that many certificates are simply never deployed in public-facing
+HTTPS sites. Another likely contributing factor is the increasing prevelance of
+Server Name Indication (SNI)~\cite{rfc6066}, which would cause Censys' probes to
+be rejected when they do not include the correct server name.
+
+From Censys and \ac{ct}, we obtained a total of 156,289,973 valid domain names
+for which a certificate had been issued. To address the possibility that many of
+these names may not be used for public-facing sites, we performed a scan of port
+443 (the default for \ac{https}) using ZGrab~\cite{durumeric2015search} for all
+of these domain names, and discarded any domain names that failed to respond.
+This resulted in a set of 64,050,329 names that we used for testing, as
+described below.
 
 \subsection{Signaling Set Representation}
 \label{sec:evaluation:implementation}
 
-As described in \autoref{sec:design:signaling}, our motivation for using \iac{dafsa}-based
-representation of the signaling set was twofold: first, the representation has
-no false positives or negatives, and second, it can be searched in its
-compressed state, leading to a lower memory usage requirement for clients. To
-evaluate the effectiveness of these design decisions against other alternatives,
-we conducted an experiment to measure the space requirements for the signaling
-set in various representations. 
-We measured both the fully compressed size 
-(which dictates bandwidth usage when transmitting
-the set to the client and the client's overhead storing it on disk)
-and the size in memory (when being used by the client during certificate verification).
+As described in \autoref{sec:design:signaling}, our motivation for using
+\iac{dafsa}-based representation of the signaling set was twofold: first, the
+representation has no false positives or negatives, and second, it can be
+searched in its compressed state, leading to a lower memory usage requirement
+for clients. To evaluate the effectiveness of these design decisions against
+other alternatives, we conducted an experiment to measure the space requirements
+for the signaling set in various representations. We measured both the fully
+compressed size (which dictates bandwidth usage when transmitting the set to the
+client and the client's overhead storing it on disk) and the size in memory
+(when being used by the client during certificate verification).
 
 In particular, we compared the plaintext representation of the signaling set (as
 of July 3, 2018) with a compressed representation using Bloom filters, the
-generic compression utility zpaq~\cite{zpaq},\footnote{While we tested compression with other
-  utilities, zpaq had the smallest size. Thus we used zpaq for the experiment to
-  compare a near-best-case compression scenario.} and various configurations of
-our \ac{dafsa}-based representation. We also compressed the \ac{dafsa}-based
-representation using zpaq to find its size on disk and in transit. 
+generic compression utility zpaq~\cite{zpaq},\footnote{While we tested
+  compression with other utilities, zpaq had the smallest size. Thus we used
+zpaq for the experiment to compare a near-best-case compression scenario.} and
+various configurations of our \ac{dafsa}-based representation. We also
+compressed the \ac{dafsa}-based representation using zpaq to find its size on
+disk and in transit. 
 
 We specifically tested a Bloom filter with false positive rates of 0.001\%,
 0.01\%, and 0.1\%. Since the number of domain names is on the order of
@@ -120,10 +120,10 @@ compression methods, 1 and 5, where method 1 completes in a short amount of time
 (25 seconds) but compresses the input less while method 5 takes a long time (20
 minutes) but yields excellent compression. Furthermore, with zpaq method 5, we
 tested with 64 MiB and 2048 MiB blocks, where larger blocks typically yield
-better compression. Finally, with our \ac{dafsa}-based representation, 
-we tested a plain encoding as
-well as an encoding using our path-compressed \ac{dafsa}, and compressed each of
-these encodings with zpaq method 5 using both block sizes.
+better compression. Finally, with our \ac{dafsa}-based representation, we tested
+a plain encoding as well as an encoding using our path-compressed \ac{dafsa},
+and compressed each of these encodings with zpaq method 5 using both block
+sizes.
 
 \input{table/signaling}
 
@@ -164,7 +164,7 @@ However, the results also indicate that to achieve a competitive size (i.e.,
 \bloomlargesize{}~MB or less),
 Bloom filters would require an unacceptably high false 
 positive rate: one in every 10K sites would be falsely signaled
-as being under attack and hence would be rendered inaccessible.
+as supporting \ac{https} and hence would be rendered inaccessible.
 %Bloom filters offer high
 %compression even with a low false positive rate, and their in-memory
 %representation is the same as their on-disk representation. However, they still
@@ -177,6 +177,15 @@ requirement of 1.5~GB. Our \ac{dafsa}-based representation captures a ``sweet
 spot'' between these two alternatives, suffering no false positives or negatives and, in the
 best case, an on-disk representation of just \fsapczpaqmedsize{}~MB with an in-memory
 representation of \fsamedsize{}~MB.
+
+For comparison, the set of all names from Censys and \ac{ct} (including
+unresponsive names) totaled 3.48~GB, and using our signaling set
+representation, achieved sizes of 409~MB in memory (using path compaction) and
+335~MB on disk and in transit (using path compaction and zpaq method 5 with
+2048~MiB blocks). Thus the set of responsive names we used for testing comprised
+41.6\% of all observed valid names, 43.4\% of the total uncompressed size of
+all names from Censys and \ac{ct}, 46.5\% of the size in memory with our
+\ac{dafsa} representation, and 44.2\% of the size on disk and in transit.
 
 For some clients, an initial download size of \fsapczpaqmedsize{}~MB may be too much. One
 approach that such clients might take to protect themselves would be to only track

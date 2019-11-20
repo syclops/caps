@@ -469,15 +469,14 @@ We found several classes of components that, for our underlying set of domain
 names, provided substantial reductions in the size of the \ac{dafsa}
 representation. The first was to select what we call \emph{isolated paths}, that
 is, paths of the form $(s_1, \sigma_1, \ldots, s_m)$ where for all $i$ such that
-$1 < i < m$, $s_i$ only had one incoming and one outgoing transition. 
-Using techniques from prior work~\cite{daciuk2000incremental} to build the \ac{dafsa} 
-results in a significant number of isolated paths.
-Hence performing path compaction on all such paths
-results in a size savings of nearly 10\% of the original \ac{dafsa} size.
-We also found that selecting a constant $\alpha$ and then selecting components
-consisting entirely of states that had one incoming transition and $\alpha$
-outgoing transitions (or vice versa) yielded more modest but still nontrivial
-size reductions for $\alpha = 2$ and $\alpha = 3$. \jay{do we want to specify how much?}
+$1 < i < m$, $s_i$ only had one incoming and one outgoing transition. Using
+techniques from prior work~\cite{daciuk2000incremental} to build the \ac{dafsa}
+results in a significant number of isolated paths. Hence performing path
+compaction on all such paths results in a size savings of nearly 10\% of the
+original \ac{dafsa} size. We also found that selecting a constant $\alpha$ and
+then selecting components consisting entirely of states that had one incoming
+transition and $\alpha$ outgoing transitions (or vice versa) yielded more modest
+but still nontrivial size reductions for $\alpha = 2$ and $\alpha = 3$.
 
 \subsection{Building the \ac{name} Policy Database}
 \label{sec:design:policy}
