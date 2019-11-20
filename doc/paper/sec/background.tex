@@ -40,10 +40,10 @@ CT-enabled clients reject certificates that are not accompanied by such a proof.
 %\ac{tls} handshake protocol
 
 Censys and \ac{ct} can be used in conjunction to provide a reasonably complete
-view of the Web's \ac{https} ecosystem, particularly the \acp{fqdn}~\cite{vandersloot2016towards}
-of sites deploying HTTPS.
-Previous work has used this view to efficiently represent 
-the set of all revoked certificates~\cite{larisch2017crlite}.
+view of the Web's \ac{https} ecosystem, particularly the \acp{fqdn} of sites
+deploying HTTPS~\cite{vandersloot2016towards}. Previous work has used this view
+to efficiently represent the set of all revoked
+certificates~\cite{larisch2017crlite}.
 
 \subsection{Enforcing \ac{https}}
 
@@ -93,8 +93,8 @@ adversary can simply intercept and block the \ac{https} request to cause Smart
 
 Recent work on improving certificate issuance and validation has focused on
 providing alternate or additional mechanisms by which domains can authenticate
-their public keys to clients. We focus on two approaches: public-key pinning and
-log-based authentication.
+their public keys to clients. We focus on three approaches: public-key pinning,
+log-based authentication, and exported authenticators.
 
 Public-key pinning is \iac{tofu} approach that, similar to \ac{hsts}, allows a
 domain to provide directives to clients during client validation of public keys.
@@ -130,6 +130,21 @@ like public-key pinning, do not offer a quick, simple path for recovery.
 Furthermore, these systems offer limited deployment strategies, expecting all
 domains to switch to the new \ac{pki} at once (i.e., on a ``flag day'') or allowing adversaries to
 downgrade handshakes to the current, vulnerable \ac{pki}.
+
+The idea of \ac{tls} exported authenticators~\cite{rfc-extra-cert-1,
+rfc-extra-cert-2} is to use an existing \ac{tls} connection to send additional
+authentication information, namely proof of ownership of additional
+certificates. The intended use of exported authenticators is to allow servers to
+provide additional certificates for their other identities or for other,
+higher-layer protocols. The advantage of this approach over the previous two is
+that it requires no changes to \ac{tls}; rather, it is built on \ac{tls} in such
+a way that it can be used as-is in both \ac{tls} 1.2 and 1.3. However, as a
+result, it also provides no added security against \ac{mitm} attacks than
+\ac{tls}. In particular, an adversary Mallory who performs a successful
+\ac{mitm} attack in \ac{tls} can exchange additional certificates for which she
+controls the private keys, allowing her to perform further \ac{mitm} attacks.
+Moreover, nothing stops Mallory from performing the initial \ac{mitm} attack
+beyond what is already in \ac{tls}.
 
 %%%%%%%%%%%%%%%
 

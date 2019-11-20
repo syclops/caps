@@ -37,7 +37,7 @@ expect an attack that involves poisoning data sources in this way to be possible
 but rare and noticeable, and an attacker seeking to carry out \iac{mitm} in this way has a
 higher hurdle for the attack to succeed than in today's Web \ac{pki}.
 
-\paragraph{The Role of Log Aggregator}
+\paragraph{The Role of the Log Aggregator}
 
 In our design of \ac{name}, we have described the log aggregators as independent entities.
 However, we believe that the most realistic deployment route would likely be for
@@ -71,21 +71,22 @@ in an egalitarian fashion~\cite{privatecomm}.
 
 \paragraph{Future Work}
 
-One avenue of future exploration that is currently ongoing is 
-\emph{transition compaction}, which aims to minimize our \ac{dafsa}
-representation by reducing the representation size of each transition. A
-transition in the representation consists of a symbol and destination state. We
-have found that in the current signaling set representation, the symbols and
-destination states had a long-tailed distribution. Thus by using variable-length
-encodings, we can reduce the overall size of each transition. One
-straightforward way to do so is via Huffman encoding, but the long-tailed
-distribution results in a Huffman dictionary whose size is significant enough to
-neutralize any space savings that would result. We are currently exploring the
-use of selecting a subset of symbols to Huffman encode. For destination states,
-we can assign an ordering of states in the \ac{dafsa} such that the difference
-to each destination state in the ordering is small, and we can then use integer encoding to
-represent the location of these states. We are currently exploring the
-possibility of vertex separators in graphs to address this problem.
+One avenue of future exploration that is currently ongoing is \emph{transition
+compaction}, which aims to minimize our \ac{dafsa} representation by reducing
+the representation size of each transition. A transition in the representation
+consists of a symbol and destination state. We have found that in the current
+signaling set representation, the symbols and destination states had a
+long-tailed distribution. Thus by using variable-length encodings, we can reduce
+the overall size of each transition. One straightforward way to do so is via
+Huffman encoding, but the long-tailed distribution results in a Huffman
+dictionary whose size is significant enough to neutralize any space savings that
+would result. We are currently exploring heuristics by which we can select a
+subset of symbols to Huffman encode (such as ones that occur more than a
+threshold number of times). For destination states, we can assign an ordering of
+states in the \ac{dafsa} such that the difference to each destination state in
+the ordering is small, and we can then use integer encoding to represent the
+location of these states. We are currently exploring the possibility of using
+graph vertex separators to address this problem.
 
 %We also plan to examine the use of multiple \acp{dafsa}, collecting data on
 %domain names including relative popularity, region, and category. We can then

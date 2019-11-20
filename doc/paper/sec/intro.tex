@@ -66,13 +66,13 @@ can occur at a small handful of participants, namely browser vendors and public
 logs, who are better equipped to make these changes than domains or \acp{ca}
 that have historically been reluctant to deploy major changes.
 
-\ac{name} achieves the above properties through several important observations.
+\ac{name} achieves the above properties by leveraging several important observations.
 First, because the Web \ac{pki} encompasses a vast set of domains with diverse
 security needs, few changes to the \ac{pki} will be universally adopted
 overnight. Thus we must have a \emph{signaling mechanism} to indicate which
 domains have adopted a new \ac{pki} enhancement. \ac{name} conveys this signal
 with the use of a single bit that indicates whether a domain supports
-\ac{https}. Without this bit \ac{tls} stripping~\cite{marlinspike2009new} can
+\ac{https}. Without this bit, \ac{tls} stripping~\cite{marlinspike2009new} can
 occur, causing the client to ignore even the existing \ac{pki}. With the use of
 this bit, the remaining signaling information can be communicated as an
 extension to the \ac{tls} handshake. Because existing solutions for indicating
@@ -83,7 +83,7 @@ or connection
 latency.\footnote{\url{https://mybrowseraddon.com/smart-https.html}} Instead, we
 use data compression techniques and compact data structures to locally store at
 each client a succinct summary of the \emph{entire} set of domains that deploy
-\ac{https}; with our prototype, it requires less than 150~MB of storage
+\ac{https}; in our prototype, this requires less than 150~MB of storage
 (and Section~\ref{sec:evaluation:implementation} discusses additional tradeoffs 
 to reduce this overhead).
 
@@ -122,14 +122,15 @@ the corresponding private key is lost or compromised.
 
 Even without considering wholly new \acp{pki}, \ac{name} is attractive from a
 deployment standpoint. In particular, the administrative burden of deployment
-for domains is limited to acquiring additional certificates, and with the use
-of free certificate services like Let's
+for domains is limited to acquiring additional certificates, and with the use of
+free certificate services like Let's
 Encrypt,\footnote{\url{https://letsencrypt.org/}} the financial burden can be
 minimized as well. Furthermore, \ac{name} is an opt-in system, meaning that only
-domains who choose to obtain additional certificates incur a cost. From its
-initial deployment, \ac{name} protects all domains from \ac{tls} stripping, and
-it allows non-deploying domains to coexist with deploying domains without
-enabling downgrade attacks on deploying domains.
+domains who choose to obtain additional certificates incur a cost, and this cost
+is purely for purchasing the certificates. From its initial deployment,
+\ac{name} protects all domains from \ac{tls} stripping, and it allows
+non-deploying domains to coexist with deploying domains without enabling
+downgrade attacks on deploying domains.
 
 In summary, we make the following contributions.
 \begin{compactitem}

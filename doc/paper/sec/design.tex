@@ -102,24 +102,25 @@ one of its public keys can obtain additional independent certificates for that
 key, and the log aggregators will automatically update their \ac{name} policies
 for that domain.
 
-Intuitively, log aggregators simply send a signed pair $(\hostname, \policy)$
-where \hostname is a domain name and \policy is the \emph{\ac{name} policy
-  value}, i.e., the number of independent certificate chains backing an authoritative
-  key for \hostname.\footnote{\hostname may have more than one authoritative
-  key; if public keys $\pk_1$ and $\pk_2$ are both backed by three independent
-chains then both public keys are treated as authoritative
-for \hostname.} To prevent an adversary from downgrading handshakes in the
-improved \ac{pki} to a handshake in the existing Web \ac{pki}, each log
-aggregator indicates which domains in its signaling set have a key policy value
-greater than 1.
+Intuitively, log aggregators simply provide signed pairs of the form
+$(\hostname, \policy)$ where \hostname is a domain name and \policy is the
+\emph{\ac{name} policy value}, i.e., the number of independent certificate
+chains backing an authoritative key for \hostname.\footnote{\hostname may have
+more than one authoritative key; if public keys $\pk_1$ and $\pk_2$ are both
+backed by three independent chains then both public keys are treated as
+authoritative for \hostname.} To prevent an adversary from downgrading
+handshakes in the improved \ac{pki} to a handshake in the existing Web \ac{pki},
+each log aggregator indicates which domains in its signaling set have a
+\ac{name} policy value greater than 1.
 
-When establishing an HTTPS connection with a server,
-the client will look up $(\hostname, \policy)$ in the data received
-from a log aggregator, and it will expect to receive \policy
-independent certificate chains from the server.
-\bp{TODO: The paper is inconsistent in describing log aggregation info;
-          in some places we say the client gets it from the aggregator,
-          in other places that the domain does and forwards to the client}
+When establishing an HTTPS connection with a server, clients can use the
+signaling set to determine whether a domain has a \ac{name} policy value that is
+exactly one or greater than one. In the former case, the client may connect to
+the domain using the standard \ac{tls} handshake, but in the latter case, the
+client requests policy information from the domain using a \ac{tls} extension.
+Domains obtain the information from log aggregators and forward it to the
+client; if a client receives and verifies a policy of $(\hostname, \policy)$, it
+will expect to receive \policy independent certificate chains from the server.
 
 The current PKI actually supports three classes of certificates: standard
 domain-validated (DV) certificates, organization-validated (OV) certificates,
@@ -297,9 +298,9 @@ of knowing all names in the DNS namespace, which requires the cooperation of all
 \ac{tld} operators (including many national governments). Finally, using an
 existing data compression utility (e.g., zpaq) with aggressive compression
 parameters could minimize the required storage space, but would also require
-decompression each time a client tried to connect to a site whose \ac{https}
-deployment status was not known, resulting in significant latency overhead
-(\autoref{sec:evaluation:performance}).
+decompression and lookup each time a client tried to connect to a site whose
+\ac{https} deployment status was not known, resulting in significant latency
+overhead (\autoref{sec:evaluation:performance}).
 %\steve{Distinguish transmission and local usage overhead}
 
 \begin{figure}
@@ -373,11 +374,11 @@ then $\query(\hostname) = \onecert$. Otherwise, $\query(\hostname) = \nohttps$.
 We begin by building the \ac{dafsa} as described in previous
 work~\cite{daciuk2000incremental}. Though this previous work assumes transitions
 based on a single character, we consider the possibility of multi-character
-symbols and thus our symbol set consists of strings of symbols of
-length up to 253 characters\footnote{Recall that DNS names can be a maximum of 253 characters.}:
-$\symbolstrings = \bigcup_{i=0}^{253} \symbols^i$, 
-where \symbols is the set of all ASCII characters allowed in domain names,
-and $\symbols^i$ indicates strings of length $i$.
+symbols and thus our symbol set consists of strings of symbols of length up to
+253 characters:\footnote{Recall that DNS names can be a maximum of 253
+characters.} $\symbolstrings = \bigcup_{i=0}^{253} \symbols^i$, where \symbols
+is the set of all ASCII characters allowed in domain names, and $\symbols^i$
+indicates strings of length $i$.
 
 We succinctly represent this \ac{dafsa} as a bitvector by following the
 high-level approach of previous work~\cite{daciuk2012smaller}. Intuitively, we
@@ -467,10 +468,10 @@ states, which we write as \symboldh and \destdh, respectively. Suppose that we k
 original entropies \symbolh and \desth, and that we define $\dentropy = \symboldh +
 \destdh$ and $\entropy = \symbolh + \desth$. Then we can compute the difference in
 size between the two \acp{dafsa} as
-\begin{equation*}
+\begin{equation}
   |\numtrans{S}| \dentropy + \left(|\numpaths{C}| - |\numtrans{C}|\right)
   (\entropy + \dentropy)
-\end{equation*}
+\end{equation}
 and only remove $C$ if this quantity is negative.
 
 We found several classes of components that, for our underlying set of domain
@@ -548,12 +549,13 @@ key. The domain periodically downloads the latest
 each of the log aggregators. For a name \hostname, a policy value \policy, a
 timestamp \timestamp, and a log aggregator \logagg, we specify the policy proof
 to be
-\begin{align*}
+\begin{align}
   %data &= \logagg \concat \hostname \concat \timestamp \concat \policy \\
   \policyproof(\logagg, \hostname, \policy, \timestamp) &= 
-  \left\{data, \signature(\pk_{\logagg}^{-1}, data)\right\} \mbox{ where} \\
-  data &= \logagg \concat \pk_{\logagg} \concat \hostname \concat \timestamp \concat \policy \\
-\end{align*}
+  \left\{data, \signature(\pk_{\logagg}^{-1}, data)\right\} \mbox{ where}
+  \nonumber \\
+  data &= \logagg \concat \pk_{\logagg} \concat \hostname \concat \timestamp \concat \policy
+\end{align}
 where $\pk_{\logagg}$ and $\pk_{\logagg}^{-1}$ denote respectively the public
 and private keys of \logagg, and $\signature(K, m)$ denotes a signature on $m$
 with private key $K$. The domain keeps these proofs for use in the handshake
@@ -561,8 +563,6 @@ described below.
 
 \subsection{Connection Establishment}
 \label{sec:design:handshake}
-
-\bp{TODO: Need to cite TLS extensions for multiple certs~\cite{rfc-extra-cert-1,rfc-extra-cert-2}}
 
 To establish a connection to a domain, a client (e.g., browser) first queries the 
 signaling set for the domain's name.
