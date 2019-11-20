@@ -178,14 +178,14 @@ spot'' between these two alternatives, suffering no false positives or negatives
 best case, an on-disk representation of just \fsapczpaqmedsize{}~MB with an in-memory
 representation of \fsamedsize{}~MB.
 
-For comparison, the set of all names from Censys and \ac{ct} (including
-unresponsive names) totaled 3.48~GB, and using our signaling set
-representation, achieved sizes of 409~MB in memory (using path compaction) and
-335~MB on disk and in transit (using path compaction and zpaq method 5 with
-2048~MiB blocks). Thus the set of responsive names we used for testing comprised
-41.6\% of all observed valid names, 43.4\% of the total uncompressed size of
-all names from Censys and \ac{ct}, 46.5\% of the size in memory with our
-\ac{dafsa} representation, and 44.2\% of the size on disk and in transit.
+%For comparison, the set of all names from Censys and \ac{ct} (including
+%unresponsive names) totaled 3.48~GB, and using our signaling set
+%representation, achieved sizes of 409~MB in memory (using path compaction) and
+%335~MB on disk and in transit (using path compaction and zpaq method 5 with
+%2048~MiB blocks). Thus the set of responsive names we used for testing comprised
+%41.6\% of all observed valid names, 43.4\% of the total uncompressed size of
+%all names from Censys and \ac{ct}, 46.5\% of the size in memory with our
+%\ac{dafsa} representation, and 44.2\% of the size on disk and in transit.
 
 For some clients, an initial download size of \fsapczpaqmedsize{}~MB may be too much. One
 approach that such clients might take to protect themselves would be to only track
