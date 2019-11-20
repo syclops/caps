@@ -113,6 +113,14 @@ improved \ac{pki} to a handshake in the existing Web \ac{pki}, each log
 aggregator indicates which domains in its signaling set have a key policy value
 greater than 1.
 
+When establishing an HTTPS connection with a server,
+the client will look up $(\hostname, \policy)$ in the data received
+from a log aggregator, and it will expect to receive \policy
+independent certificate chains from the server.
+\bp{TODO: The paper is inconsistent in describing log aggregation info;
+          in some places we say the client gets it from the aggregator,
+          in other places that the domain does and forwards to the client}
+
 The current PKI actually supports three classes of certificates: standard
 domain-validated (DV) certificates, organization-validated (OV) certificates,
 and extended validation (EV) certificates. EV certificates require domains to
@@ -553,6 +561,8 @@ described below.
 
 \subsection{Connection Establishment}
 \label{sec:design:handshake}
+
+\bp{TODO: Need to cite TLS extensions for multiple certs~\cite{rfc-extra-cert-1,rfc-extra-cert-2}}
 
 To establish a connection to a domain, a client (e.g., browser) first queries the 
 signaling set for the domain's name.
