@@ -350,18 +350,17 @@ The \ac{dafsa} also has the restriction that the state transition function is
 s_{i+1}$ for $1 \le i < n$ and $\transfunc(s_n, \sigma_n) = s_1$.
 
 We represent queries to the signaling set within the \ac{dafsa} as follows: let
-\symbols contain $\policy$ unique symbols $\multicertsymbol_1\dots\multicertsymbol_\policy$ 
-which are not present in any name in \httpsset. 
-Then, if there exists a sequence of
+\symbols contain a unique symbol \multicertsymbol that is not present in any
+name in \httpsset. Then, if there exists a sequence of
 states and symbols $(s_0, \ldots, s_n), (\sigma_1, \ldots, \sigma_n)$ that
 satisfies
 \begin{inparaenum}
 \item $\transfunc(s_i, \sigma_{i+1}) = s_{i+1}$ for each $i$ where $0 \le i < n$,
 \item $\sigma_1 \| \dots \| \sigma_{n-1} = \hostname$, 
-\item $\sigma_n = \multicertsymbol_m$, and
+\item $\sigma_n = \multicertsymbol$, and
 \item $s_n \in \finalstates$,
 \end{inparaenum}
-we say that $\query(\hostname) = \multicert(m)$.
+we say that $\query(\hostname) = \multicert$.
 Otherwise, if
 \begin{inparaenum}
 \item $\transfunc(s_i, \sigma_{i+1}) = s_{i+1}$ for each $i$ where $0 \le i < n$,
@@ -578,8 +577,8 @@ signaling set for the domain's name.
 %\multicertsymbol to determine whether that transitions to an accept state (and
 %hence the domain has a policy value greater than 1). 
 If this query returns
-\onecert or $\multicert$, then the client performs the \ac{name}-extended
-TLS handshake to establish a connection with the domain.
+\onecert the client performs a regular \ac{tls} handshake. If the query returns
+$\multicert$, the client extends this handshake as described below.
 
 The \ac{name}-extended TLS handshake protocol allows a client to verify a
 domain's authoritative public key. The \ac{tls} handshake
