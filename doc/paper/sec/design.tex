@@ -117,10 +117,14 @@ When establishing an HTTPS connection with a server, clients can use the
 signaling set to determine whether a domain has a \ac{name} policy value that is
 exactly one or greater than one. In the former case, the client may connect to
 the domain using the standard \ac{tls} handshake, but in the latter case, the
-client requests policy information from the domain using a \ac{tls} extension.
+client requests policy information from the domain using a \ac{tls} extension
+similar to ones currently under consideration for IETF 
+standardization~\cite{rfc-extra-cert-1, rfc-extra-cert-2}.
 Domains obtain the information from log aggregators and forward it to the
 client; if a client receives and verifies a policy of $(\hostname, \policy)$, it
 will expect to receive \policy independent certificate chains from the server.
+If it receives fewer chains, or if any fail to validate, the client aborts
+the connection.
 
 The current PKI actually supports three classes of certificates: standard
 domain-validated (DV) certificates, organization-validated (OV) certificates,
