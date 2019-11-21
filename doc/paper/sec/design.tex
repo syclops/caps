@@ -585,10 +585,9 @@ The \ac{name}-extended TLS handshake protocol allows a client to verify a
 domain's authoritative public key. The \ac{tls} handshake
 protocol~\cite{rfc5246} provides support for open-ended extensions (implemented
 in cryptographic libraries), and thus we designed our protocol as an extension
-within the existing \ac{tls} handshake.\footnote{Exported authenticators as
-  mentioned in \autoref{sec:background:issuance} could be used in place of a
-  custom extension. However, this requires the client to establish \iac{https}
-  connection with a potentially malicious endpoint.} During the initial
+within the existing \ac{tls} handshake.
+
+During the initial
   ClientHello message, the client includes a \ac{name} extension message, which
   consists of a single integer \numlas, indicating the number of policy proofs
   that the domain should send back.
@@ -634,6 +633,12 @@ handshake, which requires the client to verify an additional certificate chain
 in the ServerCertificate message and perform all other checks required by the
 \ac{tls} handshake protocol.
 
+While our current design relies its own custom TLS extension,
+in the future, \ac{name} may instead be able to leverage
+recently proposed TLS extensions~\cite{rfc-extra-cert-1,
+rfc-extra-cert-2} designed to allow the transmission
+of additional certificates (primarily to facilitate
+content hosting by CDNs).  
 
 \subsection{Bootstrapping Advanced Policies}
 \label{sec:design:bootstrapping}
