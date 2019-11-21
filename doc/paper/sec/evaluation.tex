@@ -212,16 +212,14 @@ best-case memory usage in \ac{name}) and the size of the zpaq-compressed
   \label{fig:sample}
 \end{figure}
 
-\autoref{fig:sample} shows the results. If the fraction of
-domains that use multiple independent certificate chains for the same name is
-small, as we would anticipate, then \ac{name} clients 
-significantly reduce their memory and disk usage. 
-For example, even if 10\% of all HTTPS websites deployed additional certificates,
-the compressed DAFSA representation would require just under 33~MB.
-Of course, at very low levels of adoption,
-the advantage of the \ac{dafsa}-based
-approach over a list of names decreases. This makes sense, given that the
-\ac{dafsa} is designed to take advantage of common substrings (especially
+\autoref{fig:sample} shows the results. If the fraction of domains that use
+multiple independent certificate chains for the same name is small, as we would
+anticipate, then \ac{name} clients significantly reduce their memory and disk
+usage. For example, even if 10\% of all HTTPS websites deployed additional
+certificates, the compressed DAFSA representation would require just under
+33~MB. Of course, at very low levels of adoption, the advantage of the
+\ac{dafsa}-based approach over a list of names decreases. This makes sense,
+given that the \ac{dafsa} takes advantage of common substrings (especially
 prefixes and suffixes) in a set.
 
 \subsection{Signaling Set Updates}
@@ -300,33 +298,7 @@ homepage requires approximately 400~KB.
 %its site. Thus, not only are these pitfalls unlikely in practice, with advance
 %planning and minimal effort, domains can avoid both of these situations.
 
-\subsection{Connection Establishment}
-\label{sec:evaluation:performance}
-
-%\begin{figure*}[thb]
-  %\centering
-  %\subfloat[Proof count]{
-    %\includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/0-time_elapsed_vs_num_proofs_requested}
-    %\label{fig:evaltlsext:numproof}
-  %}
-  %\subfloat[Chain count]{
-    %\includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/1-time_elapsed_vs_num_chains_sent}
-    %\label{fig:evaltlsext:numchain}
-  %}
-  %\quad
-  %\subfloat[Chain length]{
-    %\includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/2-time_elapsed_vs_num_certs_per_chain}
-    %\label{fig:evaltlsext:numcert}
-  %}
-  %\subfloat[Chain size]{
-    %\includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/3-time_elapsed_vs_avg_chain_size}
-    %\label{fig:evaltlsext:sizechain}
-  %}
-  %\caption{Handshake latency in different scenarios. Error bars represent
-  %standard error.}
-  %\label{fig:evaltlsext}
-%\end{figure*}
-
+% Put the figures here to make them display on a single page.
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{fig/eval_tls_ext/0-time_elapsed_vs_num_proofs_requested}
@@ -359,6 +331,32 @@ homepage requires approximately 400~KB.
   \label{fig:evaltlsext:sizechain}
 \end{figure}
 
+\subsection{Connection Establishment}
+\label{sec:evaluation:performance}
+
+%\begin{figure*}[thb]
+  %\centering
+  %\subfloat[Proof count]{
+    %\includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/0-time_elapsed_vs_num_proofs_requested}
+    %\label{fig:evaltlsext:numproof}
+  %}
+  %\subfloat[Chain count]{
+    %\includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/1-time_elapsed_vs_num_chains_sent}
+    %\label{fig:evaltlsext:numchain}
+  %}
+  %\quad
+  %\subfloat[Chain length]{
+    %\includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/2-time_elapsed_vs_num_certs_per_chain}
+    %\label{fig:evaltlsext:numcert}
+  %}
+  %\subfloat[Chain size]{
+    %\includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/3-time_elapsed_vs_avg_chain_size}
+    %\label{fig:evaltlsext:sizechain}
+  %}
+  %\caption{Handshake latency in different scenarios. Error bars represent
+  %standard error.}
+  %\label{fig:evaltlsext}
+%\end{figure*}
 To measure the performance of connection establishment in \ac{name}, we
 implemented the handshake as a custom \ac{tls} extension in the OpenSSL library.
 For concrete evaluation of this extension, we use \texttt{nginx} and \texttt{curl} with minor
