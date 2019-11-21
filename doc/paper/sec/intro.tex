@@ -83,9 +83,10 @@ or connection
 latency.\footnote{\url{https://mybrowseraddon.com/smart-https.html}} Instead, we
 use data compression techniques and compact data structures to locally store at
 each client a succinct summary of the \emph{entire} set of domains that deploy
-\ac{https}; in our prototype, this requires less than 150~MB of storage
+\ac{https}.  In our prototype, we summarize over 64 million domain names with 
+less than 150~MB of storage
 (and Section~\ref{sec:evaluation:implementation} discusses additional tradeoffs 
-to reduce this overhead).
+that can reduce this overhead to less than 35~MB).
 
 We also observe that all known instances of \ac{ca} misbehavior up to this point
 have involved a single misbehaving \ac{ca}.  Hence, \ac{name} allows a domain to
@@ -134,14 +135,14 @@ downgrade attacks on deploying domains.
 
 In summary, we make the following contributions.
 \begin{compactitem}
-\item We present the design of \ac{name}, which provides an incrementally deployable,
+\item\medskip We present the design of \ac{name}, which provides an incrementally deployable,
       backwards compatible path to a more resilient Web PKI.
-\item We show how a security policy based on the number of independent certificate chains
+\item\medskip We show how a security policy based on the number of independent certificate chains
       a domain can obtain strikes a good balance between automation, 
       resilience to attack, and robustness to domain errors (including private key loss).
-\item We combine a global view of Web certificates with techniques from data
+\item\medskip We combine a global view of Web certificates with techniques from data
       compression and compact data structures to succinctly signal \ac{https} deployment
-\item We demonstrate via an evaluation of a prototype that the client-side overhead for
+\item\medskip We demonstrate via an evaluation of a prototype that the client-side overhead for
       \ac{name} in terms of storage, memory, and connection-establishment latency is
       modest. 
 \end{compactitem}
