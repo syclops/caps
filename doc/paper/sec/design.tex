@@ -350,18 +350,18 @@ The \ac{dafsa} also has the restriction that the state transition function is
 s_{i+1}$ for $1 \le i < n$ and $\transfunc(s_n, \sigma_n) = s_1$.
 
 We represent queries to the signaling set within the \ac{dafsa} as follows: let
-\symbols contain $\policy$ unique symbols $\multicertsymbol_1\dots\multicertsymbol_\policy$ 
-which are not present in any name in \httpsset. 
+\symbols contain a unique symbol $\multicertsymbol$ 
+which is not present in any name in \httpsset. 
 Then, if there exists a sequence of
 states and symbols $(s_0, \ldots, s_n), (\sigma_1, \ldots, \sigma_n)$ that
 satisfies
 \begin{inparaenum}
 \item $\transfunc(s_i, \sigma_{i+1}) = s_{i+1}$ for each $i$ where $0 \le i < n$,
 \item $\sigma_1 \| \dots \| \sigma_{n-1} = \hostname$, 
-\item $\sigma_n = \multicertsymbol_m$, and
+\item $\sigma_n = \multicertsymbol$, and
 \item $s_n \in \finalstates$,
 \end{inparaenum}
-we say that $\query(\hostname) = \multicert(m)$.
+we say that $\query(\hostname) = \multicert$.
 Otherwise, if
 \begin{inparaenum}
 \item $\transfunc(s_i, \sigma_{i+1}) = s_{i+1}$ for each $i$ where $0 \le i < n$,
@@ -597,7 +597,7 @@ within the existing \ac{tls} handshake.\footnote{Exported authenticators as
   %maximum.
 In an initial deployment, we expect that typically $k=1$, but allowing the use
 of larger values for $k$ provides resilience against compromised log
-aggregators.
+aggregators.  See Section~\ref{sec:discussion} for further discussion.
 
 The domain then sends back a ServerHello message that contains \numlas recent
 policy proofs from \numlas distinct log aggregators, as well as \numlas
