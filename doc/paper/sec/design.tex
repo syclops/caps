@@ -581,8 +581,12 @@ signaling set for the domain's name.
 %name lead to a state that is not an accept state, the client can supply
 %\multicertsymbol to determine whether that transitions to an accept state (and
 %hence the domain has a policy value greater than 1). 
-If this query returns
-\onecert or $\multicert$, then the client performs the \ac{name}-extended
+If this query returns \onecert 
+then the client performs a standard TLS handshake
+(and refuses any attempts to downgrade to plain HTTP).
+If the query returns $\multicert$,
+indicating the domain has more than one certificate chain, 
+then the client performs the \ac{name}-extended
 TLS handshake to establish a connection with the domain.
 
 The \ac{name}-extended TLS handshake protocol allows a client to verify a
