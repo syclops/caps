@@ -117,10 +117,14 @@ When establishing an HTTPS connection with a server, clients can use the
 signaling set to determine whether a domain has a \ac{name} policy value that is
 exactly one or greater than one. In the former case, the client may connect to
 the domain using the standard \ac{tls} handshake, but in the latter case, the
-client requests policy information from the domain using a \ac{tls} extension.
+client requests policy information from the domain using a \ac{tls} extension
+similar to ones currently under consideration for IETF 
+standardization~\cite{rfc-extra-cert-1, rfc-extra-cert-2}.
 Domains obtain the information from log aggregators and forward it to the
 client; if a client receives and verifies a policy of $(\hostname, \policy)$, it
 will expect to receive \policy independent certificate chains from the server.
+If it receives fewer chains, or if any fail to validate, the client aborts
+the connection.
 
 The current PKI actually supports three classes of certificates: standard
 domain-validated (DV) certificates, organization-validated (OV) certificates,
@@ -576,18 +580,21 @@ signaling set for the domain's name.
 %name lead to a state that is not an accept state, the client can supply
 %\multicertsymbol to determine whether that transitions to an accept state (and
 %hence the domain has a policy value greater than 1). 
-If this query returns
-\onecert the client performs a regular \ac{tls} handshake. If the query returns
-$\multicert$, the client extends this handshake as described below.
+If this query returns \onecert 
+then the client performs a standard TLS handshake
+(and refuses any attempts to downgrade to plain HTTP).
+If the query returns $\multicert$,
+indicating the domain has more than one certificate chain, 
+then the client performs the \ac{name}-extended
+TLS handshake to establish a connection with the domain.
 
 The \ac{name}-extended TLS handshake protocol allows a client to verify a
 domain's authoritative public key. The \ac{tls} handshake
 protocol~\cite{rfc5246} provides support for open-ended extensions (implemented
 in cryptographic libraries), and thus we designed our protocol as an extension
-within the existing \ac{tls} handshake.\footnote{Exported authenticators as
-  mentioned in \autoref{sec:background:issuance} could be used in place of a
-  custom extension. However, this requires the client to establish \iac{https}
-  connection with a potentially malicious endpoint.} During the initial
+within the existing \ac{tls} handshake.
+
+During the initial
   ClientHello message, the client includes a \ac{name} extension message, which
   consists of a single integer \numlas, indicating the number of policy proofs
   that the domain should send back.
@@ -596,7 +603,7 @@ within the existing \ac{tls} handshake.\footnote{Exported authenticators as
   %maximum.
 In an initial deployment, we expect that typically $k=1$, but allowing the use
 of larger values for $k$ provides resilience against compromised log
-aggregators.
+aggregators.  See Section~\ref{sec:discussion} for further discussion.
 
 The domain then sends back a ServerHello message that contains \numlas recent
 policy proofs from \numlas distinct log aggregators, as well as \numlas
@@ -633,6 +640,12 @@ handshake, which requires the client to verify an additional certificate chain
 in the ServerCertificate message and perform all other checks required by the
 \ac{tls} handshake protocol.
 
+While our current design relies its own custom TLS extension,
+in the future, \ac{name} may instead be able to leverage
+recently proposed TLS extensions~\cite{rfc-extra-cert-1,
+rfc-extra-cert-2} designed to allow the transmission
+of additional certificates (primarily to facilitate
+content hosting by CDNs).  
 
 \subsection{Bootstrapping Advanced Policies}
 \label{sec:design:bootstrapping}
