@@ -1,0 +1,52 @@
+We thank the reviewers for taking time to carefully review our work.  We address key issues below.  We’ll incorporate the remaining suggestions in our next revision.
+
+## Authoritative Keys
+
+To address Rev.D’s one crucial drawback: Excellent point w.r.t. false positives when a domain changes CAs.  Fortunately, our data indicates this is rare, affecting 0.105% of our signaling set (possibly due to NIST SP-800-57’s guidelines re:key rotation, or because CA client software often defaults to generating a new key when creating a signing request).  To mitigate this, we could, with a bit more work from deploying domains, use an X.509 extension to explicitly mark a certificate as intended for CAPS (and thus should increase the policy value).  Alternatively, log aggregators could ignore certificates that overlap by less than a threshold length of time, avoiding extra domain work but remaining susceptible to false positives.
+
+Rev.C is correct that CAPS supports multiple authoritative keys if all are backed by the same number of independent certificate chains.  We will elevate this point from its current footnote.
+
+## Log Aggregators
+
+Browser vendors acting as log aggregators seems plausible, given the trusted role they already play, but as Rev.B suggests, CT logs would be reasonable candidates too.  The data need not be perfectly real-time (Rev.B), as the signaling-set membership and policy values only change (Sec.4.1) when new independent chains appear for the same public key.  Let's Encrypt renewals will not cause churn, because they do not create additional independent certificate chains.  
+
+Divergence among log aggregators (Rev.A,D) will likely be minimal and temporary, as the information is largely based off of highly available, audited entities (e.g.,CT logs). Today, browsers already use different root-certificate stores, rendering engines, etc., and fortunately the Web largely tolerates such divergences. 
+
+Note that aggregators transmit the signaling set directly to clients, so a client authoritatively knows whether a domain employs HTTPS/CAPS.  If an attacker impersonates a CAPS-enabled domain (Rev.B), they would need more independent certificate chains than the domain or to forge enough aggregator proofs (Eq.2) with a lower policy value.
+
+## Scalability & Performance 
+
+HTTPS Everywhere adds latency? (Rev.A): Footnote 2 points to Smart HTTPS, which adds latency because it always first tries HTTPS, and then falls back to HTTP. HTTPS Everywhere and CAPS do both locally store a set of HTTPS domains, but HTTPS Everywhere is opt-in and covers far fewer domains.
+
+Re:Mobile (Rev.C): We can certainly evaluate CAPS’ latency on phones, but since the computational cost of validating a few extra certificates is quite small, we do not anticipate significant differences. 
+
+Storage (Rev.B,C): We can evaluate CAPS with larger input sets, and yes our current 150MB is non-trivial.  Fortunately, Fig.7 shows sublinear growth in the size of the DAFSA-based signaling set, and we can further reduce overhead by only signaling CAPS-enabled domains (Sec.6.2, Fig.7).  As further mitigation, over time, storage prices fall and bandwidth increases, and hopefully our work inspires others to further improve our algorithms.
+
+## Specific Questions
+
+> Rev.B: Existence of a certificate != HTTPS-availability
+
+True; hence our signaling set only contains domain names that responded when queried directly (Sec.6.1).  
+
+> Rev.B: Few domain owners will pay for multiple certificates
+
+Perhaps, but that is a question for markets to answer.  Note that CAPS does not force domain owners to pay for additional certificates.  Only sites that wish to move away from today’s weakest-link CA security need to acquire extra certificates.
+
+> Rev.B: It makes no sense to me to prepare a transition solution for a future PKI
+
+CAPS improves the resilience of the current PKI to CA failures and TLS-stripping. It also happens to provide a path towards many possible future PKIs proposed in the literature (Sec.2.3).
+
+> Rev.C: session resumption
+
+Session resumption (Rev.C) implies the client previously connected to the server, presumably with CAPS.  CAPS results can be cached, obviating the need to perform another signaling set query during resumption.
+
+
+> Rev.D: Determining truly independent certificate chains is difficult 
+
+Indeed, we have analyzed this as best we can, but this is worth additional future investigation.
+
+> Rev.D: Reducing the number of certificate chains seems impossible
+
+To reduce the policy value, simply let certificates expire; the process of building the CAPS policy database (Sec.4.2) will update the policy value. If the change is more time-sensitive, the domain can obtain and publicize certificate revocations. Changes to the signaling set are only necessary if the policy value decreases from 2+ to 1 or 0.
+
+
