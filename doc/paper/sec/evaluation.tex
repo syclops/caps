@@ -45,20 +45,13 @@ March 26, 2013 to July 3, 2018.
 
 \begin{figure}
   \centering
-  \includegraphics[width=\linewidth]{fig/cert_count_valid}
-  \caption{Number of unique certificates seen by Censys and \ac{ct} over time.}
-  \label{fig:count:certs}
-\end{figure}
-
-\begin{figure}
-  \centering
   \includegraphics[width=\linewidth]{fig/name_count_valid}
   \label{fig:count:names}
   %\caption{Number of unique certificates and domain names in the Web \ac{pki} as seen by
   %Censys and \ac{ct}.}
   \caption{Number of unique names (including hostnames and wildcard names) seen
   by Censys and \ac{ct} over time.}
-  \label{fig:count}
+  %\label{fig:count}
 \end{figure}
 
 On each of these days, we consider an ``active set'' of certificates consisting
@@ -71,7 +64,7 @@ time it was first observed in our data until its expiration. We then consider
 the number of unique, valid domain names, which we use to build the signaling
 set.
 
-Figures \autoref{fig:count:certs} and \autoref{fig:count:names} show the number
+Figures~\ref{fig:count:certs} and~\ref{fig:count:names} show the number
 of domain names observed by Censys, \ac{ct}, and their overlap over time. Our
 results show that \ac{ct} observes vastly more certificates (and consequently
 names) than Censys. It is unclear what accounts for this large discrepancy. One
@@ -246,14 +239,6 @@ prefixes and suffixes) in a set.
   \label{fig:updates:added}
 \end{figure}
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{fig/deleted_name_set_size}
-  \label{fig:updates:deleted}
-  \caption{Size of deleted names sets over time.}
-  \label{fig:updates}
-\end{figure}
-
 Because the signaling set will be updated over time, we also carried out an
 experiment to determine the size of updates that will be sent to clients. 
 An update to the signaling set consists of the names added to the signaling
@@ -272,19 +257,20 @@ for example, we used the zpaq method that produced the smallest archive (method
 5 with 64 MiB blocks) and our \ac{dafsa} representation used path compaction.
 We experimented with the full set of names.
 
-\autoref{fig:updates} shows the results. As
-\autoref{fig:count} would indicate, the size of the signaling set has increased
-over time, and thus the set of added names is consistently larger than the set
-of deleted names. Given the relatively modest sizes of these sets compared to
-that of the full signaling set, the most space-efficient method for representing
-and transmitting these updates to clients is a zpaq-compressed archive
-of the raw text file of names rather than \iac{dafsa}-based representation. From
-a technical perspective, this method of transmission is also advantageous:
-clients can simply add the set of added names to their existing \ac{dafsa}, and
-build (and subsequently add to) a new \ac{dafsa} for the set of deleted names.
-Our results show that updates (added and deleted names) are typically less than
-3~MB per week or $\sim$439~KB/day; by comparison, downloading the Google
-homepage requires approximately 400~KB.
+Figures~\ref{fig:updates:added} and~\ref{fig:updates:deleted} show the
+results. As Figures~\ref{fig:count:certs} and~\ref{fig:count:names} would
+indicate, the size of the signaling set has increased over time, and thus the
+set of added names is consistently larger than the set of deleted names. Given
+the relatively modest sizes of these sets compared to that of the full signaling
+set, the most space-efficient method for representing and transmitting these
+updates to clients is a zpaq-compressed archive of the raw text file of names
+rather than \iac{dafsa}-based representation. From a technical perspective, this
+method of transmission is also advantageous: clients can simply add the set of
+added names to their existing \ac{dafsa}, and build (and subsequently add to) a
+new \ac{dafsa} for the set of deleted names. Our results show that updates
+(added and deleted names) are typically less than 3~MB per week or
+$\sim$439~KB/day; by comparison, downloading the Google homepage requires
+approximately 400~KB.
 
 % BP: Why release once a week instead of every day?
 %Releasing signaling set updates each week means that some false positives and
@@ -299,64 +285,55 @@ homepage requires approximately 400~KB.
 %planning and minimal effort, domains can avoid both of these situations.
 
 % Put the figures here to make them display on a single page.
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{fig/eval_tls_ext/0-time_elapsed_vs_num_proofs_requested}
-  \caption{Handshake latency with different numbers of proofs requested. Error
-  bars represent standard error.}
-  \label{fig:evaltlsext:numproof}
-\end{figure}
+%\begin{figure}[t]
+  %\centering
+  %\includegraphics[width=\linewidth]{fig/eval_tls_ext/0-time_elapsed_vs_num_proofs_requested}
+  %\caption{Handshake latency with different numbers of proofs requested. Error
+  %bars represent standard error.}
+  %\label{fig:evaltlsext:numproof}
+%\end{figure}
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{fig/eval_tls_ext/1-time_elapsed_vs_num_chains_sent}
-  \caption{Handshake latency with different numbers of certificate chains sent
-  from the server. Error bars represent standard error.}
-  \label{fig:evaltlsext:numchain}
-\end{figure}
+%\begin{figure}[t]
+  %\centering
+  %\includegraphics[width=\linewidth]{fig/eval_tls_ext/1-time_elapsed_vs_num_chains_sent}
+  %\caption{Handshake latency with different numbers of certificate chains sent
+  %from the server. Error bars represent standard error.}
+  %\label{fig:evaltlsext:numchain}
+%\end{figure}
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{fig/eval_tls_ext/2-time_elapsed_vs_num_certs_per_chain}
-  \caption{Handshake latency with different average certificate chain length (in
-  certificates). Error bars represent standard error.}
-  \label{fig:evaltlsext:numcert}
-\end{figure}
+%\begin{figure}[t]
+  %\centering
+  %\includegraphics[width=\linewidth]{fig/eval_tls_ext/2-time_elapsed_vs_num_certs_per_chain}
+  %\caption{Handshake latency with different average certificate chain length (in
+  %certificates). Error bars represent standard error.}
+  %\label{fig:evaltlsext:numcert}
+%\end{figure}
 
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{fig/eval_tls_ext/3-time_elapsed_vs_avg_chain_size}
-  \caption{Handshake latency with different average certificate chain size (in
-  bytes). Error bars represent standard error.}
-  \label{fig:evaltlsext:sizechain}
-\end{figure}
+%\begin{figure}[t]
+  %\centering
+  %\includegraphics[width=\linewidth]{fig/eval_tls_ext/3-time_elapsed_vs_avg_chain_size}
+  %\caption{Handshake latency with different average certificate chain size (in
+  %bytes). Error bars represent standard error.}
+  %\label{fig:evaltlsext:sizechain}
+%\end{figure}
 
 \subsection{Connection Establishment}
 \label{sec:evaluation:performance}
 
-%\begin{figure*}[thb]
-  %\centering
-  %\subfloat[Proof count]{
-    %\includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/0-time_elapsed_vs_num_proofs_requested}
-    %\label{fig:evaltlsext:numproof}
-  %}
-  %\subfloat[Chain count]{
-    %\includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/1-time_elapsed_vs_num_chains_sent}
-    %\label{fig:evaltlsext:numchain}
-  %}
-  %\quad
-  %\subfloat[Chain length]{
-    %\includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/2-time_elapsed_vs_num_certs_per_chain}
-    %\label{fig:evaltlsext:numcert}
-  %}
-  %\subfloat[Chain size]{
-    %\includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/3-time_elapsed_vs_avg_chain_size}
-    %\label{fig:evaltlsext:sizechain}
-  %}
-  %\caption{Handshake latency in different scenarios. Error bars represent
-  %standard error.}
-  %\label{fig:evaltlsext}
-%\end{figure*}
+\begin{figure*}[thb]
+  \centering
+  \subfloat[Proof count]{
+    \includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/0-time_elapsed_vs_num_proofs_requested}
+    \label{fig:evaltlsext:numproof}
+  }
+  \subfloat[Chain count]{
+    \includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/1-time_elapsed_vs_num_chains_sent}
+    \label{fig:evaltlsext:numchain}
+  }
+  \caption{Handshake latency in different scenarios. Error bars represent
+  standard error.}
+  \label{fig:evaltlsext}
+\end{figure*}
 To measure the performance of connection establishment in \ac{name}, we
 implemented the handshake as a custom \ac{tls} extension in the OpenSSL library.
 For concrete evaluation of this extension, we use \texttt{nginx} and \texttt{curl} with minor

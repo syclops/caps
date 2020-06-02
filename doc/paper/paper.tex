@@ -1,4 +1,6 @@
-\documentclass[compsoc,conference,a4paper,10pt,times]{IEEEtran}
+\input{setup/preclass}
+
+\documentclass[sigconf,anonymous]{acmart}
 
 \input{setup/main}
 
@@ -11,11 +13,12 @@
   Submission \#53
 }
 
-\maketitle
-
+% For acmart, the abstract needs to be declared before maketitle.
 \begin{abstract}
   \input{abstract}
 \end{abstract}
+
+\maketitle
 
 \input{sec/intro}
 
@@ -31,7 +34,11 @@
 
 \input{sec/conclusion}
 \newpage
-\bibliographystyle{IEEEtran}
+\bibliographystyle{ACM-Reference-Format}
 \bibliography{bib}
+
+\appendix
+
+\input{sec/figures}
 
 \end{document}

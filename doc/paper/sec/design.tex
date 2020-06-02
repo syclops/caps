@@ -2,9 +2,9 @@
 %\subsection{Overview}
 \label{sec:design:overview}
 
-\begin{figure*}
+\begin{figure}
   \centering
-  \includegraphics[width=0.8\linewidth]{fig/arch}
+  \includegraphics[width=\linewidth]{fig/arch}
   \caption{Overview of \ac{name} architecture (log auditors and monitors not
   shown). Dotted lines denote the browser and its components, and italic text
 denotes new entities or actions in \ac{name}.  As shown in the diagram,
@@ -12,7 +12,7 @@ CAPS is currently implemented as a browser plug-in, but we envision it
 would become a standard browser component.
   }
   \label{fig:overview}
-\end{figure*}
+\end{figure}
 
 \paragraph{Goals}
 
@@ -219,7 +219,7 @@ non-EV certificates for the domain.
 %both the existing and improved \ac{pki}. We also assume that the adversary
 %cannot break cryptographic primitives.
 
-\section{\ac{name} Detailed Design}
+\section{CAPS Detailed Design}
 In this section, we describe \ac{name} in detail, including how it signals which domains have
 deployed \ac{https} and improvements to the Web \ac{pki}
 (\autoref{sec:design:signaling}), how it provides stronger public-key
@@ -308,15 +308,25 @@ decompression and lookup each time a client tried to connect to a site whose
 overhead (\autoref{sec:evaluation:performance}).
 %\steve{Distinguish transmission and local usage overhead}
 
+%\begin{figure}
+  %\centering
+  %\includegraphics[width=\linewidth]{fig/dafsa}
+  %\caption{A simple \ac{dafsa} with one-character transitions, along with the
+    %set of strings it represents and its succinct representation as a vector of
+    %variable-length bitstrings. In this representation, each edge (gray)
+    %consists of a label (blue) and next state (orange), along with flags
+  %indicating whether the next state is an accept state (green) and whether the
+%edge is the last one outgoing from this state (red).}
+  %\label{fig:dafsa}
+%\end{figure}
+
 \begin{figure}
   \centering
-  \includegraphics[width=\linewidth]{fig/dafsa}
-  \caption{A simple \ac{dafsa} with one-character transitions, along with the
-    set of strings it represents and its succinct representation as a vector of
-    variable-length bitstrings. In this representation, each edge (gray)
-    consists of a label (blue) and next state (orange), along with flags
-  indicating whether the next state is an accept state (green) and whether the
-edge is the last one outgoing from this state (red).}
+  \includegraphics[width=\linewidth]{fig/dafsa_combined}
+  \caption{The first stages of the \ac{dafsa} construction process used in
+    \ac{name}. After generating the final \ac{dafsa} shown above, we use
+    heuristic methods to generate a final \ac{dafsa} in a way that aims to
+  minimize the size of the binary representation.}
   \label{fig:dafsa}
 \end{figure}
 
@@ -398,13 +408,13 @@ overall size of the \ac{dafsa} representation.
 
 \paragraph{Path Compaction}
 
-\begin{figure}
-  \centering
-  \includegraphics[width=\linewidth]{fig/dafsa_compact}
-  \caption{The \ac{dafsa} from \autoref{fig:dafsa} with its long edges
-  compacted. The binary representation is more succinct than its counterpart.}
-  \label{fig:dafsa_compact}
-\end{figure}
+%\begin{figure}
+  %\centering
+  %\includegraphics[width=\linewidth]{fig/dafsa_compact}
+  %\caption{The \ac{dafsa} from \autoref{fig:dafsa} with its long edges
+  %compacted. The binary representation is more succinct than its counterpart.}
+  %\label{fig:dafsa_compact}
+%\end{figure}
 
 We extend the design of prior work with \emph{path compaction}, which
 minimizes the \ac{dafsa} representation by reducing the overall number of
