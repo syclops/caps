@@ -1,0 +1,32 @@
+\section{Additional Figures}
+
+\steve{This section title will change and is just a placeholder for now.}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\linewidth]{fig/cert_count_valid}
+  \caption{Number of unique certificates seen by Censys and \ac{ct} over time.}
+  \label{fig:count:certs}
+\end{figure}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{fig/deleted_name_set_size}
+  \label{fig:updates:deleted}
+  \caption{Size of deleted names sets over time.}
+\end{figure}
+
+\begin{figure*}[thb]
+  \centering
+  \subfloat[Chain length]{
+    \includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/2-time_elapsed_vs_num_certs_per_chain}
+    \label{fig:evaltlsext:numcert}
+  }
+  \subfloat[Chain size]{
+    \includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/3-time_elapsed_vs_avg_chain_size}
+    \label{fig:evaltlsext:sizechain}
+  }
+  \caption{Handshake latency in different scenarios. Error bars represent
+  standard error.}
+  \label{fig:evaltlsext-2}
+\end{figure*}
