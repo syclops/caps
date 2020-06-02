@@ -1,0 +1,258 @@
+IEEE EuroS&P 2020 Paper #53 Reviews and Comments
+===========================================================================
+Paper #53 CAPS: Smoothly Transitioning to a More Resilient Web PKI
+
+
+Review #53A
+===========================================================================
+
+Overall merit
+-------------
+3. Weak accept
+
+Reviewer expertise
+------------------
+3. Knowledgeable
+
+Paper summary
+-------------
+This paper presents CAPS, a new architecture that extends Web PKI. The paper gives an overview of the system and presents most of the details of two of the core ideas (signaling sets and policies). The authors evaluate CAPS against MITM attacks and consider other attacks outside their threat model. Then, the rest of the evaluation is on the size of the set representations at construction and update times.
+
+Comments for author
+-------------------
+Strengths:
+* A new architecture for a more robust Web PKI
+* Presented algorithms and techniques to build a signaling set
+
+Weaknesses:
+* Unclear properties of the system depending on who is running the log aggregators
+* Unclear convergence of log aggregators and its impact
+
+The paper addresses a fundamental problem of the web platform and proposes a system called CAPS to avoid HTTPS downgrade attacks and misbehaving CAs. CAPS improves over existing systems and introduces new entities when compared to the current Web PKI such as the log aggregators.
+
+Overall I like the proposed idea and the solutions presented. However, I would like the authors to take the following comments into account.
+
+First, the authors say that HTTPS Everywhere adds latency. But then, it seems that CAPS still uses a similar design and architecture. The only difference seems to be using a more efficient way to handle membership queries. Here, I would have liked to see an evaluation to show the actual improvement over the approach followed by HTTPS everywhere. 
+
+Second, the paper describes in detail the structure of signaling sets, their creation, use, and management. The evaluation also shows that MITMs are not successful against CAPS. This part is well done. 
+
+However, I feel that other important aspects of CAPS have been neglected. For example, much of the behavior of CAPS depend on whether log aggregators will eventually converge. If they don't, they may be providing different "views," creating partitions on the Web. I feel that the severity/relevance of these partitions can vary. 
+
+For example, one factor I think is the organizations that will be managing the log aggregators and how browsers are related to them. The authors suggest that browser vendors will run them. Here, each browser can create a partition, and each partition will have signaling sets with different properties, e.g., size, accuracy. A bit less unclear is the scenario where browser vendors won't play such a role. Then, another aspect that is not well explained is how to create a high-quality DB. The creation of a  good database requires good (and trustworthy) sources, good infrastructure, and well-defined procedures for acquisition and elaboration.
+
+
+
+Review #53B
+===========================================================================
+
+Overall merit
+-------------
+2. Weak reject
+
+Reviewer expertise
+------------------
+2. Some familiarity
+
+Paper summary
+-------------
+The proposed work introduces a technique which can be used as a transition from the current, insecure PKI towards a more resilient PKI, which according to the authors may be invented in the future. The authors assume a MitM attacker model between a domain and the actual client accessing it. To intercept the communication between them both, the attacker pretends to be the domain owner and claims lack of HTTPS deployment of the domain.
+The authors claim that the client can detect this attack if it knows whether a valid certificate exists for this domain, such that it can just decline the downgrade.
+For this case this work proposed certificates with automated policies and signaling (CAPS), to prevent HTTPS downgrade attacks like SSL stripping.
+
+CAPS introduces a new entity in PKI infrastructure, called the _log aggregator_. It provides a signaling set to clients which contains information about all websites adopting HTTPS. This aggregator builds its set by downloading all certificates from public available sources such as Certificate Transparency logs and Censys logs and extracting the domain names from them. This set is properly compressed as a _deterministic acyclic finite state automata_, which promises minimal storage and efficient searchability and send to each client. Querying this set before the initial TLS handshake the client knows whether the intended domain is accessible via HTTPS and thus can decline a possibly invalid HTTP downgrade attempt. In addition, CAPS allows domains to use multiple certificate chains, to improve their client confidence. This information is then stored in the signaling set as well and is used to protect clients against malicious CAs. The authors assume that domain owners being willing to obtain additional certificates for this reason. For the deployment of CAPS no fundamental changes on the communication between domains and CAs are needed. In addition, the authors states their work being backwards compatible since it can be used alongside with the current PKI model.
+
+Comments for author
+-------------------
+### Pros
+The authors give in the introduction a decent overview of the current Web PKI and it's components, in which they embed their proposed solution CAPS. It is encouraging that the deployment bulk of CAPS is shifted to the browser vendors since CAs and other entities in Web PKI often are reluctant to major changes, as the authors claim themselves.
+For the data compression algorithm used in this work the authors give a formal set construction and analysis.
+
+### Cons
+- I really doubt it being a feasible solution to store such volatile information like HTTPS accessibility on each client, especially in times of Let's Encrypt, even if one neglects the storage and data transmission problem. This set must be constantly updated multiple times a day for being consistent with the global view of HTTPS usage.
+- If I have it rightly understood, the domain provider forwards the policy information from the log aggregator to clients. Who audits, whether the (possibly forged) domain did its job correctly? It is able to downgrade a client's communication, why shouldn't it be able to do the same with the signaling information of the log aggregator?
+- Using only one log aggregator would create is an additional point of failure of the already fragile Web PKI infrastructure. Using multiple log aggregators seems to me being redundant alongside with CT. Why not shifting this work to the those already deployed CT logs? They collect this information already, why shouldn't they provide the signaling set as well?
+- Only the existence of a valid Certificate does not imply a website being accessible via HTTPS. Maybe the domain owner was not able to include this certificate for this website due to any technical reasons?
+- The authors states the set's size being only 150 MB, which in my opinion is a lot of data to transmit and store, especially via mobile data.
+- Multiple chains results in multiple certificates for the same domain. I doubt domain owner are willing to pay this additional costs as some of them will not understand why it contributes to a higher client confidence.
+
+### Further comments
+- It seems to me the main contribution of this paper is the data compression algorithm, which I cannot judge due to lack of knowledge on this topic. But I wonder whether there is no existing solution for this purpose, since the requirements on storage size and searchability don't seem uncommon to me. If this is not the case I would suggest the authors to leave out the PKI use-case and choose another conference for publication, that is more suitable for this topic.
+- I makes no sense to me to prepare a transition solution for a future PKI, that not even exists at this moment such that it's requirements cannot be predicted at this time.
+- What exactly means _strongly authenticated_ public key? How does it differ from a _weakly authenticated_ public key?
+- In my opinion backwards compatibility means not using a new possibly better solution alongside the old one.
+
+### Minor issues
+- Domains are not doing anything, they're just names. The authors probably mean domain owner?
+- The official name of the referred downgrade attack is SSL Stripping, not TLS Stripping.
+- The authors claim that browsers trust about 1,5k public keys. I miss a time-stamped reference for this number.
+
+
+
+Review #53C
+===========================================================================
+
+Overall merit
+-------------
+2. Weak reject
+
+Reviewer expertise
+------------------
+2. Some familiarity
+
+Paper summary
+-------------
+The authors present a system called CAPS that hardens the current PKI without requiring drastic changes to the current PKI infrastructure and processes (e.g. certificate issuance).
+The system proposes the use of a new entity they call a log aggregator (LG), which combs the CT (certificate transparency) logs to extract useful information. This information is fed back to the client/web browsers to harden the current PKI. The authors propose two main security use cases:
+
+1. Prevention of SSL stripping. For this the log aggregator (LG) builds a database of all valid domains present in CT. This database is then pushed to the client. or may be shipped with the web browser. It is updated regularly, eg every day. Before the client connects to a website, it first lookups the domain in this database (locally stored on disk) and if it has a valid certificate, it will connect thru TLS. Otherwise it will do HTTP. This thwarts TLS stripping attacks. The database requires additional memory and adds runtime lookup latency, so the authors use special data structures and compression schemes to mitigate these problems. Using a dataset of 64M certificates (which they found to be valid in the CT logs and 'responding' to TLS requests as of 2018), their experiment shows on average 11ms latency overhead over WLAN and 1.2ms over the localhost interface; and requires 190MB storage on disk and 148MB in memory.
+
+2. A CAPS policy that server admins can apply to their server to add a different trust anchor. What this means is that a server admin may select a set of LGs that will vet for a public key that should be presented by the server to the client. Such a public key is called an 'authoritative public key' in the CAPS system. To select a public key as authoritative, a server admin creates multiple certificates with the same public key and have each certificate signed by independent CAs, so as to create different verification chains. Every day or so, LG looks at the CT logs where these different certificates are recorded. The public key with the largest number of independent validation chains is selected as being the authoritative public key. LGs sign the policy (domain,c) with their own private key, where c is the number of independent certificate chains that validate the authoritative public key. When the server handshakes with a client, the server sends the policy (domain,c) and as many certificate chains (c) to the client, using a TLS extension. The client verifies each certificate chain and aborts if any fail to validate, or if fewer than c chains are presented by the server. An attacker needs to compromise at least c CAs to pull off a MiTM, because he needs to create c independent certificate chains for a public key he created. 
+
+Note that point 2. gives similar guarantees as multi-signature certificates, but does not requires complicated collaboration to be setup by different CAs. It is also more flexible  as the set of LGs may be updated over time.
+
+One of the benefits of the CAPS system is that it can co-exists with the current PKI. For a given domain, if the CAPS policy indicates a single certificate chain (c), then the client will fall back to traditional PKI verification. If c is larger than 1, then the client will verify each of the independent chains sent by the server. In the long run everyone may move to CAPS.
+
+Comments for author
+-------------------
+The paper is well written and easy to follow. The systems clearly adds security guarantees to the current PKI.
+
+Overall I think the evaluation should be improved:
+
+- You only tested a curl client running on a desktop. It is important you test on more constrained devices such as smartphones, and maybe also using a standard web browser (at least a headless one to help automation). It is hard to draw any conclusion on the feasibility of CAPS if you have not tested on smartphones. The majority of web traffic originates from smartphones today.
+
+- The dataset you used had 64M unique domains. That's far from the 300M domains registered in 2016 [0], and which seems to grow at a rate of ~12M/year. Since CAPS is a system that should be adopted by all domains in the long run, it seems necessary to evaluate with at least 300M domains. Note that Censys seems to only scan IPv4 addresses, which may explain why you found fewer certificates in Censys that the ones in CT (which account for IPv6 addresses as well). Regardless of the number of domains in used today, I think it is necessary to evaluate the system with more domains, such as 500M,600M and even 1B or 2B. The number of domains will keep growing, and it's really important to understand what maximum number of domains CAPS can realistically handle for different machine types (smartphone/low-end devices/desktops). 
+
+- You tested performance overhead with a TLS handshake, but you did not test session resumption handshakes. These resumption handshakes are more sensitive to latency so you need to test them too.
+
+Additional comments:
+
+- in many places throughout the paper, you talk about "the domain's public key" or "the authoritative public key established in CAPS". I think this wording does not play in your favour, as it infers your scheme supports a single authoritative key. But your scheme supports multiple 'authoritative' public keys and this is a very important features: Looking at CT logs, it's pretty common practice for domains to have several valid certificates with different public keys, e.g. see [1],[2],[3],[4] for google.com. If just a single key could be authoritative, then your scheme would be incompatible with current practices. You currently have just a footnote stating CAPS supports multiple public keys: '8. name may have more than one authoritative key; if public keys K1 and K2 are both backed by three independent chains then both public keys are treated as authoritative for name.'.
+I think you need to write an entire paragraph about the importance of supporting different authoritative keys. A domain may have 4 different valid public keys, but can still harden all of them by requesting the same number of additional certificate for each key.
+
+- it would be useful to discuss the price associated with these additional certificates, as well as the burden it would put on domain admins. How many CAs support automated certificate issuance, i.e., CAs that provide a set of tools to automated certificate issuance for the domain owner?
+
+- because the signalling set is a data structure shared across all domains in the web browser, it may be subject to timing side channels. A malicious webpage may try to launch requests to various domains and check how long it takes. I don't know if this is a big issue as only during TLS handshake and TLS resumption will the entry of the domains be in the cache. Nevertheless, this is something you should discuss.
+
+[0] https://www.businesswire.com/news/home/20170228006844/en/Internet-Grows-329.3-Million-
+[1] https://censys.io/certificates/d74e91f73a4e8a51def589d544e8519a73a0eae2e3156cd0b39a74ffaab116b5
+[2] https://censys.io/certificates/ac3167219d499de6fcda5ee77c6a4db3c5f7f604b578b448b956b347184a5e68
+[3] https://censys.io/certificates/27e41507ebb635d760725d940bf431012545f20a6f46148da4b621ea306e5cdf
+[4] https://censys.io/certificates/5026a7d0d5b8dcfe496d2a8f69d0645877c8ed977726f698662c7ece50c14dcc
+
+
+
+Review #53D
+===========================================================================
+
+Overall merit
+-------------
+1. Reject
+
+Reviewer expertise
+------------------
+3. Knowledgeable
+
+Paper summary
+-------------
+The paper presents an upgrade path from the current web PKI to a more
+secure PKI, without requiring a global change at the same time by
+phasing in the new approach slowly. The proposed method also gives
+benefits to early adopters, namely higher security, while those
+domains that are not interested are not forced to use the method, and
+do not suffer any downside over the current state-of-affairs.
+
+On the technical side, the proposed method collects aggregate logs,
+scans for the presence of certificates for domains, identifies those
+domains with multiple certificates, and thus classifies domains into
+non-https, traditional, and new. The resulting dataset must be
+communicated to web browsers for which the paper presents different
+efficient encodings. Furthermore, the paper provides measurement
+results evaluated on a prototype web browser plugin.
+
+Comments for author
+-------------------
+Advantages:
+
++ New PKI setup with higher security than status quo
+
++ Setup overhead fine for first-world, non-data-limited connections,
+and reasonable for most other connections, like mobile only users in
+less affluent areas, or remote satellite connections with hard limits,
+in places like rural Canada.
+
++ Per connection overhead fine for everyone.
+
++ I appreciate the existence of the prototype and presented
+measurements that show feasibility better than would otherwise have
+been possible.
+
+Drawbacks:
+
+- [CRUCIAL] 4.1, (2): In my understanding this does not work, and
+  would break many existing domain's setups, thus invalidating the key
+  goal of the proposal made by the paper. Response in the rebuttal is
+  requested, and I explain my concern with examples in detail next:
+
+The problem I see is that currently many domains have multiple
+certificates, where many of them may be valid, and from different
+independent chains.
+
+An example of this main problem are domains that switch their CA
+before the old certificate expires (necessary to avoid outages), but
+then keep using the old certificate until it really expires, or use
+both in parallel. Your system would detect this as CAPS-enabled, when
+it absolutely is not. Similarly, domains switching to Let's Encrypt
+will still have their old certificate, which is independent.
+
+Furthermore, CDNs use "cruise-liner" certificates which are valid for
+many domains and may reuse the public key for a long time. If these
+ever switch the CA provider, every included domain will become
+unreachable.
+
+
+- Independent CA chains are more tricky to determine than the paper
+  suggests: many different CAs do belong to the same corporate
+  organization nowadays, due to mergers. This needs to be evaluated
+  more closely.
+
+- Agreement on a global set of aggregators may be harder to achieve
+  than presented in the paper. The browser vendors are a good starting
+  point, but leaves us with a maximum of 3 logs, where a discussion is
+  needed on how many of those are desirable.
+
+- p8, end of 4: I wonder if it is ever possible for a domain to reduce
+  the number of certificates and cert chains it has. Let's say a
+  domain initially went overboard and got 5 such chains, but after a
+  few years decides 3 are enough. Can it lower this, without loss of
+  service? From my reading, this seems not possible.
+
+Further comments:
+
+The paper in general is well written, addresses all obvious questions
+I have, and seems a clear improvement over the current state, with
+exception of the crucial first drawback. Should this be satisfactorily
+explained, I can see this paper being accepted easily.
+
+
+Minor details:
+
+p4, right column, second paragraph: what about subdomains on large
+sharehosters, which each may have their own certificate? Does this
+have any effect? Also, these could be used to DDoS the log providers
+by adding certificates for arbitrary subdomains. Can this be
+considered?
+
+p5: C_EV vs C_!EV are not defined. From the text I guess that C_EV are
+actual EV certificates while C_!EV are all other certificates, but
+this could be made clearer.
+
+p8: left column, in 4.3, point "(4)": should this be "at least one
+more", instead of "one more"? There could otherwise be a mismatch
+adding another new certificate chain that has not yet been seen by all
+policy versions.
+
+p9, end of 5: This sounds like 3 DV certs would be overruled by 1 EV
+cert. Is this the case? If so an adversary can easily deny service
+with just 1 EV cert for all domains that do not use EV certs, so this
+is likely not intended. On the other hand, this means that the domain
+needs the same number of EV as DV certs?

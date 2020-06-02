@@ -1,3 +1,6 @@
-Feedback from Paul:
 
+Can CAPS protect FQDNs covered via wildcard certs?
+
+Bryan Parno 8:42 PM
+It’s a good question!  I think we can handle wildcard certs, even though it’s not discussed explicitly in the paper.  If the log aggregator spots *.google.com , then when building the signaling set, it would treat * as a character in the name.  One detail the draft apparently omitted is that we actually build the DAFSA in reverse segment order (i.e., com.google.*) to leverage the high likelihood of overlap at the early stages.  Hence, if you do a look up for store.google.com, you’ll follow a DAFSA path for com then google and while you won’t find store, you will find * (edited) 
 
