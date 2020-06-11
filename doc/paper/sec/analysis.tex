@@ -2,11 +2,12 @@
 \label{sec:analysis}
 
 In this section, we analyze the security that \ac{name} provides. We begin with
-our main security claim and informally argue that it holds given our adversary
-model. We then describe two potential weaknesses of \ac{name} not covered by our
-security claim, and argue that countermeasures (some of which are currently
-used) make these weaknesses difficult or impossible to exploit.
-
+our main security claim, that an adversary must compromise a threshold number
+of \acp{ca} or log aggregators to mount a successful \ac{mitm} attack, and
+informally argue that it holds given our adversary model. We then describe
+potential weaknesses of \ac{name} not covered by our security claim, and argue
+why these weaknesses are unlikely to be used in practice, able to be mitigated
+by simple countermeasures, or out of the scope of \ac{name}.
 
 \subsection{Main Security Claim}
 \label{sec:analysis:informal}
@@ -67,64 +68,90 @@ the $\policy^{th}$ independent chain fails to arrive.
 \label{sec:analysis:weaknesses}
 
 Our main security claim shows that under our assumptions, the adversary cannot
-mount a successful \ac{mitm} attack on a client and domain. Therefore, we can
-conclude that the failure of $\numlas - 1$ log aggregators or $\policy - 1$ \acp{ca} 
-are not sufficient to
-enable a \ac{mitm} attack. However, we did not describe the consequence of
-misbehavior by the other parties shown in \autoref{fig:overview}: the data
-sources (namely, public logs) or the browser vendor. We now show that while
-failures of these entities can have negative consequences for the performance or
-security of \ac{name}, we consider these cases out of the scope of this work
-because they are unlikely to succeed in practice or are catastrophic failures
-that can circumvent almost any practical defense.
+mount a successful \ac{mitm} attack on a client and domain. However, we did not
+yet address the ways in which \acp{ca}, log aggregators, or other parties shown
+in \autoref{fig:overview} may fail. We now discuss possible failures for each
+of these parties and how they may affect the security of \ac{name}, along with
+potential mitigations.
 
-\paragraph{Resource Exhaustion}
+\paragraph{\acp{ca}}
 
-Log aggregators rely on public logs to obtain a complete view of certificates in
-the Web \ac{pki}. However, given the open nature of many of these logs (i.e.,
-the fact that many parties can submit or otherwise make
-certificates available to them), an adversary may take advantage of this
-openness to force the log aggregators to increase their resource consumption.
-For example, an adversary who controls \iac{ca} signing key can issue millions
-of certificates and make them available to the logs, causing the log aggregators
-to store these certificates when updating their respective policy databases.
+Historically, all publicly known CA failures have been singletons (i.e.,
+separated in time and causation from other failures), but a systemic flaw may
+allow an adversary to compromise many \acp{ca} at once. Beyond domains being
+able to prepare for this possibility with an appropriately high value of
+$\policy$, such a widespread compromise would be quickly detected by public
+logs and certificate scanning services. Subsequently, the browsers or \acp{ca}
+could issue revocations of the affected certificates or \ac{ca} keys using
+existing methods.
 
-While \ac{name} provides no mechanism to stop this behavior, the issuance of
-these certificates produces traceable evidence of the adversary's behavior,
-and the requirement that newly-issued certificates be logged increases the
-likelihood of someone detecting this behavior. This detection would likely lead
-to consequences such as the revocation of the \ac{ca} certificate by its issuing
-\ac{ca} or by the browser vendor. Moreover, only an adversary with access to
-\iac{ca} signing key can carry out this attack; while Let's Encrypt does provide
-free certificates through an automatic protocol, it imposes a rate limit per
-domain based on the Public Suffix
-List,\footnote{\url{https://publicsuffix.org/}} thus requiring an adversary
-without access to \iac{ca} signing key to obtain many domain names to carry out
-this attack.
+\paragraph{Public Logs}
 
-\paragraph{Malicious Browser Vendors}
+A misbehaving public log may record a fraudulently-issued certificate, refuse
+to include a certificate in its database, or attempt to change details of
+previously logged certificates. \ac{ct} proposes several auditor roles that
+monitor logs for any such misbehavior, with anyone being able to take on this
+role~\cite{rfc6962}. Recording fraudulent certificates may cause a log
+aggregator to compute a policy value that is too high, making a domain
+inaccessible in \ac{name}. However, this also requires the failure of $\policy$
+\acp{ca} to mount \iac{mitm} attack, and would be quickly detected by an
+auditor. Once detected, browsers and log aggregators can simply ignore the
+misbehaving log.
 
-Adversary control of the browser vendor is a catastrophic failure that can
-enable a \ac{mitm} attack under almost any circumstances, since this allows the
-adversary to completely control the client's experience with the Web. In this
-scenario, the adversary can arbitrarily deviate from the \ac{tls} or \ac{name}
-handshakes, insert its own root certificates, or display arbitrary pages. Even
-with \ac{name}, an adversary-controlled vendor can also intercept and modify the
-result of queries to the signaling set or rewrite HTTPS requests to HTTP
-requests, defeating \ac{name}'s protection against downgrade attacks.
-While some countermeasures such as OS-level protections may protect the client,
-we suggest that defenses against PKI failures (whether \ac{name} or others)
-are unlikely to stop powerful client-side adversaries.
+\paragraph{Log Aggregators}
 
-\paragraph{Correlated CA Compromises}
+A log aggregator's private key may become lost or stolen, allowing it to
+provide incorrect policy information or signaling sets. A successful \ac{mitm}
+attack would require $\numlas - 1$ aggregators to send incorrect policy
+information. Clients can use a sufficiently high value of $\numlas$ to minimize
+this risk, and can also take a similar approach to verify signaling sets and
+their updates.
 
-Finally, our threat model assumes the adversary can compromise at most $\policy-1$
-CAs. Historically, all publicly known CA failures have been singletons (i.e.,
-separated in time and causation from other failures).  However, an adversary that discovered
-a systemic flaw in all (or many) CAs could undermine the security of \ac{name}.
-One mitigating factor is \ac{name}'s support for EV certificates,
-which \ac{name} allows to dominate DV certificates (see Section~\ref{sec:design:overview}).
-Hence, even in the event of a large multi-CA DV compromise,
-a domain with (or able to obtain) an EV certificate would still be protected.
-Since EV certificate issuance, unlike DV issuance, requires manual steps,
-we may hope that CA failures around EV certificates are less likely to be correlated.
+A log aggregator may not provide updates in a timely manner, leading to policy
+values that are incorrect or mismatched with those of other aggregators, which
+in turn can make a domain inaccessible or provide insufficient protection
+against misbehaving \acp{ca}. Since domains provide policy proofs to clients,
+we expect that domains can quickly detect this delay and send the correct
+number of certificates or fix the issue with the relevant aggregators. The
+delay may also affect signaling sets, but only if the policy value changes
+between $\nohttps$, $\onecert$, and $\multicert$ (0, 1, and $\ge 2$ independent
+chains, respectively). Finally, as logs themselves are held to a standard of
+availability, doing the same for log aggregators can minimize the risk of these
+failures.
+
+\paragraph{Browser Vendors}
+
+A misbehaving browser vendor can ship a malicious version of a browser to
+clients, and we consider this failure mode outside of the scope of \ac{name}. A
+malicious browser can arbitrarily deviate from \ac{tls} or \ac{name}, insert
+its own root certificates, or display arbitrary pages. Even with \ac{name}, an
+adversary-controlled browser can also modify queries or responses of the
+signaling set or carry out \ac{tls} stripping attacks. While some
+countermeasures such as OS-level protections may protect the client, we suggest
+that defenses against PKI failures (whether \ac{name} or others) are unlikely
+to stop these powerful client-side adversaries.
+
+%\paragraph{Resource Exhaustion}
+
+%Log aggregators rely on public logs to obtain a complete view of certificates in
+%the Web \ac{pki}. However, given the open nature of many of these logs (i.e.,
+%the fact that many parties can submit or otherwise make
+%certificates available to them), an adversary may take advantage of this
+%openness to force the log aggregators to increase their resource consumption.
+%For example, an adversary who controls \iac{ca} signing key can issue millions
+%of certificates and make them available to the logs, causing the log aggregators
+%to store these certificates when updating their respective policy databases.
+
+%While \ac{name} provides no mechanism to stop this behavior, the issuance of
+%these certificates produces traceable evidence of the adversary's behavior,
+%and the requirement that newly-issued certificates be logged increases the
+%likelihood of someone detecting this behavior. This detection would likely lead
+%to consequences such as the revocation of the \ac{ca} certificate by its issuing
+%\ac{ca} or by the browser vendor. Moreover, only an adversary with access to
+%\iac{ca} signing key can carry out this attack; while Let's Encrypt does provide
+%free certificates through an automatic protocol, it imposes a rate limit per
+%domain based on the Public Suffix
+%List,\footnote{\url{https://publicsuffix.org/}} thus requiring an adversary
+%without access to \iac{ca} signing key to obtain many domain names to carry out
+%this attack.
+

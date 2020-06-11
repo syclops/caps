@@ -11,11 +11,11 @@ performance effects of \ac{name} on connection establishment.
 \label{sec:evaluation:https}
 
 Before building a representation of the signaling set, we need to determine
-which domains belong in it. Moreover, to determine the long-term
-viability of our solution, we also need to understand how the size of this set
-of domains may change in the future. Addressing both of these problems requires
-a complete and accurate view of the Web \ac{pki}, namely, the set of domains
-that are accessible over HTTPS.
+which domains belong in it. Moreover, to determine the long-term viability of
+our solution, we also need to understand how the size of this set of domains may
+change in the future. Addressing both of these problems requires a complete and
+accurate view of the Web \ac{pki}, namely, the set of domains accessible over
+HTTPS.
 
 We can obtain a view of the Web \ac{pki} using data from public logs (\autoref{sec:design:signaling}). 
 Specifically, we obtain public-key
@@ -45,13 +45,13 @@ March 26, 2013 to July 3, 2018.
 
 \begin{figure}
   \centering
-  \includegraphics[width=\linewidth]{fig/name_count_valid}
-  \label{fig:count:names}
+  \includegraphics[width=0.85\linewidth]{fig/name_count_valid}
   %\caption{Number of unique certificates and domain names in the Web \ac{pki} as seen by
   %Censys and \ac{ct}.}
   \caption{Number of unique names (including hostnames and wildcard names) seen
   by Censys and \ac{ct} over time.}
   %\label{fig:count}
+  \label{fig:count:names}
 \end{figure}
 
 On each of these days, we consider an ``active set'' of certificates consisting
@@ -59,26 +59,25 @@ of all certificates that were valid on that day and had an associated
 certificate chain rooted in one of the three major root certificate stores,
 determined by Apple, Microsoft, or Mozilla. In the Censys dataset, because we
 observed a great deal of churn (i.e., certificates disappearing and appearing in
-consecutive scans), we included a certificate in the active set from the
-time it was first observed in our data until its expiration. We then consider
-the number of unique, valid domain names, which we use to build the signaling
-set.
+consecutive scans), we included a certificate in the active set from the time it
+was first observed in our data until its expiration. We then consider the number
+of unique, valid domain names to build the signaling set.
 
-Figures~\ref{fig:count:certs} and~\ref{fig:count:names} show the number
-of domain names observed by Censys, \ac{ct}, and their overlap over time. Our
-results show that \ac{ct} observes vastly more certificates (and consequently
-names) than Censys. It is unclear what accounts for this large discrepancy. One
-possibility is that many certificates are simply never deployed in public-facing
-HTTPS sites. Another likely contributing factor is the increasing prevalence of
-Server Name Indication (SNI)~\cite{rfc6066}, which would cause Censys' probes to
-be rejected when they do not include the correct server name.
+\autoref{fig:count:names} shows the number of domain names observed by Censys,
+\ac{ct}, and both over time. We found that \ac{ct} observes vastly more
+certificates (and consequently names) than Censys. It is unclear what causes
+this large discrepancy. One possibility is that many certificates are simply
+never deployed in public-facing HTTPS sites. Another likely contributing factor
+is the increasing use of Server Name Indication (SNI)~\cite{rfc6066}, which
+cause Censys' probes to be rejected when they do not include the correct server
+name.
 
 From Censys and \ac{ct}, we obtained a total of 156,289,973 valid domain names
 for which a certificate had been issued. To address the possibility that many of
 these names may not be used for public-facing sites, we performed a scan of port
 443 (the default for \ac{https}) using ZGrab~\cite{durumeric2015search} for all
-of these domain names, and discarded any domain names that failed to respond.
-This resulted in a set of 64,050,329 names that we used for testing, as
+of these domain names, and discarded any domain names that consistently failed
+to respond. This resulted in 64,050,329 names that we used for testing, as
 described below.
 
 \subsection{Signaling Set Representation}
@@ -88,12 +87,11 @@ As described in \autoref{sec:design:signaling}, our motivation for using
 \iac{dafsa}-based representation of the signaling set was twofold: first, the
 representation has no false positives or negatives, and second, it can be
 searched in its compressed state, leading to a lower memory usage requirement
-for clients. To evaluate the effectiveness of these design decisions against
-other alternatives, we conducted an experiment to measure the space requirements
-for the signaling set in various representations. We measured both the fully
-compressed size (which dictates bandwidth usage when transmitting the set to the
-client and the client's overhead storing it on disk) and the size in memory
-(when being used by the client during certificate verification).
+for clients. To evaluate the effectiveness of these design decisions, we
+conducted an experiment to measure the space requirements for the signaling set
+in various representations. We measured both the fully compressed size (used
+when transmitting the set to the client and when stored on disk) and the size in
+memory (when being used during certificate verification).
 
 In particular, we compared the plaintext representation of the signaling set (as
 of July 3, 2018) with a compressed representation using Bloom filters, the
@@ -150,25 +148,18 @@ sizes.
   \label{tab:signaling}
 \end{table}
 
-The results are shown in \autoref{tab:signaling}.
-Starting from an enormous plaintext corpus of over 1.5 GB,
-the various options all achieve impressive compression ratios.
-However, the results also indicate that to achieve a competitive size (i.e.,
-\bloomlargesize{}~MB or less),
-Bloom filters would require an unacceptably high false 
-positive rate: one in every 10K sites would be falsely signaled
-as supporting \ac{https} and hence would be rendered inaccessible.
-%Bloom filters offer high
-%compression even with a low false positive rate, and their in-memory
-%representation is the same as their on-disk representation. However, they still
-%have false positives, which would lead to those domains becoming inaccessible.
-While zpaq does not have any false positives or false
-negatives and yields excellent compression when run using method 5, 
-its in-memory representation of the
-signaling set would simply be the uncompressed set of domains, yielding a memory
-requirement of 1.5~GB. Our \ac{dafsa}-based representation captures a ``sweet
-spot'' between these two alternatives, suffering no false positives or negatives and, in the
-best case, an on-disk representation of just \fsapczpaqmedsize{}~MB with an in-memory
+The results are shown in \autoref{tab:signaling}. Starting from a plaintext
+corpus of over 1.5 GB, the various options all achieve impressive compression
+ratios. However, the results also indicate that to achieve a competitive size
+(i.e., \bloomlargesize{}~MB or less), Bloom filters would require an
+unacceptably high false positive rate: one in every 10K sites would be falsely
+signaled as supporting \ac{https} and hence would be rendered inaccessible.
+While zpaq does not have any false positives or false negatives and yields
+excellent compression when run using method 5, its in-memory representation is
+simply the uncompressed set of domains, yielding a memory requirement of 1.5~GB.
+Our \ac{dafsa}-based representation captures a ``sweet spot'' between these two
+alternatives, suffering no false positives or negatives and, in the best case,
+an on-disk representation of just \fsapczpaqmedsize{}~MB with an in-memory
 representation of \fsamedsize{}~MB.
 
 %For comparison, the set of all names from Censys and \ac{ct} (including
@@ -180,42 +171,52 @@ representation of \fsamedsize{}~MB.
 %all names from Censys and \ac{ct}, 46.5\% of the size in memory with our
 %\ac{dafsa} representation, and 44.2\% of the size on disk and in transit.
 
-For some clients, an initial download size of \fsapczpaqmedsize{}~MB may be too much. One
-approach that such clients might take to protect themselves would be to only track
-sites that have more than one certificate (i.e., sites with $\policy > 1$).
-This would ensure that such clients still benefit from greater resiliency
-against CA compromises, particularly for ``high-value'' domains that take the effort
-to obtain extra certificates. 
-For these clients, this optimization would reduce \ac{name}' disk and memory usage,
-but \ac{name} would no longer protect such clients 
-from \ac{tls} stripping attacks targeting
-``normal'' domains (those with a single certificate).
-To estimate clients' memory and disk usage in this case, we subsampled the full set of names
-and computed the size of the \ac{dafsa} with path compaction (which represents
+For some clients, an initial download size of \fsapczpaqmedsize{}~MB may be too
+much. One approach that such clients might take to protect themselves would be
+to only track sites that have more than one certificate (i.e., sites with
+$\policy > 1$). This would ensure that such clients still benefit from greater
+resiliency against CA compromises, particularly for ``high-value'' domains that
+take the effort to obtain extra certificates. For these clients, this
+optimization would reduce disk and memory usage, but \ac{name} would
+no longer protect such clients from \ac{tls} stripping attacks targeting
+``normal'' domains (those with a single certificate). To estimate clients'
+memory and disk usage in this case, we subsampled the full set of names and
+computed the size of the \ac{dafsa} with path compaction (which represents
 best-case memory usage in \ac{name}) and the size of the zpaq-compressed
 \ac{dafsa} (which represents the best-case disk usage).
 
-\begin{figure}[t]
+\begin{table}[tbp]
   \centering
-  \includegraphics[width=\linewidth]{fig/sample}
-  \caption{Size of the signaling set in various representations when 
-           the names in the set are subsampled from the full set of names. 
-           The labels above each distinct value on the $x$-axis
-           denote the fraction of the full set that was sampled.}
-  \label{fig:sample}
-\end{figure}
+  \caption{Size of the signaling set in various representations when the names
+  in the set are subsampled from the full set of names.}
+  \begin{tabular}{|lccccc|}
+    \toprule
+    %\textbf{Fraction} & \textbf{Names} & \textbf{Uncompressed (MB)} &
+    %\textbf{\ac{dafsa} (MB)} & \textbf{Compressed \ac{dafsa} (MB)}\\
+    \textbf{Fraction} & \textbf{0.01} & \textbf{0.05} & \textbf{0.1} &
+    \textbf{0.2} & \textbf{0.5} \\
+    \midrule
+    \textbf{Names (100K)} & 6.39 & 32.0 & 64.1 & 128 & 320 \\
+    \midrule
+    \textbf{Uncompressed (MB)} & 15.1 & 75.5 & 151 & 302 & 755 \\
+    \textbf{\ac{dafsa} (MB)} & 5.25 & 22.9 & 41.7 & 73.1 & 140 \\
+    \textbf{Compressed \ac{dafsa} (MB)} & 4.21 & 18.2 & 33.0 & 58.1 & 112 \\
+    \bottomrule
+  \end{tabular}
+  \label{tab:sample}
+\end{table}
 
-\autoref{fig:sample} shows the results. If the fraction of domains that use
+\autoref{tab:sample} shows the results. If the fraction of domains that use
 multiple independent certificate chains for the same name is small, as we would
 anticipate, then \ac{name} clients significantly reduce their memory and disk
 usage. For example, even if 10\% of all HTTPS websites deployed additional
-certificates, the compressed DAFSA representation would require just under
-33~MB. Of course, at very low levels of adoption, the advantage of the
-\ac{dafsa}-based approach over a list of names decreases. This makes sense,
-given that the \ac{dafsa} takes advantage of common substrings (especially
-prefixes and suffixes) in a set.
+certificates, the compressed DAFSA representation would require just 33~MB. Of
+course, at very low levels of adoption, the advantage of the \ac{dafsa}-based
+approach over a list of names decreases. This makes sense, given that the
+\ac{dafsa} takes advantage of common substrings (especially prefixes and
+suffixes) in a set.
 
-\subsection{Signaling Set Updates}
+\subsection{Signaling Set and Certificate Updates}
 \label{sec:evaluation:updates}
 
 %\begin{figure*}[t]
@@ -234,18 +235,19 @@ prefixes and suffixes) in a set.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\linewidth]{fig/added_name_set_size}
-  \caption{Size of added name sets over time.}
-  \label{fig:updates:added}
+  \includegraphics[width=0.95\linewidth]{fig/combined_update_size}
+  \caption{Size of update set (added name set and deleted name set) in different
+  formats over time.}
+  \label{fig:updates}
 \end{figure}
 
 Because the signaling set will be updated over time, we also carried out an
-experiment to determine the size of updates that will be sent to clients. 
-An update to the signaling set consists of the names added to the signaling
-set since the most recent version, as well the names 
-deleted due to certificate expiration or revocation. We computed the set of
-added and deleted names for our range of scans, aggregating these sets by week.
-We then computed the sizes of these sets in four different representations:
+experiment to determine the size of updates that will be sent to clients. An
+update to the signaling set consists of the names added to the signaling set
+since the most recent version, as well the names deleted due to certificate
+expiration or revocation. We computed the set of added and deleted names for our
+range of scans, aggregating these sets by week. We then computed the combined
+sizes of these sets in four different representations:
 \begin{inparaenum}[(1)]
 \item as an uncompressed text file of name strings,
 \item as a compressed zpaq archive containing the above file,
@@ -257,20 +259,30 @@ for example, we used the zpaq method that produced the smallest archive (method
 5 with 64 MiB blocks) and our \ac{dafsa} representation used path compaction.
 We experimented with the full set of names.
 
-Figures~\ref{fig:updates:added} and~\ref{fig:updates:deleted} show the
-results. As Figures~\ref{fig:count:certs} and~\ref{fig:count:names} would
-indicate, the size of the signaling set has increased over time, and thus the
-set of added names is consistently larger than the set of deleted names. Given
-the relatively modest sizes of these sets compared to that of the full signaling
+\autoref{fig:updates} shows the results. The size of added and deleted names is
+slowly increasing over time, with the set of added names consistently being
+larger than the set of deleted names (Appendix \steve{TODO}). Given the
+relatively modest sizes of these sets compared to that of the full signaling
 set, the most space-efficient method for representing and transmitting these
 updates to clients is a zpaq-compressed archive of the raw text file of names
-rather than \iac{dafsa}-based representation. From a technical perspective, this
-method of transmission is also advantageous: clients can simply add the set of
-added names to their existing \ac{dafsa}, and build (and subsequently add to) a
-new \ac{dafsa} for the set of deleted names. Our results show that updates
-(added and deleted names) are typically less than 3~MB per week or
-$\sim$439~KB/day; by comparison, downloading the Google homepage requires
-approximately 400~KB.
+rather than \iac{dafsa}-based representation. This method of transmission is
+also advantageous since clients can simply add the set of added names to their
+existing \ac{dafsa}, then build (and subsequently add to) a new \ac{dafsa} for
+the set of deleted names. Our results show that updates are typically less than
+3~MB per week or $\sim$439~KB/day; by comparison, downloading the Google
+homepage requires approximately 400~KB.
+
+Under certain circumstances, changes in a domain's \ac{ca} may cause an
+incorrect policy value update. Specifically, if a domain obtains a new
+independent certificate chain (e.g., by switching \acp{ca}) for the same public
+key without revoking the old one, log aggregators may report a policy value one
+higher than the domain has, potentially affecting the signaling set and
+\ac{name} handshakes. We reviewed our database for these potential cases and
+found 72,034 names in our test set of names, or 0.11\% of the overall set. This
+is a conservative upper bound, containing certificates that are almost certainly
+from the same issuer with slightly different issuer organization names, such as
+``Gandi'' and ``GANDI SAS'', indicating that these failures are likely to be
+almost nonexistent in practice.
 
 % BP: Why release once a week instead of every day?
 %Releasing signaling set updates each week means that some false positives and
@@ -320,20 +332,29 @@ approximately 400~KB.
 \subsection{Connection Establishment}
 \label{sec:evaluation:performance}
 
-\begin{figure*}[thb]
+%\begin{figure*}[thb]
+  %\centering
+  %\subfloat[Proof count]{
+    %\includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/0-time_elapsed_vs_num_proofs_requested}
+    %\label{fig:evaltlsext:numproof}
+  %}
+  %\subfloat[Chain count]{
+    %\includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/1-time_elapsed_vs_num_chains_sent}
+    %\label{fig:evaltlsext:numchain}
+  %}
+  %\caption{Handshake latency in different scenarios. Error bars represent
+  %standard error.}
+  %\label{fig:evaltlsext}
+%\end{figure*}
+
+\begin{figure}[t]
   \centering
-  \subfloat[Proof count]{
-    \includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/0-time_elapsed_vs_num_proofs_requested}
-    \label{fig:evaltlsext:numproof}
-  }
-  \subfloat[Chain count]{
-    \includegraphics[width=0.5\linewidth]{fig/eval_tls_ext/1-time_elapsed_vs_num_chains_sent}
-    \label{fig:evaltlsext:numchain}
-  }
-  \caption{Handshake latency in different scenarios. Error bars represent
-  standard error.}
-  \label{fig:evaltlsext}
-\end{figure*}
+  \includegraphics[width=0.9\linewidth]{fig/eval_tls_ext/1-time_elapsed_vs_num_chains_sent}
+  \caption{Handshake latency vs.\@ the number of certificate chains sent by the
+  domain. Error bars are standard error.}
+  \label{fig:numchain}
+\end{figure}
+
 To measure the performance of connection establishment in \ac{name}, we
 implemented the handshake as a custom \ac{tls} extension in the OpenSSL library.
 For concrete evaluation of this extension, we use \texttt{nginx} and \texttt{curl} with minor
@@ -341,9 +362,8 @@ modifications to use our \ac{tls} extension.
 
 Additionally, we constructed sample sets of domain names based on four parameters:
 \begin{inparaenum}
-\item the number of proofs requested by the client during the
-  ClientHello message (\numlas),
-\item the number of certificate chains the domain sends during the ServerHello
+\item the number of proofs requested during the ClientHello message (\numlas),
+\item the number of certificate chains sent with the ServerHello
   message (\policy),
 \item the average number of certificates per chain, and
 \item the average size of each certificate chain.
@@ -353,30 +373,21 @@ sent in the \ac{name} handshake, and the latency of the handshake both with and
 without the \ac{name} \ac{tls} extension.
 
 We tested this both over the Internet (by connecting to a virtual private server
-with latency varying from 30 to 300 ms), as well
-as over the local loopback interface. The
-tests over the internet (\emph{WAN}) provide an indication of the effect of
-the extension on ``real world'' servers, 
-whereas the \emph{localhost} tests provide a lower bound on time added due to
-sending/receiving/processing extra data. A total of 15385 TLS connections were
-established for our testing: 5768 over WAN, 9617 over localhost.
+with latency varying from 30 to 300 ms), as well as over the local loopback
+interface. The tests over the internet (\emph{WAN}) provide an indication of the
+effect of the extension on ``real world'' servers, whereas the \emph{localhost}
+tests provide a lower bound on time added due to sending/receiving/processing
+extra data. A total of 15385 TLS connections were established for our testing:
+5768 over WAN, 9617 over localhost.
 
-Our results in Figures~\ref{fig:evaltlsext:numproof},
-\ref{fig:evaltlsext:numchain}, \ref{fig:evaltlsext:numcert}, and
-\ref{fig:evaltlsext:sizechain} show that in comparison to the mean time
-elapsed, there is an approximately 5\% increase in connection establishment
-time: an average of 11ms longer for WAN and 1.2ms for localhost. 
+Our results were similar in each case, with a representative example shown in
+\autoref{fig:numchain} (others in Appendix \steve{TODO}). In comparison to the
+mean time elapsed, there is an approximately 5\% increase in connection
+establishment time: an average of 11ms longer for WAN and 1.2ms for localhost.
 Since our \ac{tls} extension does not add any extra round-trips to the
 handshake, the time added is small, especially in comparison to random
-measurement fluctuations (e.g., when we look at confidence intervals within one
-standard deviation from the mean --- shown as error bars in the figures).
+measurement fluctuations (i.e., the error bars shown).
 
-The extra data sent in the \ac{name} handshake is directly dependent on the size
-and number of certificate chains, as well as the number of proofs sent. In
-particular, the extra data sent from client to server is 1 byte, and the extra
-data sent from server to client is
-$(2 + (292 \times \text{\#proofs}) +
-(\sum_{\text{chain}}\texttt{sizeof}(\text{chain})))$ bytes. 
 %While this means
 %that some connections may result in a great deal of extra data sent, we can
 %expect that the vast majority of domains will not send additional certificate

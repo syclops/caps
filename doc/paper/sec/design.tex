@@ -21,13 +21,14 @@ would become a standard browser component.
 the existing \ac{pki} to a new \ac{pki} altogether). We assume that during this
 transition, both the existing and improved \acp{pki} will coexist, and that the
 improved \ac{pki} will make \ac{mitm} attacks more difficult to carry out.
-Hence, \ac{name} must prevent downgrades to the old \ac{pki}. More precisely, if
-a client and server both support the improved \ac{pki}, then when they perform a
-handshake, they should negotiate a session key based on the domain's public key
-as certified in the improved \ac{pki}. As secondary objectives, we also seek to
-prevent domains from becoming inaccessible due to misconfiguration, private key
-loss, or private key compromise, and to minimize the changes to existing
-interactions between clients, domains, and \acp{ca}.
+Hence, \ac{name} must prevent downgrades to the old \ac{pki} as well as \ac{tls}
+stripping. More precisely, if a client and server both support the improved
+\ac{pki}, then when they perform a handshake, they should negotiate a session
+key based on the domain's public key as certified in the improved \ac{pki}. As
+secondary objectives, we also seek to prevent domains from becoming inaccessible
+due to misconfiguration, private key loss, or private key compromise, and to
+minimize the changes to existing interactions between clients, domains, and
+\acp{ca}.
 
 \paragraph{Adversary Model}
 
@@ -57,14 +58,15 @@ Web \ac{pki}, it necessarily includes the entities in the current \ac{pki}:
 \item \emph{Public logs} maintain a publicly auditable, append-only database of
   certificates, such as those used in \ac{ct}.
 \end{compactitem}
-\ac{name} introduces a new entity, the \emph{log aggregator}, that uses publicly
-available data to maintain a database of domains that have deployed \ac{https}
-and/or the improved \ac{pki}. As our figure shows, there may be multiple
-independent log aggregators. While throughout this section we assume that the
-log aggregator is separate from other entities and that there is a globally
-accepted set of known and trusted log aggregators, in \autoref{sec:discussion}
-we discuss how we can relax these assumptions, namely, by arguing that browser
-vendors should take on this responsibility.
+\ac{name} introduces a new entity, the \emph{log aggregator}, a
+high-availability entity that uses publicly available data to maintain a
+database of domains that have deployed \ac{https} and/or the improved \ac{pki}.
+As our figure shows, there may be multiple independent log aggregators. While
+throughout this section we assume that the log aggregator is separate from other
+entities and that there is a globally accepted set of known and trusted log
+aggregators, in \autoref{sec:discussion} we discuss how we can relax these
+assumptions, namely, by arguing that browser vendors should take on this
+responsibility.
 
 % Procedures from the current PKI
 As shown in \autoref{fig:overview}, many of the interactions between entities in
@@ -91,27 +93,26 @@ to engage in an HTTP connection.
 % Policy overview
 To allow domains more control over their public keys than in the current
 \ac{pki}, log aggregators use data from public logs to construct a set of
-\emph{\ac{name} policies}, which allows each domain to establish an
-\emph{authoritative public key} in the \emph{current} Web \ac{pki}. \ac{name}
-policies take a simple and intuitive approach: \emph{treat whichever public key
-  is backed by the largest number of independent certificate
-  chains\footnote{This term means that the certificate chains share no public
-keys except at the leaf.} in the current \ac{pki} as authoritative in \ac{name}
-and the improved \ac{pki}}. A domain wanting to increase client confidence in
-one of its public keys can obtain additional independent certificates for that
-key, and the log aggregators will automatically update their \ac{name} policies
-for that domain.
+\emph{\ac{name} policies}, which allows each domain to establish one or more
+\emph{authoritative public keys} in the \emph{current} Web \ac{pki}. \ac{name}
+policies take a simple and intuitive approach: \emph{treat any public key backed
+  by a maximal number of independent certificate chains\footnote{This term means
+  that the certificate chains share no public keys except at the leaf.} in the
+current \ac{pki} as authoritative}. A domain wanting to increase client
+confidence in one of its public keys can obtain additional independent
+certificates for that key, and the log aggregators will automatically update
+their \ac{name} policies for that domain.
 
 Intuitively, log aggregators simply provide signed pairs of the form
 $(\hostname, \policy)$ where \hostname is a domain name and \policy is the
 \emph{\ac{name} policy value}, i.e., the number of independent certificate
-chains backing an authoritative key for \hostname.\footnote{\hostname may have
-more than one authoritative key; if public keys $\pk_1$ and $\pk_2$ are both
-backed by three independent chains then both public keys are treated as
-authoritative for \hostname.} To prevent an adversary from downgrading
-handshakes in the improved \ac{pki} to a handshake in the existing Web \ac{pki},
-each log aggregator indicates which domains in its signaling set have a
-\ac{name} policy value greater than 1.
+chains backing an authoritative key for \hostname. In case of a tie, \hostname
+may have more than one authoritative key: if public keys $\pk_1$ and $\pk_2$ are
+both backed by three independent chains then both public keys are treated as
+authoritative for \hostname. To prevent an adversary from downgrading handshakes
+in the improved \ac{pki} to a handshake in the existing Web \ac{pki}, each log
+aggregator indicates which domains in its signaling set have a \ac{name} policy
+value greater than 1.
 
 When establishing an HTTPS connection with a server, clients can use the
 signaling set to determine whether a domain has a \ac{name} policy value that is
@@ -129,105 +130,24 @@ the connection.
 The current PKI actually supports three classes of certificates: standard
 domain-validated (DV) certificates, organization-validated (OV) certificates,
 and extended validation (EV) certificates. EV certificates require domains to
-undergo more rigorous screening than the other two.
-Hence, the actual \ac{name} policy value is a tuple $(\policy_{EV},
-\policy_{!EV})$. For a given domain, \ac{name} will treat as authoritative the
-public key with the largest $\policy_{EV}$, with ties broken based on the
-largest value of $\policy_{!EV}$, which represents the policy value of all
-non-EV certificates for the domain.
+undergo more rigorous screening than the other two. Hence, the actual \ac{name}
+policy value is a pair $(\policy_{EV}, \policy_{!EV})$. For a given domain,
+\ac{name} will treat as authoritative a public key with the largest observed
+$\policy_{EV}$, with ties broken based on the largest value of $\policy_{!EV}$,
+which represents the policy value of all non-EV certificates for the domain.
 
-%Our policy also implies that if $n$ is the
-%highest number of observed independent certificate chains for a given domain,
-%then \emph{any} public key backed by $n$ chains can be used as that domain's in
-%the improved \ac{pki}. Thus, it is possible for a domain to have multiple public
-%keys in the improved \ac{pki}.\footnote{In practice, any improved \ac{pki} can
-%enforce the use of a single public key by, for example, considering the first
-%key backed by $n$ chains as authoritative and using a ``cool-off period'' as in
-%AKI~\cite{kim2013accountable}.}
-
-
-%To move towards \iac{pki} with increased resilience to the compromise of trusted
-%parties (i.e., \acp{ca}), we need to prevent \iac{ca} that misissues a
-%certificate for a domain from exposing that domain to \iac{mitm} attack. We
-%observe that signatures from multiple independent \acp{ca} on a single public
-%key can spur greater trust in the key, and therefore we design \ac{name} around
-%the idea that domains should be able to obtain and communicate the presence of
-%multiple certificates for a single public key. We can then protect domains from
-%\ac{mitm} attacks by simply communicating to the client the number of
-%certificates to expect. This approach results in simple policies that require
-%domain involvement only in rare cases of deliberate misissuance, and allow
-%security-conscious domains to ``ratchet up'' their security to their desired
-%level.
-
-%\ac{name} leverages \ac{ct}'s infrastructure in its policy mechanism, and
-%therefore the two systems have similar architectures, as shown in
-%\autoref{fig:overview}. \steve{TODO: add Censys data and an external service or
-%browser vendor to the overview figure} \ac{name} assumes a full deployment of
-%\ac{ct}, that is, all certificates must be logged for clients to accept them as
-%valid. \steve{Beginning in October 2017, Chrome will begin enforcing this
-  %requirement for all \ac{https} sites, so this assumption is a reasonable one.}
-  %For the purposes of obtaining \acp{sct}, the logging process works just as it
-  %does in \ac{ct}. Also as with \ac{ct}, public logs are kept accountable by
-  %auditors and monitors, and an external party (Google in the case of \ac{ct})
-  %maintains a list of known trusted logs.
-
-%In \ac{name}, however, logs maintain an additional database of certificate
-%policies alongside their database of certificates. The logging process also
-%triggers changes in this policy database. Domains periodically request the proof
-%for their latest policy from the logs and provide both their policy and proof to
-%clients during the \ac{tls} handshake. We further describe the details of our
-%policy mechanism in \autoref{sec:policy}.
-
-%Client browsers locally maintain a \emph{signal set}, which indicate whether or
-%not a given domain has deployed \ac{https}. The browser queries the signal set
-%before initiating an HTTP or \ac{https} connection to a site 
-%in order to determine
-%\begin{inparaenum}
-%\item whether or not to establish \iac{https} connection, and
-%\item if so, how many certificates to expect.
-%\end{inparaenum}
-%If the signal set indicates that the domain has deployed \ac{https} but the
-%server does not provide a certificate, the browser aborts the connection,
-%assuming that an adversary is attempting to mount \iac{tls} stripping attack.
-
-%The signal set is created by using data from the \ac{ct} logs. This data is used
-%to construct a list of all DNS names for which a \ac{tls} certificate has been
-%observed (either as the main subject or as a subject alternative name). This
-%list is then represented using \iac{dafsa} that recognizes the DNS names of
-%sites that deploy \ac{https}. By using compression techniques, we compact this
-%\ac{dafsa} into a representation that requires little storage. Such a compact
-%representation allows us to store the \ac{dafsa} in memory, offering performant
-%lookups. We further describe the details of our signal set design in
-%\autoref{sec:design:signaling}.
-
-%\subsection{Threat Model}
-%\label{sec:design:threat}
-
-%Ultimately, an adversary of \iac{pki} has the goal of mounting a successful
-%\ac{mitm} attack, and this goal remains before, during, and after the process of
-%transitioning to an improved \ac{pki}. Therefore, in this paper we consider an
-%adversary whose goal, informally stated, is to issue an unauthorized public-key
-%certificate that a standard client (i.e., a client who trusts a standard set of
-%root \acp{ca}) will accept.
-
-%To achieve this goal, the adversary can control a set of $n$ \acp{ca}. For
-%convenience, we assume that each \ac{ca} has a single private key, and thus the
-%adversary can issue arbitrary certificates using any of $n$ different private
-%keys. We also assume that the adversary controls the network, and thus can
-%replay, drop, or modify messages sent over the network. Since we examine the
-%process of deploying an improved \ac{pki}, we also assume that clients support
-%both the existing and improved \ac{pki}. We also assume that the adversary
-%cannot break cryptographic primitives.
 
 \section{CAPS Detailed Design}
-In this section, we describe \ac{name} in detail, including how it signals which domains have
-deployed \ac{https} and improvements to the Web \ac{pki}
+
+In this section, we describe \ac{name} in detail, including how it signals which
+domains have deployed \ac{https} and improvements to the Web \ac{pki}
 (\autoref{sec:design:signaling}), how it provides stronger public-key
 authentication over the existing Web \ac{pki} (\autoref{sec:design:policy}), and
 how clients establish secure end-to-end connections with servers
 (\autoref{sec:design:handshake}). We conclude by describing how \ac{name} thus
 enables the bootstrapping of more advanced policies
 (\autoref{sec:design:bootstrapping}).
+
 \subsection{Building the Signaling Set}
 \label{sec:design:signaling}
 
@@ -236,18 +156,18 @@ The signaling set represents
 \item a set of \acp{fqdn} (hereafter names) known to have deployed \ac{https}
   (by virtue of having a valid public-key certificate appear in a public log), and
 \item the subset of names that have adopted \ac{name} (by
-  virtue of having multiple independent public-key certificates for the same
-  public key).
+  virtue of having multiple independent certificate chains for the same public
+  key).
 \end{inparaenum}
 Formally, the signaling set is a pair $(\httpsset, \multicertset)$ where
-\httpsset and \multicertset are unordered sets of valid names in
+$\httpsset$ and $\multicertset$ are unordered sets of valid names in
 ASCII\footnote{A valid name is a Unicode or ASCII string up to 253 bytes in
   length overall, with no label longer than 63 bytes~\cite{rfc1035}. We further
 add the requirement that the name has \iac{tld} that is a current global
 \ac{tld} according to ICANN. We use ASCII here because we can encode names in
 Punycode.} and $\multicertset \subseteq \httpsset$. The set supports a query
 operation, formally defined as $\query: \strings \to \{\nohttps, \onecert,
-\multicert\}$ where \strings is the set of all ASCII strings and \nohttps,
+\multicert\}$ where $\strings$ is the set of all ASCII strings and \nohttps,
 \onecert, and $\multicert$ are values indicating whether a string is a name
 known to have no \ac{https} certificate, a public key backed by one certificate
 chain, or a public key backed by multiple independent certificate chains,
@@ -388,11 +308,11 @@ then $\query(\hostname) = \onecert$. Otherwise, $\query(\hostname) = \nohttps$.
 We begin by building the \ac{dafsa} as described in previous
 work~\cite{daciuk2000incremental}. Though this previous work assumes transitions
 based on a single character, we consider the possibility of multi-character
-symbols and thus our symbol set consists of strings of symbols of length up to
-253 characters:\footnote{Recall that DNS names can be a maximum of 253
-characters.} $\symbolstrings = \bigcup_{i=0}^{253} \symbols^i$, where \symbols
-is the set of all ASCII characters allowed in domain names, and $\symbols^i$
-indicates strings of length $i$.
+symbols and thus our symbol set consists of strings of length up to 253
+characters:\footnote{Recall that DNS names can be a maximum of 253 characters.}
+$\symbolstrings = \bigcup_{i=0}^{253} \symbols^i$, where \symbols is the set of
+all ASCII characters allowed in domain names, and $\symbols^i$ indicates strings
+of length $i$.
 
 We succinctly represent this \ac{dafsa} as a bitvector by following the
 high-level approach of previous work~\cite{daciuk2012smaller}. Intuitively, we
@@ -432,7 +352,7 @@ s_m)$, where for all $i$ where $1 \le i < m$, $\transfunc(s_i, \sigma_i)
 = s_{i+1}$.
 We say that a set of states $\stateset
 \subseteq \states$ is a \emph{connected component} if either $\stateset
-\subseteq \finalstates$ or $\stateset \cap \finalstates = \varnothing$, and for
+\subseteq \finalstates$ or $\stateset \cap \finalstates = \emptyset$, and for
 any two states $t, u \in \stateset$, 
 any path between $t$ and $u$ contains only states in $\stateset$.
 The \emph{upstream states} of a connected component \stateset, written
@@ -516,12 +436,12 @@ aggregators again rely on the data used to build the signaling set.
 
 \begin{figure}
   \centering
-  \includegraphics[width=\linewidth]{fig/chain}
-  \caption{Sample certificate fingerprint graph. An arrow from A to B indicates
-    that a certificate with fingerprint A is the authority public key for a
-    certificate with fingerprint B. Though the leaf certificate
-  $\texttt{6ac3c336}\ldots$ has four chains, only two of the chains are
-independent.}
+  \includegraphics[width=0.9\linewidth]{fig/chain}
+  \caption{Sample certificate fingerprint graph. $A \rightarrow B$ indicates
+    that a certificate with fingerprint $A$ is the authority public key for a
+    certificate with fingerprint $B$. Though the leaf certificate
+    $\texttt{6ac3c336}\ldots$ has four chains, the bolded fingerprints show that
+    only two of the chains are independent.}
   \label{fig:chain}
 \end{figure}
 
@@ -537,36 +457,29 @@ ensure that the log aggregator has a list of currently valid certificates. The
 log aggregator can then use the database to construct a mapping of names to
 policies. Specifically, the aggregator creates a graph of certificate
 fingerprints as shown in \autoref{fig:chain}, and computes the \emph{policy
-value}, the minimum number of \ac{ca} public keys that must be compromised 
-for a \ac{name}-enabled browser to accept a fraudulent certificate for this site. 
-The policy value can be computed using a
-straightforward approach (e.g., computing a minimal vertex separator), allowing
-the log aggregator to easily construct a mapping of certificate fingerprints to
-policy values. The log aggregator can then perform a series of simple join
-operations to map each name to the maximum policy number associated with a
-certificate containing the name.
+value}, the minimum number of \ac{ca} public keys that must be compromised for a
+\ac{name}-enabled browser to accept a fraudulent certificate for this site. The
+policy value can be computed using a straightforward approach (e.g., computing a
+minimal vertex separator), allowing the log aggregator to easily construct a
+mapping of certificate fingerprints to policy values. The log aggregator can
+then perform a series of simple join operations to map each name to the maximum
+policy number associated with a certificate containing the name.
 
 The log aggregator constructs this name-to-policy mapping each time it receives
 data from public sources (recall from \autoref{sec:design:signaling} that this
 occurs at regular, scheduled intervals). Once it has created the mapping, the
 log aggregator certifies the name--policy-value pairs in this mapping by
-timestamping and signing them.\footnote{For efficiency, the log aggregator can
-  sign a subset of pairs each day, and have each client consider a signature
-  valid for multiple update intervals. For example, the log aggregator could
-sign a third of the pairs each day, and clients could treat a signed, timestamp
-pair as valid for at least three days.} For auditability, the log aggregators
+timestamping and signing them. For auditability, the log aggregators
 can additionally take an approach similar to that of logs in \ac{ct}, using a
 Merkle hash tree to store their policy proofs over time in a cryptographically
 verifiable, append-only fashion.
 
-
 With the policy databases of the log aggregators, a domain can provide the
 information necessary for clients to establish the domain's authoritative public
-key. The domain periodically downloads the latest
-\emph{policy proofs}, which are signed and timestamped name-policy pairs, from
-each of the log aggregators. For a name \hostname, a policy value \policy, a
-timestamp \timestamp, and a log aggregator \logagg, we specify the policy proof
-to be
+key. The domain periodically downloads the latest \emph{policy proofs}, which
+are signed and timestamped name-policy pairs, from each of the log aggregators.
+For a name \hostname, a policy value \policy, a timestamp \timestamp, and a log
+aggregator \logagg, we specify the policy proof to be
 \begin{align}
   %data &= \logagg \concat \hostname \concat \timestamp \concat \policy \\
   \policyproof(\logagg, \hostname, \policy, \timestamp) &= 
@@ -576,27 +489,22 @@ to be
 \end{align}
 where $\pk_{\logagg}$ and $\pk_{\logagg}^{-1}$ denote respectively the public
 and private keys of \logagg, and $\signature(K, m)$ denotes a signature on $m$
-with private key $K$. The domain keeps these proofs for use in the handshake
-described below.
+with private key $K$. The domain uses these proofs in the handshake described
+below.
 
 \subsection{Connection Establishment}
 \label{sec:design:handshake}
 
-To establish a connection to a domain, a client (e.g., browser) first queries the 
-signaling set for the domain's name.
-%Due to the way that querying occurs in the
-%\ac{dafsa}-based implementation of the signaling set, the client can observe the
-%state transitions in the \ac{dafsa} and, if the symbols making up the domain
-%name lead to a state that is not an accept state, the client can supply
-%\multicertsymbol to determine whether that transitions to an accept state (and
-%hence the domain has a policy value greater than 1). 
-If this query returns \onecert 
-then the client performs a standard TLS handshake
-(and refuses any attempts to downgrade to plain HTTP).
-If the query returns $\multicert$,
-indicating the domain has more than one certificate chain, 
-then the client performs the \ac{name}-extended
-TLS handshake to establish a connection with the domain.
+To establish a connection to a domain, a client (e.g., browser) first queries
+the signaling set for the domain's name. If this query returns \onecert then the
+client performs a standard TLS handshake (and refuses any attempts to downgrade
+to plain HTTP). If the query returns $\multicert$, indicating the domain has
+more than one certificate chain, then the client performs the \ac{name}-extended
+TLS handshake to establish a connection with the domain. The result of the query
+to the signaling set is cached until the next signaling set update, which
+eliminates the need for this query in future connections. Caching is
+particularly effective at minimizing overhead for operations such as session
+resumption~\cite{rfc8446}.
 
 The \ac{name}-extended TLS handshake protocol allows a client to verify a
 domain's authoritative public key. The \ac{tls} handshake
@@ -613,7 +521,7 @@ During the initial
   %maximum.
 In an initial deployment, we expect that typically $k=1$, but allowing the use
 of larger values for $k$ provides resilience against compromised log
-aggregators.  See Section~\ref{sec:discussion} for further discussion.
+aggregators.  See Section~\ref{sec:analysis:weaknesses} for further discussion.
 
 The domain then sends back a ServerHello message that contains \numlas recent
 policy proofs from \numlas distinct log aggregators, as well as \numlas
@@ -631,7 +539,7 @@ extension message:
 \end{equation}
 where $\certchain_j$ is a certificate chain for \hostname. In the extension
 message, the domain only sends $\policy - 1$ certificate chains because the
-remaining chain will be sent in the ServerCertificate message of the TLS
+remaining chains will be sent in the ServerCertificate message of the TLS
 handshake.
 
 The client then checks that
@@ -650,12 +558,11 @@ handshake, which requires the client to verify an additional certificate chain
 in the ServerCertificate message and perform all other checks required by the
 \ac{tls} handshake protocol.
 
-While our current design relies its own custom TLS extension,
-in the future, \ac{name} may instead be able to leverage
-recently proposed TLS extensions~\cite{rfc-extra-cert-1,
-rfc-extra-cert-2} designed to allow the transmission
-of additional certificates (primarily to facilitate
-content hosting by CDNs).  
+While our current design uses a custom TLS extension, in the future, \ac{name}
+may instead be able to leverage recently proposed TLS
+extensions~\cite{rfc-extra-cert-1, rfc-extra-cert-2} designed to allow the
+transmission of additional certificates (primarily to facilitate content hosting
+by CDNs).  
 
 \subsection{Bootstrapping Advanced Policies}
 \label{sec:design:bootstrapping}

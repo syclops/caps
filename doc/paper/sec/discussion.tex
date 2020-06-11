@@ -1,96 +1,47 @@
-\section{Discussion}
+\section{Deployment Considerations}
 \label{sec:discussion}
 
-In this section, we discuss \ac{name} in a broader context, examining its
-reliance on the integrity of its data sources and its performance in
-the face of increasing \ac{https} adoption. We conclude with a discussion of
-future work.
+We now discuss the deployment of \ac{name} in practice. Specifically, we
+discuss possible candidates for log aggregators and the expected performance of
+\ac{name} in the modern Web.
 
-\paragraph{Data Source Integrity}
+\paragraph{Candidates for Log Aggregators}
 
-\ac{name} relies on the integrity of the data sources (in our current prototype,
-Censys and \ac{ct}). Therefore, \iac{ca} who issues
-and publicizes an unauthorized certificate for a domain that does not deploy
-\ac{https} can cause the domain to be included in the signal set and thus render
-the domain inaccessible. This fragility effectively allows an adversary who controls
-one or more private CA keys to
-``poison the well'' that \ac{name} relies on, and execute a denial-of-service
-attack with just a single unauthorized certificate.
+Our design of \ac{name} does not require specific entities to serve as log
+aggregators. However, from our analysis in \autoref{sec:analysis:weaknesses},
+we conclude that log aggregators should have high availability and widely
+known. We believe that browser vendors or public logs would be particularly
+suited for these roles. Both already take an active role in ``policing'' the
+Web PKI: browser vendors can use updates to avoid known compromised
+certificates or updates~\cite{langley2012revocation}, and logs already record
+certificates that can uncover \ac{ca} malfeasance~\cite{sleevi2015sustaining}.
+Both offer high availability, with logs being held to a minimum of 99\%
+availability, minimizing the risk of synchronization issues. Finally, lists
+of major browser vendors and logs are already widely known, making it easy to
+present clients with a list of available log aggregators to provide policy
+proofs.
 
-To recover from such an attack, the
-affected domain could request that the \ac{ca} revoke the certificate if the
-\ac{ca} issued the certificate in error. If the \ac{ca} deliberately misissued
-the certificate, the browser vendor could treat the certificate as revoked
-(though such action is unlikely unless the domain is popular). The affected
-domain could also upgrade to \ac{https}, obtaining enough certificates to
-override the misissued certificate. 
-%In the event that the domain wishes to
-%remain without \ac{https}, we can allow domains to set a policy flag that
-%signals that the domain will communicate over HTTP. The domain, however, must
-%still send this policy and proof during connection establishment.
+\paragraph{\ac{name} in the Modern Web}
 
-Enhancements to certificate logs to mitigate situations such as this are ongoing. Some
-\ac{ct} logs, for example, only accept certificates from certain \acp{ca}, and
-nearly all of them perform some level of certificate validation, including
-checking whether a certificate is anchored in a known root certificate. We
-expect an attack that involves poisoning data sources in this way to be possible
-but rare and noticeable, and an attacker seeking to carry out \iac{mitm} in this way has a
-higher hurdle for the attack to succeed than in today's Web \ac{pki}.
+The use of \ac{https} has increased significantly over the past years
+(\autoref{sec:evaluation:https}), in part due to the advent of services such as
+Let's Encrypt. Despite this increase, we anticipate the manageable level of
+storage and memory overhead of the \ac{name} signaling set in the future for
+three reasons. First, \autoref{tab:sample} suggests a sublinear growth in the
+size of the signaling set relative to the number of names. Second, despite
+\autoref{fig:count:names} showing a large increase in names for which
+certificates are being issued, \autoref{fig:updates} suggests that the growth
+of names that are accessible on the public Web is much slower. Finally, the
+previous points do not take into account the falling cost of disk space and
+memory over time, which it even more likely that this overhead will remain
+manageable.
 
-\paragraph{The Role of the Log Aggregator}
-
-In our design of \ac{name}, we have described the log aggregators as independent entities.
-However, we believe that the most realistic deployment route would likely be for
-each browser vendor to act as an aggregator, at least for clients with their browser.
-Today, browser vendors already take an active role in ``policing'' the Web PKI,
-for instance by directly revoking compromised certificates via browser updates.
-Thus, they have an incentive to support a move to a more resilient PKI.  
-They are also already a fundamental part of the Web's TCB,
-and hence expanding on that role may be preferable to adding a new party.
-
-\paragraph{Increasing \ac{https} Adoption}
-
-In the past several years, Let's Encrypt and similar efforts to increase
-the use of \ac{https} in the Internet has caused a marked increase in the number
-of domain names served over \ac{tls}, as shown in
-\autoref{sec:evaluation:https}. Due to the structure of DNS, it is impossible to
-know how many domain names there are overall, and thus difficult to determine a
-ceiling for the number of names known to serve content over \ac{https}.
-Therefore, it is possible that the signaling set may grow to a size that is
-untenable for increasingly many clients.
-However, this may also be offset by the upward trend in available bandwidth
-(e.g., the upcoming move to 5G).
-We could also mitigate the memory and disk usage for clients by splitting the 
-signaling set into several \ac{dafsa} representations based 
-on a client's region or self-selected categories of interest.
-We also considered splitting the DAFSA based on popularity,
-but conversations with Mozilla indicate this approach is not palatable
-as it is seen as perpetuating inequality on the Web;
-hence any solution should ideally treat websites large and small 
-in an egalitarian fashion~\cite{privatecomm}.
-
-\paragraph{Future Work}
-
-One avenue of future exploration that is currently ongoing is \emph{transition
-compaction}, which aims to minimize our \ac{dafsa} representation by reducing
-the representation size of each transition. A transition in the representation
-consists of a symbol and destination state. We have found that in the current
-signaling set representation, the symbols and destination states had a
-long-tailed distribution. Thus by using variable-length encodings, we can reduce
-the overall size of each transition. One straightforward way to do so is via
-Huffman encoding, but the long-tailed distribution results in a Huffman
-dictionary whose size is significant enough to neutralize any space savings that
-would result. We are currently exploring heuristics by which we can select a
-subset of symbols to Huffman encode (such as ones that occur more than a
-threshold number of times). For destination states, we can assign an ordering of
-states in the \ac{dafsa} such that the difference to each destination state in
-the ordering is small, and we can then use integer encoding to represent the
-location of these states. We are currently exploring the possibility of using
-graph vertex separators to address this problem.
-
-%We also plan to examine the use of multiple \acp{dafsa}, collecting data on
-%domain names including relative popularity, region, and category. We can then
-%construct multiple \ac{dafsa} according to our existing approach, and evaluate
-%disk space, memory usage, and connection latency (particularly if we dynamically
-%load \acp{dafsa}). We note that some of the necessary data is available from services
-%as Alexa Web Information Services and DNS resolvers.
+An increasing number of Web clients are now mobile devices with limited
+computational, memory, and storage resources. While there are performance
+tradeoffs that we hope to explore in future work, we can still feasibly deploy
+\ac{name} on these devices. As we describe in
+\autoref{sec:evaluation:implementation}, smaller forms of the signaling set can
+provide limited protection against \ac{mitm} attacks on resource-constrained
+devices. Moreover, \autoref{fig:numchain} shows, the added latency of \ac{name}
+is small compared to the overall latency, and is mostly due to validating
+additional certificate chains or policy proofs.
