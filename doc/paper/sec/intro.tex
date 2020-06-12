@@ -24,7 +24,7 @@ Unfortunately, the current Web \ac{pki} is demonstrably fragile. Existing
 certificate databases~\cite{durumeric2015search, rfc6962} indicate that Web
 browsers and operating systems provided by Mozilla, Apple, and Microsoft
 directly or indirectly trust more than 1,500 \ac{ca} signing keys across more
-than 600 organizations worldwide. There are few measures in place to prevent any
+than 600 organizations worldwide. Little prevents any
 of these \acp{ca} from issuing an unauthorized certificate for any site,
 resulting in \emph{weakest-link security} for most sites: the compromise of any
 \ac{ca} can threaten the security of all Web domains, and by extension, all
@@ -37,16 +37,16 @@ As we describe in \autoref{sec:background}, previous work has made progress
 towards protecting clients and domains against the misbehavior of trusted
 entities such as \acp{ca}, and some of this work has seen increasingly
 widespread deployment. Unfortunately, no proposed solution offers both
-preemptive, robust protection against misbehaving \acp{ca} and a feasible,
-secure deployment strategy. In particular, while systems like Google's \ac{ct}
+preemptive, robust protection against misbehaving \acp{ca} and a feasible
+deployment strategy. In particular, while systems like Google's \ac{ct}
 project~\cite{rfc6962,ct-laurie} enjoy relatively widespread deployment, they
 only enable detection, not prevention, of unauthorized certificate issuance.
-Systems that do prevent unauthorized certificate issuance will
+Systems that do prevent unauthorized issuance 
 \begin{inparaenum}
 \item require drastic changes to certificate issuance~\cite{kim2013accountable},
 \item require domains to deploy complex new infrastructure~\cite{rfc6698,
   szalachowski2014policert},
-\item significantly increase latency and communication~\cite{yu2016dtki},
+\item increase latency and communication~\cite{yu2016dtki},
 \item require all domains to increase their security level at
   once~\cite{basin2014arpki}, or
 \item render a domain inaccessible if misconfigured~\cite{palmer2017intent}.
@@ -69,14 +69,14 @@ changes than domains or \acp{ca} that have historically been reluctant to deploy
 major changes.
 
 The design of \ac{name} relies on several important observations. First,
-\emph{our near-complete view of the modern Web \ac{pki} can be used as a low-effort channel
+\emph{our near-complete view of the modern Web \ac{pki} can serve as a low-effort channel
 for domains to communicate information}. Fast, Internet-wide
 scanning~\cite{durumeric2013zmap} and browser-based Web \ac{pki}
-standards~\cite{sleevi2016requiring} have resulted in large databases of
+standards~\cite{sleevi2016requiring} have produced large databases of
 \ac{tls} certificates~\cite{durumeric2015search}. 
 %and these databases have already been used for insights~\cite{vandersloot2016towards} and
 %improvements~\cite{larisch2017crlite} in the Web \ac{pki}. 
-\ac{name} uses this view of the Web \ac{pki} to obtain domain information, including \ac{ca}
+\ac{name} uses this view to obtain domain information, including \ac{ca}
 information and public keys, without domains taking any additional action
 beyond obtaining certificates (which they already do). 
 %Therefore, \ac{name}
@@ -98,12 +98,12 @@ signaling information can be communicated as an extension to the standard
 \ac{tls} handshake. Previous approaches have required operational changes to
 domains~\cite{rfc4033, rfc6698} or significant storage overhead
 (\autoref{sec:background:https}). \ac{name} uses a global view of the Web
-\ac{pki} in conjunction with data compression techniques and compact data
+\ac{pki} along with data compression techniques and compact data
 structures to locally store at each client a succinct summary of nearly the
 \emph{entire} set of domains that deploy \ac{https}. In our prototype, we
-summarize over 64 million domain names with less than 150~MB of storage (and
-Section~\ref{sec:evaluation:implementation} discusses additional tradeoffs that
-can reduce this overhead to less than 35~MB).
+summarize over 64 million domain names with $<$150~MB of storage (and
+Section~\ref{sec:evaluation:implementation} discusses tradeoffs that
+reduce this overhead to $<$35~MB).
 
 Third, \emph{any domain that supports \ac{https} has obtained a certificate
 using an existing issuance process, and can use this process to obtain
@@ -114,7 +114,7 @@ only the \emph{number} of independent chains that denote an authoritative key,
 \ac{name} makes it easy for a domain to recover from the loss or compromise of a
 private key or from a misconfiguration. The domain simply obtains an equal or
 greater number of chains for a new public key to establish it as authoritative.
-Moreover, the global view we have of the Web \ac{pki} allows \ac{name} to
+Moreover, the CAPS' global view allows it to
 \emph{automatically} keep this number up to date with no changes to current
 certificate issuance processes and no additional action from domains. Even with
 this flexibility, authoritative public keys in \ac{name} are hard to forge: if a
