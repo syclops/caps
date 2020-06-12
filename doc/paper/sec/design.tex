@@ -15,7 +15,6 @@ would become a standard browser component.
 \end{figure}
 
 \paragraph{Goals}
-
 \ac{name} primarily aims to enable a smooth transition from the Web's existing
 \ac{pki} to an \emph{improved \ac{pki}} (which can range from an extension of
 the existing \ac{pki} to a new \ac{pki} altogether). We assume that during this
@@ -31,7 +30,6 @@ minimize the changes to existing interactions between clients, domains, and
 \acp{ca}.
 
 \paragraph{Adversary Model}
-
 In designing \ac{name}, we consider a \iac{mitm} adversary. 
 %We assume the adversary has access to the
 %signing keys for $n$ \acp{ca} and can thus issue and revoke arbitrary
@@ -42,7 +40,6 @@ intercept, drop, or modify all messages sent among all entities described
 below. We assume that the adversary cannot break standard cryptographic primitives.
 
 \paragraph{Architecture}
-
 \autoref{fig:overview} illustrates the \ac{name} architecture and how \ac{name}
 achieves the goals stated above. Since \ac{name} transitions from the current
 Web \ac{pki}, it necessarily includes the entities in the current \ac{pki}:
@@ -263,7 +260,6 @@ make an additional design change, \emph{path compaction},
 to our \ac{dafsa} representation that further reduces its size.
 
 \paragraph{Formal \ac{dafsa} Definition}
-
 To precisely describe these changes, we begin by presenting a formal framework
 to describe \acp{dafsa}. Formally, \iac{dafsa} is a tuple $(\symbols, \states,
 \initstate, \transfunc, \finalstates)$ where
@@ -303,7 +299,6 @@ Otherwise, if
 then $\query(\hostname) = \onecert$. Otherwise, $\query(\hostname) = \nohttps$.
 
 \paragraph{\ac{dafsa} Representation}
-
 We begin by building the \ac{dafsa} as described in previous
 work~\cite{daciuk2000incremental} (\autoref{fig:dafsa}). Though this previous work assumes transitions
 based on a single character, we consider the possibility of multi-character
@@ -326,7 +321,6 @@ We thus focus on leveraging patterns in the underlying data to minimize the
 overall size of the \ac{dafsa} representation.
 
 \paragraph{Path Compaction}
-
 %\begin{figure}
   %\centering
   %\includegraphics[width=\linewidth]{fig/dafsa_compact}
@@ -334,7 +328,6 @@ overall size of the \ac{dafsa} representation.
   %compacted. The binary representation is more succinct than its counterpart.}
   %\label{fig:dafsa_compact}
 %\end{figure}
-
 We extend the design of prior work with \emph{path compaction}, which
 minimizes the \ac{dafsa} representation by reducing the overall number of
 transitions. Intuitively, path compaction removes a connected set of states from

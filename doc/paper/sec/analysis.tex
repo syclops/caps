@@ -75,7 +75,6 @@ of these parties and how they may affect the security of \ac{name}, along with
 potential mitigations.
 
 \paragraph{\acp{ca}}
-
 Historically, all publicly known CA failures have been singletons (i.e.,
 separated in time and causation from other failures), but a systemic flaw may
 allow an adversary to compromise many \acp{ca} at once. 
@@ -85,7 +84,6 @@ could issue revocations of the affected certificates or \ac{ca} keys using
 existing methods.
 
 \paragraph{Public Logs}
-
 A misbehaving public log may record a fraudulently-issued certificate, refuse
 to include a certificate in its database, or attempt to change details of
 previously logged certificates. \ac{ct} expects auditors (a role anyone can adopt) to
@@ -98,7 +96,6 @@ auditor. Once detected, browsers and log aggregators can simply ignore the
 misbehaving log.
 
 \paragraph{Log Aggregators}
-
 A log aggregator's private key may become lost or stolen, allowing it to
 provide incorrect policy information or signaling sets. A successful \ac{mitm}
 attack would require $\numlas - 1$ aggregators to send incorrect policy
@@ -119,7 +116,6 @@ availability, doing the same for log aggregators can minimize the risk of these
 failures.
 
 \paragraph{Browser Vendors}
-
 A misbehaving browser vendor can ship a malicious version of a browser to
 clients, and we consider this failure mode outside of the scope of \ac{name}. A
 malicious browser can arbitrarily deviate from \ac{tls} or \ac{name}, insert
@@ -132,7 +128,6 @@ its own root certificates, or display arbitrary pages.
 %to stop these powerful client-side adversaries.
 
 %\paragraph{Resource Exhaustion}
-
 %Log aggregators rely on public logs to obtain a complete view of certificates in
 %the Web \ac{pki}. However, given the open nature of many of these logs (i.e.,
 %the fact that many parties can submit or otherwise make
