@@ -243,10 +243,9 @@ overhead (\autoref{sec:evaluation:performance}).
 \begin{figure}
   \centering
   \includegraphics[width=\linewidth]{fig/dafsa_combined}
-  \caption{The first stages of the \ac{dafsa} construction process used in
-    \ac{name}. After generating the final \ac{dafsa} shown above, we use
-    heuristic methods to generate a final \ac{dafsa} in a way that aims to
-  minimize the size of the binary representation.}
+  \caption{The first stages of our \ac{dafsa} construction. 
+           Each stage modifies the \ac{dafsa} to ultimately minimize the 
+           the size of its binary representation.}
   \label{fig:dafsa}
 \end{figure}
 
@@ -306,7 +305,7 @@ then $\query(\hostname) = \onecert$. Otherwise, $\query(\hostname) = \nohttps$.
 \paragraph{\ac{dafsa} Representation}
 
 We begin by building the \ac{dafsa} as described in previous
-work~\cite{daciuk2000incremental}. Though this previous work assumes transitions
+work~\cite{daciuk2000incremental} (\autoref{fig:dafsa}). Though this previous work assumes transitions
 based on a single character, we consider the possibility of multi-character
 symbols and thus our symbol set consists of strings of length up to 253
 characters:\footnote{Recall that DNS names can be a maximum of 253 characters.}

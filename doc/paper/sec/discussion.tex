@@ -1,15 +1,15 @@
 \section{Deployment Considerations}
 \label{sec:discussion}
 
-We now discuss the deployment of \ac{name} in practice. Specifically, we
-discuss possible candidates for log aggregators and the expected performance of
-\ac{name} in the modern Web.
+We now discuss the deployment of \ac{name} in practice. 
+%Specifically, we discuss possible candidates for log aggregators and the expected performance of
+%\ac{name} in the modern Web.
 
 \paragraph{Candidates for Log Aggregators}
 
 Our design of \ac{name} does not require specific entities to serve as log
 aggregators. However, from our analysis in \autoref{sec:analysis:weaknesses},
-we conclude that log aggregators should have high availability and widely
+we conclude that log aggregators should have high availability and be widely
 known. We believe that browser vendors or public logs would be particularly
 suited for these roles. Both already take an active role in ``policing'' the
 Web PKI: browser vendors can use updates to avoid known compromised
@@ -25,23 +25,20 @@ proofs.
 
 The use of \ac{https} has increased significantly over the past years
 (\autoref{sec:evaluation:https}), in part due to the advent of services such as
-Let's Encrypt. Despite this increase, we anticipate the manageable level of
-storage and memory overhead of the \ac{name} signaling set in the future for
+Let's Encrypt. Despite this increase, we anticipate the 
+storage and memory overhead of the \ac{name} signaling set to remain manageable for
 three reasons. First, \autoref{tab:sample} suggests a sublinear growth in the
 size of the signaling set relative to the number of names. Second, despite
 \autoref{fig:count:names} showing a large increase in names for which
 certificates are being issued, \autoref{fig:updates} suggests that the growth
 of names that are accessible on the public Web is much slower. Finally, the
-previous points do not take into account the falling cost of disk space and
-memory over time, which it even more likely that this overhead will remain
-manageable.
+cost of disk space and memory falls over time offsetting CAPS's overhead.
 
-An increasing number of Web clients are now mobile devices with limited
-computational, memory, and storage resources. While there are performance
-tradeoffs that we hope to explore in future work, we can still feasibly deploy
-\ac{name} on these devices. As we describe in
-\autoref{sec:evaluation:implementation}, smaller forms of the signaling set can
-provide limited protection against \ac{mitm} attacks on resource-constrained
-devices. Moreover, \autoref{fig:numchain} shows, the added latency of \ac{name}
+Many Web clients are now mobile devices with limited
+computational, memory, and storage resources, but we can still deploy
+\ac{name} on these devices. 
+Smaller forms of the signaling set (\autoref{sec:evaluation:implementation}) can
+provide some protection against \ac{mitm} attacks on resource-constrained
+devices. Moreover, \autoref{fig:numchain} shows the added latency of \ac{name}
 is small compared to the overall latency, and is mostly due to validating
 additional certificate chains or policy proofs.

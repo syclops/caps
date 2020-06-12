@@ -53,33 +53,35 @@ Systems that do prevent unauthorized certificate issuance will
 \end{inparaenum}
 
 To address these shortcomings, we propose \ac{name}, a system that provides a
-modest roadmap for transitioning to a more resilient Web \ac{pki}. Compared to
-previous work, \ac{name} provides similar resilience against \ac{mitm} attacks
-while also providing an improved incremental deployment strategy. Interactions
+modest roadmap for transitioning to a more resilient Web \ac{pki}. 
+In \ac{name}, domains can take simple steps to protect themselves from
+\ac{mitm} attacks in the presence of one or more misbehaving \acp{ca}.
+\ac{name} also provides an incremental deployment strategy. Interactions
 between domains and \acp{ca} remain unchanged in the vast majority of cases, and
 simple misconfigurations do not cause domains to become inaccessible. \ac{name}
 provides immediate benefits to domains and clients who deploy it, but does so in
 a way that does not penalize non-deploying domains. \ac{name} also protects
 clients from downgrade attacks such as \emph{\ac{tls}
-stripping}~\cite{marlinspike2009new} during deployment. Finally, the bulk of the
-deployment effort of \ac{name} can occur at a small handful of participants,
+stripping}~\cite{marlinspike2009new}. Finally, the bulk of the
+deployment effort of \ac{name} occurs at a small handful of participants,
 namely browser vendors and public logs, who are better equipped to make these
 changes than domains or \acp{ca} that have historically been reluctant to deploy
 major changes.
 
 The design of \ac{name} relies on several important observations. First,
-\emph{our near-complete view of the modern Web \ac{pki} can be used as a channel
+\emph{our near-complete view of the modern Web \ac{pki} can be used as a low-effort channel
 for domains to communicate information}. Fast, Internet-wide
 scanning~\cite{durumeric2013zmap} and browser-based Web \ac{pki}
 standards~\cite{sleevi2016requiring} have resulted in large databases of
-\ac{tls} certificates~\cite{durumeric2015search}, and these databases have
-already been used for insights~\cite{vandersloot2016towards} and
-improvements~\cite{larisch2017crlite} in the Web \ac{pki}. \ac{name} can use
-this view of the Web \ac{pki} to obtain domain information, including \ac{ca}
-information and public keys, without domains having to take any additional action
-beyond obtaining a certificate (which they already do). Therefore, \ac{name}
-leverages these databases to free domains and \acp{ca} from further changes to
-their operational procedures.
+\ac{tls} certificates~\cite{durumeric2015search}. 
+%and these databases have already been used for insights~\cite{vandersloot2016towards} and
+%improvements~\cite{larisch2017crlite} in the Web \ac{pki}. 
+\ac{name} uses this view of the Web \ac{pki} to obtain domain information, including \ac{ca}
+information and public keys, without domains taking any additional action
+beyond obtaining certificates (which they already do). 
+%Therefore, \ac{name}
+%leverages these databases to free domains and \acp{ca} from further changes to
+%their operational procedures.
 
 Second, \emph{a viable deployment strategy must signal both deployment of
 \ac{https} and deployment of \ac{pki} enhancements to clients}. The Web \ac{pki}
@@ -105,7 +107,7 @@ can reduce this overhead to less than 35~MB).
 
 Third, \emph{any domain that supports \ac{https} has obtained a certificate
 using an existing issuance process, and can use this process to obtain
-certificates from further \acp{ca}}. Domains in \ac{name} can thus use multiple
+certificates from further \acp{ca}}. Domains in \ac{name} use multiple
 independent certificate chains for the same public key to establish one or more
 ``authoritative'' public keys (\autoref{sec:design:policy}). By communicating
 only the \emph{number} of independent chains that denote an authoritative key,
@@ -121,7 +123,7 @@ least} $n$ certificates for the same public key to carry out \iac{mitm} attack.
 
 Finally, \emph{authoritative public keys benefit both current and future Web
 \acp{pki}}. These keys can be used on their own to provide greater confidence in
-a site's identity, or they can be used to authenticate richer policies as
+a site's identity, or they can be used to authenticate richer policies, as
 proposed in prior work~\cite{basin2014arpki, szalachowski2014policert}.
 \ac{name} can thus simplify the deployment of these proposed systems, whose
 existing deployment and certificate issuance strategies rely on complex

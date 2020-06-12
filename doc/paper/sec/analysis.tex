@@ -7,7 +7,7 @@ of \acp{ca} or log aggregators to mount a successful \ac{mitm} attack, and
 informally argue that it holds given our adversary model. We then describe
 potential weaknesses of \ac{name} not covered by our security claim, and argue
 why these weaknesses are unlikely to be used in practice, able to be mitigated
-by simple countermeasures, or out of the scope of \ac{name}.
+by simple countermeasures, or out of scope for \ac{name}.
 
 \subsection{Main Security Claim}
 \label{sec:analysis:informal}
@@ -78,9 +78,8 @@ potential mitigations.
 
 Historically, all publicly known CA failures have been singletons (i.e.,
 separated in time and causation from other failures), but a systemic flaw may
-allow an adversary to compromise many \acp{ca} at once. Beyond domains being
-able to prepare for this possibility with an appropriately high value of
-$\policy$, such a widespread compromise would be quickly detected by public
+allow an adversary to compromise many \acp{ca} at once. 
+Such a widespread compromise would be quickly detected by public
 logs and certificate scanning services. Subsequently, the browsers or \acp{ca}
 could issue revocations of the affected certificates or \ac{ca} keys using
 existing methods.
@@ -89,9 +88,9 @@ existing methods.
 
 A misbehaving public log may record a fraudulently-issued certificate, refuse
 to include a certificate in its database, or attempt to change details of
-previously logged certificates. \ac{ct} proposes several auditor roles that
-monitor logs for any such misbehavior, with anyone being able to take on this
-role~\cite{rfc6962}. Recording fraudulent certificates may cause a log
+previously logged certificates. \ac{ct} expects auditors (a role anyone can adopt) to
+monitor logs for any such misbehavior~\cite{rfc6962}. 
+Recording fraudulent certificates may cause a log
 aggregator to compute a policy value that is too high, making a domain
 inaccessible in \ac{name}. However, this also requires the failure of $\policy$
 \acp{ca} to mount \iac{mitm} attack, and would be quickly detected by an
@@ -124,12 +123,13 @@ failures.
 A misbehaving browser vendor can ship a malicious version of a browser to
 clients, and we consider this failure mode outside of the scope of \ac{name}. A
 malicious browser can arbitrarily deviate from \ac{tls} or \ac{name}, insert
-its own root certificates, or display arbitrary pages. Even with \ac{name}, an
-adversary-controlled browser can also modify queries or responses of the
-signaling set or carry out \ac{tls} stripping attacks. While some
-countermeasures such as OS-level protections may protect the client, we suggest
-that defenses against PKI failures (whether \ac{name} or others) are unlikely
-to stop these powerful client-side adversaries.
+its own root certificates, or display arbitrary pages. 
+%Even with \ac{name}, an
+%adversary-controlled browser can also modify queries or responses of the
+%signaling set or carry out \ac{tls} stripping attacks. While some
+%countermeasures such as OS-level protections may protect the client, we suggest
+%that defenses against PKI failures (whether \ac{name} or others) are unlikely
+%to stop these powerful client-side adversaries.
 
 %\paragraph{Resource Exhaustion}
 
