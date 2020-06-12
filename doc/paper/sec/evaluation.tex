@@ -17,16 +17,16 @@ Below, we evaluate the performance of \ac{name} in our prototype.
 %accurate view of the Web \ac{pki}, namely, the set of domains accessible over
 %HTTPS.
 
-We can obtain a view of the Web \ac{pki} using data from public logs (\autoref{sec:design:signaling}). 
-Specifically, we obtain public-key
+We can obtain a view of the Web \ac{pki} using data from public logs
+(\autoref{sec:design:signaling}). Specifically, we obtain public-key
 certificates from Censys~\cite{durumeric2015search} and logs in
 \ac{ct}~\cite{rfc6962}. From Censys, we collected 1,026 scans of the IPv4
-address space from September 12, 2015 to July 3, 2018.
-From \ac{ct}, we collected all entries from known \ac{ct} logs that were not
-disqualified or unreachable as of July 3,
+address space from September 12, 2015 to July 3, 2018. From \ac{ct}, we
+collected all entries from known \ac{ct} logs that were not disqualified or
+unreachable as of July 3,
 2018,\footnote{\url{https://www.certificate-transparency.org/known-logs}} which
-totaled approximately 1.74B certificates from 26 logs from
-March 26, 2013 to July 3, 2018.
+totaled approximately 1.74B certificates from 26 logs from March 26, 2013 to
+July 3, 2018.
 
 %\begin{figure*}
   %\centering
@@ -272,12 +272,12 @@ We experimented with the full set of names.
 
 \autoref{fig:updates} shows the results. The size of added and deleted names is
 slowly increasing over time, with the set of added names consistently being
-larger than the set of deleted names (Appendix \steve{TODO}). Given the
-relatively modest sizes of these sets compared to the full signaling
-set, the most space-efficient method for representing and transmitting these
-updates to clients is a zpaq-compressed archive of the raw text file of names
-rather than \iac{dafsa}-based representation. This method of transmission is
-also advantageous since clients can simply add the set of added names to their
+larger than the set of deleted names (\autoref{sec:updates}). Given
+the relatively modest sizes of these sets compared to the full signaling set,
+the most space-efficient method for representing and transmitting these updates
+to clients is a zpaq-compressed archive of the raw text file of names rather
+than \iac{dafsa}-based representation. This method of transmission is also
+advantageous since clients can simply add the set of added names to their
 existing \ac{dafsa}, then build (and subsequently add to) a new \ac{dafsa} for
 the set of deleted names. Our results show that updates are typically less than
 3~MB per week or $\sim$439~KB/day; by comparison, downloading the Google
@@ -395,7 +395,7 @@ extra data. A total of 15385 TLS connections were established for our testing:
 5768 over WAN, 9617 over localhost.
 
 Our results were similar in each case, with a representative example shown in
-\autoref{fig:numchain} (others in Appendix \steve{TODO}). In comparison to the
+\autoref{fig:numchain} (others in \autoref{sec:overhead}). In comparison to the
 mean time elapsed, there is an approximately 5\% increase in connection
 establishment time: an average of 11ms longer for WAN and 1.2ms for localhost.
 Since our \ac{tls} extension does not add any extra round-trips to the

@@ -1,34 +1,112 @@
-\section{Additional Figures}
+\section{Independent Certificate Chains}
+\label{sec:independence}
 
-\steve{This section title will change and is just a placeholder for now.}
+In \autoref{sec:design:policy} we describe how we can use a graph of certificate
+fingerprints to compute the policy value for a domain. Specifically, we compute
+the policy value as the minimum number of \ac{ca} private keys that would need
+to be compromised to create an independent set of certificate chains for an
+adversary's public key. However, this value does not necessarily result in truly
+independent certificate chains, as many \acp{ca} control multiple private keys.
+If a single \ac{ca} with poor issuance practices possesses multiple private
+keys, an adversary may gain fraudulent certificates from multiple private keys
+in a single attack. If these certificates are in multiple independent chains,
+then an adversary may be able to mount \iac{mitm} attack.
+
+One solution to this vulnerability is to use the certificate's issuer
+organization name to differentiate \acp{ca}, but the success of this approach
+depends on the \ac{ca} itself. As we describe in
+\autoref{sec:evaluation:updates}, we found certificates that are likely from the
+same issuer, but have slightly different issue organization names. Furthermore,
+one \acp{ca} may own another and use similar security practices. If these
+\acp{ca} do not certify one another, their certificate chains may be considered
+independent by log aggregators. While we leave deeper exploration of this area
+to future work, we can easily configure \ac{name} to determine the independence
+of certificate chains by the issuer key or organization name, and this is likely
+to provide sufficient security for the vast majority of cases.
+
+\section{Certificate Issuance Trends}
+\label{sec:certificates}
+
+In \autoref{sec:evaluation:https}, we computed the set of domain names that
+could potentially\footnote{we say ``potentially'' here because as we point out
+in \autoref{sec:evaluation:https}, the presence of a certificate does not
+necessarily mean the name is publicly reachable via \ac{https}.} deploy
+\ac{https} over time. We extracted this by computing an ``active set'' of
+certificates on each day between March 26, 2013 and July 3, 2018.
 
 \begin{figure}
   \centering
-  \includegraphics[width=\linewidth]{fig/cert_count_valid}
+  \includegraphics[width=0.8\linewidth]{fig/cert_count_valid}
   \caption{Number of unique certificates seen by Censys and \ac{ct} over time.}
-  \label{fig:count:certs}
+  \label{fig:certs}
+\end{figure}
+
+\autoref{fig:certs} shows that for the most part, the trend in the number of
+active certificates on a given day matches the trend in the number of active
+domain names as seen in \autoref{fig:count:names}. There does, however, seem to
+be slightly more churn in the number of active certificates over time,
+particularly during 2017, in which the usage of Let's Encrypt was becoming
+increasingly widespread. We point out that the number of names is almost
+consistently greater than the number of certificates due to the fact that
+certificates can contain multiple names (and many popular sites such as Google
+have certificates with all of their domain names).
+
+\section{Updates to the Signaling Set}
+\label{sec:updates}
+
+In \autoref{sec:evaluation:updates}, we showed that the size of updates to the
+signaling set were slowly increasing over time. To better understand how the
+size of the signaling set may change over time, we also considered the additions
+and deletions to the signaling set separately.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.95\linewidth]{fig/added_name_set_size}
+  \caption{Sizes of the set of added names over time in different
+  representations.}
+  \label{fig:updates:added}
 \end{figure}
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\linewidth]{fig/deleted_name_set_size}
+  \includegraphics[width=0.95\linewidth]{fig/deleted_name_set_size}
+  \caption{Sizes of the set of deleted names over time in different
+  representations.}
   \label{fig:updates:deleted}
-  \caption{Size of deleted names sets over time.}
 \end{figure}
+
+Figs.~\ref{fig:updates:added} and~\ref{fig:updates:deleted} show the sizes of
+these sets over time. We see that the set of added names is almost consistently
+larger than the set of deleted names, which matches the upward trend in the
+number of domain names in the Web \ac{pki} over time. We also note that
+beginning in 2017, in which Let's Encrypt issuance became more widespread, that
+the number of deleted names begins to trend upwards at a greater rate. This is
+likely due to the fact that Let's Encrypt certificates are issued for only 90
+days at a time, and the increased frequency in certificate expiration causes
+names to be purged from the active set at a greater rate.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\linewidth]{fig/sample}
-  \caption{Size of the signaling set in various representations when 
-           the names in the set are subsampled from the full set of names. 
-           The labels above each distinct value on the $x$-axis
-           denote the fraction of the full set that was sampled.}
+  \includegraphics[width=0.95\linewidth]{fig/sample}
+  \caption{Size of the signaling set given subsampling from the full set of
+  names. The labels above each distinct value on the $x$-axis denote the
+fraction of the full set that was sampled.}
   \label{fig:sample}
 \end{figure}
 
+Despite the increase in the number of names (and hence in the size of the
+signaling set) over time, we argued in \autoref{sec:discussion} that this
+increase would be outweighed by the sublinear growth of the signaling set size
+and falling cost of storage and memory. We can see the trend in the signaling
+set size especially well in \autoref{fig:sample}, a graphical representation of
+\autoref{tab:sample}.
+
+\section{Performance Overhead of CAPS}
+\label{sec:overhead}
+
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\linewidth]{fig/eval_tls_ext/0-time_elapsed_vs_num_proofs_requested}
+  \includegraphics[width=0.8\linewidth]{fig/eval_tls_ext/0-time_elapsed_vs_num_proofs_requested}
   \caption{Handshake latency versus the number of policy proofs sent by the
   domain. Error bars represent standard error.}
   \label{fig:numproofs}
@@ -36,7 +114,7 @@
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\linewidth]{fig/eval_tls_ext/2-time_elapsed_vs_num_certs_per_chain}
+  \includegraphics[width=0.8\linewidth]{fig/eval_tls_ext/2-time_elapsed_vs_num_certs_per_chain}
   \caption{Handshake latency versus the number of certificates per chain sent by the
   domain. Error bars represent standard error.}
   \label{fig:numcerts}
@@ -44,99 +122,23 @@
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\linewidth]{fig/eval_tls_ext/3-time_elapsed_vs_avg_chain_size}
+  \includegraphics[width=0.8\linewidth]{fig/eval_tls_ext/3-time_elapsed_vs_avg_chain_size}
   \caption{Handshake latency versus the average certificate chain size sent by the
   domain. Error bars represent standard error.}
   \label{fig:chainsize}
 \end{figure}
 
-The extra data sent in the \ac{name} handshake is directly dependent on the size
+In \autoref{sec:evaluation:performance}, we showed that the connection latency
+overhead in using \ac{name} is approximately 5\%. Figs.~\ref{fig:numproofs},
+\ref{fig:numcerts}, and~\ref{fig:chainsize} show this overhead given the number
+of policy proofs request, the number of certificates per chain, and the average
+size of each certificate chain, respectively. In almost every case, the variance
+in network latency resulted in error bars that far exceed the difference in
+latency between using the existing Web \ac{pki} and using \ac{name}.
+
+Given the way we structured the messages in our \ac{name} \ac{tls} extension,
+the extra data sent in the \ac{name} handshake is directly dependent on the size
 and number of certificate chains, as well as the number of proofs sent. In
 particular, the extra data sent from client to server is 1 byte, and the extra
-data sent from server to client is
-$(2 + (292 \times \text{\#proofs}) +
+data sent from server to client is $(2 + (292 \times \text{\#proofs}) +
 (\sum_{\text{chain}}\texttt{sizeof}(\text{chain})))$ bytes. 
-
-\paragraph{Data Source Integrity}
-
-\ac{name} relies on the integrity of the data sources (in our current prototype,
-Censys and \ac{ct}). Therefore, \iac{ca} who issues
-and publicizes an unauthorized certificate for a domain that does not deploy
-\ac{https} can cause the domain to be included in the signal set and thus render
-the domain inaccessible. This fragility effectively allows an adversary who controls
-one or more private CA keys to
-``poison the well'' that \ac{name} relies on, and execute a denial-of-service
-attack with just a single unauthorized certificate.
-
-To recover from such an attack, the
-affected domain could request that the \ac{ca} revoke the certificate if the
-\ac{ca} issued the certificate in error. If the \ac{ca} deliberately misissued
-the certificate, the browser vendor could treat the certificate as revoked
-(though such action is unlikely unless the domain is popular). The affected
-domain could also upgrade to \ac{https}, obtaining enough certificates to
-override the misissued certificate. 
-%In the event that the domain wishes to
-%remain without \ac{https}, we can allow domains to set a policy flag that
-%signals that the domain will communicate over HTTP. The domain, however, must
-%still send this policy and proof during connection establishment.
-
-Enhancements to certificate logs to mitigate situations such as this are ongoing. Some
-\ac{ct} logs, for example, only accept certificates from certain \acp{ca}, and
-nearly all of them perform some level of certificate validation, including
-checking whether a certificate is anchored in a known root certificate. We
-expect an attack that involves poisoning data sources in this way to be possible
-but rare and noticeable, and an attacker seeking to carry out \iac{mitm} in this way has a
-higher hurdle for the attack to succeed than in today's Web \ac{pki}.
-
-\paragraph{Increasing \ac{https} Adoption}
-
-In the past several years, Let's Encrypt and similar efforts to increase
-the use of \ac{https} in the Internet has caused a marked increase in the number
-of domain names served over \ac{tls}, as shown in
-\autoref{sec:evaluation:https}. Due to the structure of DNS, it is impossible to
-know how many domain names there are overall, and thus difficult to determine a
-ceiling for the number of names known to serve content over \ac{https}.
-Therefore, it is possible that the signaling set may grow to a size that is
-untenable for increasingly many clients.
-However, this may also be offset by the upward trend in available bandwidth
-(e.g., the upcoming move to 5G).
-We could also mitigate the memory and disk usage for clients by splitting the 
-signaling set into several \ac{dafsa} representations based 
-on a client's region or self-selected categories of interest.
-We also considered splitting the DAFSA based on popularity,
-but conversations with Mozilla indicate this approach is not palatable
-as it is seen as perpetuating inequality on the Web;
-hence any solution should ideally treat websites large and small 
-in an egalitarian fashion~\cite{privatecomm}.
-
-\paragraph{Future Work}
-
-One avenue of future exploration that is currently ongoing is \emph{transition
-compaction}, which aims to minimize our \ac{dafsa} representation by reducing
-the representation size of each transition. A transition in the representation
-consists of a symbol and destination state. We have found that in the current
-signaling set representation, the symbols and destination states had a
-long-tailed distribution. Thus by using variable-length encodings, we can reduce
-the overall size of each transition. One straightforward way to do so is via
-Huffman encoding, but the long-tailed distribution results in a Huffman
-dictionary whose size is significant enough to neutralize any space savings that
-would result. We are currently exploring heuristics by which we can select a
-subset of symbols to Huffman encode (such as ones that occur more than a
-threshold number of times). For destination states, we can assign an ordering of
-states in the \ac{dafsa} such that the difference to each destination state in
-the ordering is small, and we can then use integer encoding to represent the
-location of these states. We are currently exploring the possibility of using
-graph vertex separators to address this problem.
-
-%We also plan to examine the use of multiple \acp{dafsa}, collecting data on
-%domain names including relative popularity, region, and category. We can then
-%construct multiple \ac{dafsa} according to our existing approach, and evaluate
-%disk space, memory usage, and connection latency (particularly if we dynamically
-%load \acp{dafsa}). We note that some of the necessary data is available from services
-%as Alexa Web Information Services and DNS resolvers.
-
-Footnote from 4.2: For efficiency, the log aggregator can sign a subset of pairs
-each day, and have each client consider a signature valid for multiple update
-intervals. For example, the log aggregator could sign a third of the pairs each
-day, and clients could treat a signed, timestamp pair as valid for at least
-three days.
