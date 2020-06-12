@@ -4,7 +4,7 @@
 
 \begin{figure}
   \centering
-  \includegraphics[width=\linewidth]{fig/arch}
+  \includegraphics[width=.9\linewidth]{fig/arch}
   \caption{Overview of \ac{name} architecture (log auditors and monitors not
   shown). Dotted lines denote the browser and its components, and italic text
 denotes new entities or actions in \ac{name}.  As shown in the diagram,
@@ -239,7 +239,7 @@ overhead (\autoref{sec:evaluation:performance}).
 
 \begin{figure}
   \centering
-  \includegraphics[width=\linewidth]{fig/dafsa_combined}
+  \includegraphics[width=.9\linewidth]{fig/dafsa_combined}
   \caption{The first stages of our \ac{dafsa} construction. 
            Each stage modifies the \ac{dafsa} to ultimately minimize the 
            the size of its binary representation.}
@@ -428,13 +428,15 @@ aggregators again rely on the data used to build the signaling set.
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.9\linewidth]{fig/chain}
+  \includegraphics[width=0.85\linewidth]{fig/chain}
+  \vspace{-3mm}
   \caption{Sample certificate fingerprint graph. $A \rightarrow B$ indicates
     that a certificate with fingerprint $A$ is the authority public key for a
     certificate with fingerprint $B$. Though the leaf certificate
     $\texttt{6ac3c336}\ldots$ has four chains, the bolded fingerprints show that
     only two of the chains are independent.}
   \label{fig:chain}
+  \vspace{-3mm}
 \end{figure}
 
 A log aggregator uses this data to maintain an internal database with

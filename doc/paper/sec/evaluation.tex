@@ -45,7 +45,7 @@ March 26, 2013 to July 3, 2018.
 
 \begin{figure}
   \centering
-  \includegraphics[width=0.85\linewidth]{fig/name_count_valid}
+  \includegraphics[width=0.8\linewidth]{fig/name_count_valid}
   %\caption{Number of unique certificates and domain names in the Web \ac{pki} as seen by
   %Censys and \ac{ct}.}
   \caption{Number of unique names (including hostnames and wildcard names) seen
@@ -119,6 +119,7 @@ sizes.
 \input{table/signaling}
 
 \begin{table}[tbp]
+  \small
   \centering
   \caption{Size (on-disk or in transit) of \ac{name} signaling set on
     July 3, 2018 (\numnames{} names) with various compression approaches. The
@@ -187,6 +188,7 @@ best-case memory usage in \ac{name}) and the size of the zpaq-compressed
 
 \begin{table}[tbp]
   \centering
+  \small
   \caption{Size of the signaling set in various representations when the names
   in the set are subsampled from the full set of names.}
   \begin{tabular}{|lccccc|}
@@ -349,7 +351,7 @@ almost nonexistent in practice.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.9\linewidth]{fig/eval_tls_ext/1-time_elapsed_vs_num_chains_sent}
+  \includegraphics[width=0.8\linewidth]{fig/eval_tls_ext/1-time_elapsed_vs_num_chains_sent}
   \caption{Handshake latency vs.\@ the number of certificate chains sent by the
   domain. Error bars are standard error.}
   \label{fig:numchain}
