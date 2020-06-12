@@ -1,13 +1,13 @@
 \section{Security Analysis}
 \label{sec:analysis}
 
-In this section, we analyze the security that \ac{name} provides. We begin with
-our main security claim, that an adversary must compromise a threshold number
-of \acp{ca} or log aggregators to mount a successful \ac{mitm} attack, and
-informally argue that it holds given our adversary model. We then describe
-potential weaknesses of \ac{name} not covered by our security claim, and argue
-why these weaknesses are unlikely to be used in practice, able to be mitigated
-by simple countermeasures, or out of scope for \ac{name}.
+We analyze the security of \ac{name}, beginning with
+our main security claim: an adversary must compromise a threshold number
+of \acp{ca} or log aggregators to mount a successful \ac{mitm} attack.
+%, and informally argue that it holds given our adversary model. 
+We then describe potential weaknesses not covered by our security claim.
+%, and argue why these weaknesses are unlikely to be used in practice, able to be mitigated
+%by simple countermeasures, or out of scope for \ac{name}.
 
 \subsection{Main Security Claim}
 \label{sec:analysis:informal}
@@ -96,23 +96,23 @@ auditor. Once detected, browsers and log aggregators can simply ignore the
 misbehaving log.
 
 \paragraph{Log Aggregators}
-A log aggregator's private key may become lost or stolen, allowing it to
+A log aggregator's private key may be lost or stolen, causing it to
 provide incorrect policy information or signaling sets. A successful \ac{mitm}
 attack would require $\numlas - 1$ aggregators to send incorrect policy
 information. Clients can use a sufficiently high value of $\numlas$ to minimize
 this risk, and can also take a similar approach to verify signaling sets and
 their updates.
 
-A log aggregator may not provide updates in a timely manner, leading to policy
-values that are incorrect or mismatched with those of other aggregators, which
-in turn can make a domain inaccessible or provide insufficient protection
-against misbehaving \acp{ca}. Since domains provide policy proofs to clients,
-we expect that domains can quickly detect this delay and send the correct
+A log aggregator may not provide updates in a timely manner.
+%leading to policy values that are incorrect or mismatched with those of other aggregators, which
+%in turn can make a domain inaccessible or provide insufficient protection
+%against misbehaving \acp{ca}. 
+Since domains provide policy proofs to clients,
+domains can quickly detect this delay and send the correct
 number of certificates or fix the issue with the relevant aggregators. The
 delay may also affect signaling sets, but only if the policy value changes
-between $\nohttps$, $\onecert$, and $\multicert$ (0, 1, and $\ge 2$ independent
-chains, respectively). Finally, as logs themselves are held to a standard of
-availability, doing the same for log aggregators can minimize the risk of these
+between 0, 1, and $\ge 2$ independent chains. Finally, as logs are held to a standard of
+availability, doing the same for log aggregators minimizes the risk of these
 failures.
 
 \paragraph{Browser Vendors}

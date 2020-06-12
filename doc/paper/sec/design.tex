@@ -5,12 +5,14 @@
 \begin{figure}
   \centering
   \includegraphics[width=.9\linewidth]{fig/arch}
+  \vspace{-3mm}
   \caption{Overview of \ac{name} architecture (log auditors and monitors not
   shown). Dotted lines denote the browser and its components, and italic text
 denotes new entities or actions in \ac{name}.  As shown in the diagram,
 CAPS is currently implemented as a browser plug-in, but we envision it
 would become a standard browser component.
   }
+  \vspace{-3mm}
   \label{fig:overview}
 \end{figure}
 
@@ -30,18 +32,18 @@ minimize the changes to existing interactions between clients, domains, and
 \acp{ca}.
 
 \paragraph{Adversary Model}
-In designing \ac{name}, we consider a \iac{mitm} adversary. 
+We consider a \iac{mitm} adversary, 
 %We assume the adversary has access to the
 %signing keys for $n$ \acp{ca} and can thus issue and revoke arbitrary
 %certificates under these keys. 
-We assume that the adversary has full
+who has full
 control of the network during the TLS handshake; that is, the adversary can
 intercept, drop, or modify all messages sent among all entities described
-below. We assume that the adversary cannot break standard cryptographic primitives.
+below. We assume the adversary cannot break standard cryptographic primitives.
 
 \paragraph{Architecture}
 \autoref{fig:overview} illustrates the \ac{name} architecture and how \ac{name}
-achieves the goals stated above. Since \ac{name} transitions from the current
+achieves our goals. Since \ac{name} transitions from the current
 Web \ac{pki}, it necessarily includes the entities in the current \ac{pki}:
 \begin{compactitem}
 \item \emph{Domains} serve webpages to clients. Each domain has a name such as
@@ -66,7 +68,7 @@ assumptions, namely, by arguing that browser vendors should take on this
 responsibility.
 
 % Procedures from the current PKI
-As shown in \autoref{fig:overview}, many of the interactions between entities in
+As shown in \autoref{fig:overview}, most interactions between entities in
 the current \ac{pki} remain the same in \ac{name}. \acp{ca} remain entirely unchanged;
 they issue certificates
 to domains and log newly-issued certificates as they do in the current \ac{pki}
@@ -111,12 +113,12 @@ in the improved \ac{pki} to a handshake in the existing Web \ac{pki}, each log
 aggregator indicates which domains in its signaling set have a \ac{name} policy
 value greater than 1.
 
-When establishing an HTTPS connection with a server, clients can use the
-signaling set to determine whether a domain has a \ac{name} policy value that is
-exactly one or greater than one. In the former case, the client may connect to
+When establishing an HTTPS connection with a server, clients use the
+signaling set to if the domain has a \ac{name} policy value that is
+exactly one or greater than one. In the former case, the client connects to
 the domain using the standard \ac{tls} handshake, but in the latter case, the
 client requests policy information from the domain using a \ac{tls} extension
-similar to ones currently under consideration for IETF 
+similar to ones under consideration for IETF 
 standardization~\cite{rfc-extra-cert-1, rfc-extra-cert-2}.
 Domains obtain the information from log aggregators and forward it to the
 client; if a client receives and verifies a policy of $(\hostname, \policy)$, it
@@ -132,7 +134,6 @@ policy value is a pair $(\policy_{EV}, \policy_{!EV})$. For a given domain,
 \ac{name} will treat as authoritative a public key with the largest observed
 $\policy_{EV}$, with ties broken based on the largest value of $\policy_{!EV}$,
 which represents the policy value of all non-EV certificates for the domain.
-
 
 \section{CAPS Detailed Design}
 
@@ -240,9 +241,11 @@ overhead (\autoref{sec:evaluation:performance}).
 \begin{figure}
   \centering
   \includegraphics[width=.9\linewidth]{fig/dafsa_combined}
+  \vspace{-1mm}
   \caption{The first stages of our \ac{dafsa} construction. 
            Each stage modifies the \ac{dafsa} to ultimately minimize the 
            the size of its binary representation.}
+  \vspace{-5mm}
   \label{fig:dafsa}
 \end{figure}
 
@@ -317,7 +320,7 @@ represented by an encoding of the label $\sigma$ and the destination state $t$.
 We observe that in this construction, the overall number of outgoing
 transitions, as well as the size of the representation of each transition's
 label and destination state, strongly influence the size of the final bitvector.
-We thus focus on leveraging patterns in the underlying data to minimize the
+We thus leverage patterns in the underlying data to minimize the
 overall size of the \ac{dafsa} representation.
 
 \paragraph{Path Compaction}
@@ -374,12 +377,15 @@ Specifically, when removing \stateset, we transform the \ac{dafsa} $(\symbols,
 \sigma_{m-1}) = s_m$.
 
 Our goal is to select components that result in the greatest reduction in size.
-To determine the size reduction of removing a connected component, we must
-consider both the reduction in the number of edges in the \ac{dafsa} as well as
+To determine the impact of removing a connected component, we 
+consider both the reduction in the number of edges in the \ac{dafsa} and
 any changes to the Shannon entropy of the distributions of symbols and
-destination states in the \ac{dafsa}, as removing a component would cause these
+destination states in the \ac{dafsa}, as removing a component cause these
 distributions to change. To quantify this change, we define several helpful
 variables.
+
+\setlength{\abovedisplayskip}{3pt}
+\setlength{\belowdisplayskip}{3pt}
 
 For a set $X \subseteq\states$, let \numtrans{X} denote the set of transitions
 that start or end in $X$, that is, the number of triples $(s, t, \sigma)$ where
@@ -413,19 +419,6 @@ then selecting components consisting entirely of states that had one incoming
 transition and $\alpha$ outgoing transitions (or vice versa) yielded more modest
 but still nontrivial size reductions for $\alpha = 2$ and $\alpha = 3$.
 
-\subsection{Building the \ac{name} Policy Database}
-\label{sec:design:policy}
-
-The \ac{name} \emph{policy database} represents a binding between a name and a policy, that
-is, the number of independent certificate chains that a client
-should expect during a handshake with a server corresponding to the name.
-To construct and maintain this database, each log aggregator must keep track of
-the certificates and chains active for a domain at any given time. The log
-aggregators again rely on the data used to build the signaling set.
-%from public sources for this information,
-%which includes the data used to build the signaling set, as well as certificate
-%chains observed by public logs.
-
 \begin{figure}
   \centering
   \includegraphics[width=0.85\linewidth]{fig/chain}
@@ -438,6 +431,19 @@ aggregators again rely on the data used to build the signaling set.
   \label{fig:chain}
   \vspace{-3mm}
 \end{figure}
+
+\subsection{Building the \ac{name} Policy Database}
+\label{sec:design:policy}
+
+The \ac{name} \emph{policy database} represents a binding between a name and a policy, that
+is, the number of independent certificate chains a client
+should expect during a handshake with a server corresponding to the name.
+To construct and maintain this database, each log aggregator tracks 
+the certificates and chains active for a domain at any given time,
+using the data collected for the signaling set.
+%from public sources for this information,
+%which includes the data used to build the signaling set, as well as certificate
+%chains observed by public logs.
 
 A log aggregator uses this data to maintain an internal database with
 (many-to-many) maps of
@@ -460,20 +466,22 @@ then perform a series of simple join operations to map each name to the maximum
 policy number associated with a certificate containing the name.
 
 The log aggregator constructs this name-to-policy mapping each time it receives
-data from public sources (recall from \autoref{sec:design:signaling} that this
-occurs at regular, scheduled intervals). Once it has created the mapping, the
-log aggregator certifies the name--policy-value pairs in this mapping by
+data from public sources, which 
+occurs at regular, scheduled intervals (recall \autoref{sec:design:signaling}). 
+Once it has created the mapping, the
+log aggregator certifies the mapping's name--policy-value pairs by
 timestamping and signing them. For auditability, the log aggregators
 can additionally take an approach similar to that of logs in \ac{ct}, using a
 Merkle hash tree to store their policy proofs over time in a cryptographically
 verifiable, append-only fashion.
 
-With the policy databases of the log aggregators, a domain can provide the
+%With the policy databases of the log aggregators, 
+A domain can now provide the
 information necessary for clients to establish the domain's authoritative public
 key. The domain periodically downloads the latest \emph{policy proofs}, which
 are signed and timestamped name-policy pairs, from each of the log aggregators.
 For a name \hostname, a policy value \policy, a timestamp \timestamp, and a log
-aggregator \logagg, we specify the policy proof to be
+aggregator \logagg, the policy proof is 
 \begin{align}
   %data &= \logagg \concat \hostname \concat \timestamp \concat \policy \\
   \policyproof(\logagg, \hostname, \policy, \timestamp) &= 
@@ -517,15 +525,15 @@ In an initial deployment, we expect that typically $k=1$, but allowing the use
 of larger values for $k$ provides resilience against compromised log
 aggregators.  See Section~\ref{sec:analysis:weaknesses} for further discussion.
 
-The domain then sends back a ServerHello message that contains \numlas recent
-policy proofs from \numlas distinct log aggregators, as well as \numlas
-certificate chains, which allows the client to verify the domain's policy value
-and the certificate chains supporting this value. Formally, suppose a domain has
+The domain then sends back a ServerHello message that contains
+policy proofs from \numlas distinct log aggregators, as well as \policy
+certificate chains.  The client can then verify the domain's policy value
+and the certificate chains supporting it. Formally, suppose a domain has
 hostname \hostname and policy value \policy, and selects a set of log
 aggregators $\{\logagg_1, \ldots, \logagg_\numlas\}$. Let $\policyproofshort_i =
 \policyproof(\logagg_1, \hostname, \policy, \timestamp_i)$ for $1 \le i \le
 \numlas$, where $\timestamp_i$ is the timestamp of the policy proof from
-$\logagg_i$. Then, the domain sends the following back in the ServerHello
+$\logagg_i$. The domain sends the following back in the ServerHello
 extension message:
 \begin{equation}
   \{\policyproofshort_1, \ldots, \policyproofshort_\numlas, \certchain_1,
@@ -533,7 +541,7 @@ extension message:
 \end{equation}
 where $\certchain_j$ is a certificate chain for \hostname. In the extension
 message, the domain only sends $\policy - 1$ certificate chains because the
-remaining chains will be sent in the ServerCertificate message of the TLS
+remaining chain is sent in the ServerCertificate message of the TLS
 handshake.
 
 The client then checks that
@@ -547,13 +555,13 @@ The client then checks that
 \item each certificate chain is valid as specified in the X.509v3
   standard~\cite{rfc5280}.
 \end{inparaenum}
-If the above checks pass, the client can then continue with the standard TLS
+If the above checks pass, the client continues with the standard TLS
 handshake, which requires the client to verify an additional certificate chain
 in the ServerCertificate message and perform all other checks required by the
 \ac{tls} handshake protocol.
 
 While our current design uses a custom TLS extension, in the future, \ac{name}
-may instead be able to leverage recently proposed TLS
+may instead leverage recently proposed TLS
 extensions~\cite{rfc-extra-cert-1, rfc-extra-cert-2} designed to allow the
 transmission of additional certificates (primarily to facilitate content hosting
 by CDNs).  
@@ -580,6 +588,6 @@ Moreover, in \ac{name}, this bootstrapping can take place at any time during
 deployment. This means that in the case of a lost private key, a domain can
 simply obtain \policy new independent certificate chains, and in the case of a
 compromised private key, $\policy + 1$ new independent chains. This contrasts
-with previous proposals, which often rely on heavyweight processes that involve
-manual \ac{ca} intervention.
+with previous proposals, which often rely on heavyweight manual processes.
+%that involve manual \ac{ca} intervention.
 

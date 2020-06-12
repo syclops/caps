@@ -1,21 +1,21 @@
 \section{Evaluation}
 \label{sec:evaluation}
 
-Below, we evaluate the performance of \ac{name} in our prototype implementation.
-We first describe the domains represented by the signaling set,
-including how we identified these domains. Next, we compare different approaches
-and optimizations for representing the signaling set. Finally, we describe the
-performance effects of \ac{name} on connection establishment.
+Below, we evaluate the performance of \ac{name} in our prototype.
+%We first describe the domains represented by the signaling set,
+%including how we identified these domains. Next, we compare different approaches
+%and optimizations for representing the signaling set. Finally, we describe the
+%performance effects of \ac{name} on connection establishment.
 
 \subsection{Signaling Set Domains}
 \label{sec:evaluation:https}
 
-Before building a representation of the signaling set, we need to determine
-which domains belong in it. Moreover, to determine the long-term viability of
-our solution, we also need to understand how the size of this set of domains may
-change in the future. Addressing both of these problems requires a complete and
-accurate view of the Web \ac{pki}, namely, the set of domains accessible over
-HTTPS.
+%Before building a representation of the signaling set, we need to determine
+%which domains belong in it. Moreover, to determine the long-term viability of
+%our solution, we also need to understand how the size of this set of domains may
+%change in the future. Addressing both of these problems requires a complete and
+%accurate view of the Web \ac{pki}, namely, the set of domains accessible over
+%HTTPS.
 
 We can obtain a view of the Web \ac{pki} using data from public logs (\autoref{sec:design:signaling}). 
 Specifically, we obtain public-key
@@ -48,9 +48,11 @@ March 26, 2013 to July 3, 2018.
   \includegraphics[width=0.8\linewidth]{fig/name_count_valid}
   %\caption{Number of unique certificates and domain names in the Web \ac{pki} as seen by
   %Censys and \ac{ct}.}
+  \vspace{-2mm}
   \caption{Number of unique names (including hostnames and wildcard names) seen
   by Censys and \ac{ct} over time.}
   %\label{fig:count}
+  \vspace{-5mm}
   \label{fig:count:names}
 \end{figure}
 
@@ -86,9 +88,9 @@ described below.
 As described in \autoref{sec:design:signaling}, our motivation for using
 \iac{dafsa}-based representation of the signaling set was twofold: first, the
 representation has no false positives or negatives, and second, it can be
-searched in its compressed state, leading to a lower memory usage requirement
-for clients. To evaluate the effectiveness of these design decisions, we
-conducted an experiment to measure the space requirements for the signaling set
+searched in its compressed state, reducing client memory usage. 
+To evaluate the effectiveness of these design decisions, we
+measured the space requirements for the signaling set
 in various representations. We measured both the fully compressed size (used
 when transmitting the set to the client and when stored on disk) and the size in
 memory (when being used during certificate verification).
@@ -96,8 +98,7 @@ memory (when being used during certificate verification).
 In particular, we compared the plaintext representation of the signaling set (as
 of July 3, 2018) with a compressed representation using Bloom filters, the
 generic compression utility zpaq~\cite{zpaq},\footnote{While we tested
-  compression with other utilities, zpaq had the smallest size. Thus we used
-zpaq for the experiment to compare a near-best-case compression scenario.} and
+  compression with other utilities, zpaq had the smallest size.} and
 various configurations of our \ac{dafsa}-based representation. We also
 compressed the \ac{dafsa}-based representation using zpaq to find its size on
 disk and in transit. 
@@ -124,6 +125,7 @@ sizes.
   \caption{Size (on-disk or in transit) of \ac{name} signaling set on
     July 3, 2018 (\numnames{} names) with various compression approaches. The
     representation size in memory is not shown.}
+  \vspace{-2mm}
   \begin{tabular}{|lr|}
     \toprule
     \textbf{Representation} & \textbf{Size (MB)} \\
@@ -146,13 +148,14 @@ sizes.
     DAFSA w/ PC, zpaq (method 5, 2048 MiB blocks) & \fsapczpaqmedsize \\
     \bottomrule
   \end{tabular}
+  \vspace{-4mm}
   \label{tab:signaling}
 \end{table}
 
 The results are shown in \autoref{tab:signaling}. Starting from a plaintext
 corpus of over 1.5 GB, the various options all achieve impressive compression
 ratios. However, the results also indicate that to achieve a competitive size
-(i.e., \bloomlargesize{}~MB or less), Bloom filters would require an
+(i.e., \bloomlargesize{}~MB or less), Bloom filters require an
 unacceptably high false positive rate: one in every 10K sites would be falsely
 signaled as supporting \ac{https} and hence would be rendered inaccessible.
 While zpaq does not have any false positives or false negatives and yields
@@ -182,15 +185,17 @@ optimization would reduce disk and memory usage, but \ac{name} would
 no longer protect such clients from \ac{tls} stripping attacks targeting
 ``normal'' domains (those with a single certificate). To estimate clients'
 memory and disk usage in this case, we subsampled the full set of names and
-computed the size of the \ac{dafsa} with path compaction (which represents
-best-case memory usage in \ac{name}) and the size of the zpaq-compressed
+computed the size of the \ac{dafsa} with path compaction 
+%(which represents best-case memory usage in \ac{name}) 
+and the size of the zpaq-compressed
 \ac{dafsa} (which represents the best-case disk usage).
 
 \begin{table}[tbp]
   \centering
   \small
   \caption{Size of the signaling set in various representations when the names
-  in the set are subsampled from the full set of names.}
+  are subsampled from the full set of names.}
+  \vspace{-2mm}
   \begin{tabular}{|lccccc|}
     \toprule
     %\textbf{Fraction} & \textbf{Names} & \textbf{Uncompressed (MB)} &
@@ -205,6 +210,7 @@ best-case memory usage in \ac{name}) and the size of the zpaq-compressed
     \textbf{Compressed \ac{dafsa} (MB)} & 4.21 & 18.2 & 33.0 & 58.1 & 112 \\
     \bottomrule
   \end{tabular}
+  \vspace{-4mm}
   \label{tab:sample}
 \end{table}
 
@@ -215,8 +221,8 @@ usage. For example, even if 10\% of all HTTPS websites deployed additional
 certificates, the compressed DAFSA representation would require just 33~MB. Of
 course, at very low levels of adoption, the advantage of the \ac{dafsa}-based
 approach over a list of names decreases. This makes sense, given that the
-\ac{dafsa} takes advantage of common substrings (especially prefixes and
-suffixes) in a set.
+\ac{dafsa} takes advantage of common substrings.
+%(especially prefixes and suffixes) in a set.
 
 \subsection{Signaling Set and Certificate Updates}
 \label{sec:evaluation:updates}
@@ -237,14 +243,17 @@ suffixes) in a set.
 
 \begin{figure}[t]
   \centering
+  %\vspace{-2mm}
   \includegraphics[width=0.95\linewidth]{fig/combined_update_size}
+  \vspace{-2mm}
   \caption{Size of update set (added name set and deleted name set) in different
   formats over time.}
+  \vspace{-5mm}
   \label{fig:updates}
 \end{figure}
 
-Because the signaling set will be updated over time, we also carried out an
-experiment to determine the size of updates that will be sent to clients. An
+Because the signaling set will be updated over time, we 
+experimented to determine the size of updates sent to clients. An
 update to the signaling set consists of the names added to the signaling set
 since the most recent version, as well the names deleted due to certificate
 expiration or revocation. We computed the set of added and deleted names for our
@@ -257,14 +266,14 @@ sizes of these sets in four different representations:
 \item as a compressed zpaq archive containing the above \ac{dafsa}.
 \end{inparaenum}
 For each method, we used the variant that produced the smallest representation;
-for example, we used the zpaq method that produced the smallest archive (method
+e.g., we used the zpaq method that produced the smallest archive (method
 5 with 64 MiB blocks) and our \ac{dafsa} representation used path compaction.
 We experimented with the full set of names.
 
 \autoref{fig:updates} shows the results. The size of added and deleted names is
 slowly increasing over time, with the set of added names consistently being
 larger than the set of deleted names (Appendix \steve{TODO}). Given the
-relatively modest sizes of these sets compared to that of the full signaling
+relatively modest sizes of these sets compared to the full signaling
 set, the most space-efficient method for representing and transmitting these
 updates to clients is a zpaq-compressed archive of the raw text file of names
 rather than \iac{dafsa}-based representation. This method of transmission is
@@ -280,7 +289,8 @@ independent certificate chain (e.g., by switching \acp{ca}) for the same public
 key without revoking the old one, log aggregators may report a policy value one
 higher than the domain has, potentially affecting the signaling set and
 \ac{name} handshakes. We reviewed our database for these potential cases and
-found 72,034 names in our test set of names, or 0.11\% of the overall set. This
+found this affected only 0.11\% of the overall set. This
+%72,034 names in our test set of names, or 
 is a conservative upper bound, containing certificates that are almost certainly
 from the same issuer with slightly different issuer organization names, such as
 ``Gandi'' and ``GANDI SAS'', indicating that these failures are likely to be
@@ -352,9 +362,11 @@ almost nonexistent in practice.
 \begin{figure}[t]
   \centering
   \includegraphics[width=0.8\linewidth]{fig/eval_tls_ext/1-time_elapsed_vs_num_chains_sent}
+  \vspace{-3mm}
   \caption{Handshake latency vs.\@ the number of certificate chains sent by the
   domain. Error bars are standard error.}
   \label{fig:numchain}
+  \vspace{-4mm}
 \end{figure}
 
 To measure the performance of connection establishment in \ac{name}, we
@@ -387,8 +399,8 @@ Our results were similar in each case, with a representative example shown in
 mean time elapsed, there is an approximately 5\% increase in connection
 establishment time: an average of 11ms longer for WAN and 1.2ms for localhost.
 Since our \ac{tls} extension does not add any extra round-trips to the
-handshake, the time added is small, especially in comparison to random
-measurement fluctuations (i.e., the error bars shown).
+handshake, the time added is small compared to random
+measurement fluctuations (i.e., the error bars).
 
 %While this means
 %that some connections may result in a great deal of extra data sent, we can

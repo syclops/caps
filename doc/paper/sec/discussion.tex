@@ -11,9 +11,10 @@ aggregators. However, from our analysis in \autoref{sec:analysis:weaknesses},
 we conclude that log aggregators should have high availability and be widely
 known. We believe that browser vendors or public logs would be particularly
 suited for these roles. Both already take an active role in ``policing'' the
-Web PKI: browser vendors can use updates to avoid known compromised
-certificates or updates~\cite{langley2012revocation}, and logs already record
-certificates that can uncover \ac{ca} malfeasance~\cite{sleevi2015sustaining}.
+Web PKI. 
+%browser vendors can use updates to avoid known compromised
+%certificates or updates~\cite{langley2012revocation}, and logs already record
+%certificates that can uncover \ac{ca} malfeasance~\cite{sleevi2015sustaining}.
 Both offer high availability, with logs being held to a minimum of 99\%
 availability, minimizing the risk of synchronization issues. Finally, lists
 of major browser vendors and logs are already widely known, making it easy to
@@ -27,10 +28,10 @@ Let's Encrypt. Despite this increase, we anticipate the
 storage and memory overhead of the \ac{name} signaling set to remain manageable for
 three reasons. First, \autoref{tab:sample} suggests a sublinear growth in the
 size of the signaling set relative to the number of names. Second, despite
-\autoref{fig:count:names} showing a large increase in names for which
-certificates are being issued, \autoref{fig:updates} suggests that the growth
+\autoref{fig:count:names} showing a large increase in certified names, 
+\autoref{fig:updates} suggests that the growth
 of names that are accessible on the public Web is much slower. Finally, the
-cost of disk space and memory falls over time offsetting CAPS's overhead.
+cost of disk space and memory falls over time, offsetting CAPS's overhead.
 
 Many Web clients are now mobile devices with limited
 computational, memory, and storage resources, but we can still deploy
