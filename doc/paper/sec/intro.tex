@@ -53,7 +53,7 @@ Systems that do prevent unauthorized issuance
 \end{inparaenum}
 
 To address these shortcomings, we propose \ac{name}, a system that provides a
-modest roadmap for transitioning to a more resilient Web \ac{pki}. 
+practical roadmap for transitioning to a more resilient Web \ac{pki}. 
 In \ac{name}, domains can take simple steps to protect themselves from
 \ac{mitm} attacks in the presence of one or more misbehaving \acp{ca}.
 \ac{name} also provides an incremental deployment strategy. Interactions
@@ -139,7 +139,7 @@ free certificate services like Let's
 Encrypt,\footnote{\url{https://letsencrypt.org/}} the financial burden can be
 minimized as well. Furthermore, \ac{name} is an opt-in system, meaning that only
 domains who choose to obtain additional certificates incur a cost, and this cost
-is purely for purchasing the certificates. From its initial deployment,
+is mainly for purchasing the certificates. From its initial deployment,
 \ac{name} protects all domains from \ac{tls} stripping, and it allows
 non-deploying domains to coexist with deploying domains without enabling
 downgrade attacks on deploying domains.
@@ -149,10 +149,11 @@ In summary, we make the following contributions.
 \item We present the design of \ac{name}, which provides an incrementally deployable,
       backwards compatible path to a more resilient Web PKI.
 \item We show how a security policy based on the number of independent certificate chains
-      a domain can obtain strikes a good balance between automation, 
+      for a domain strikes a good balance between automation, 
       resilience to attack, and robustness to domain errors (including private key loss).
 \item We combine a global view of Web certificates with techniques from data
-      compression and compact data structures to succinctly signal \ac{https} deployment
+      compression and compact data structures to succinctly signal \ac{https}
+      deployment.
 \item We demonstrate via an evaluation of a prototype that the client-side overhead for
       \ac{name} in terms of storage, memory, and connection-establishment latency is
       modest. 

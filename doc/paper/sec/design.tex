@@ -32,7 +32,7 @@ minimize the changes to existing interactions between clients, domains, and
 \acp{ca}.
 
 \paragraph{Adversary Model}
-We consider a \iac{mitm} adversary, 
+We consider \iac{mitm} adversary, 
 %We assume the adversary has access to the
 %signing keys for $n$ \acp{ca} and can thus issue and revoke arbitrary
 %certificates under these keys. 
@@ -90,7 +90,7 @@ the server is in the signaling set; if it is, then the browser will refuse
 to engage in an HTTP connection.
 
 % Policy overview
-To allow domains more control over their public keys than in the current
+To give domains more control over their public keys than in the current
 \ac{pki}, log aggregators use data from public logs to construct a set of
 \emph{\ac{name} policies}, which allows each domain to establish one or more
 \emph{authoritative public keys} in the \emph{current} Web \ac{pki}. \ac{name}
@@ -111,10 +111,10 @@ both backed by three independent chains then both public keys are treated as
 authoritative for \hostname. To prevent an adversary from downgrading handshakes
 in the improved \ac{pki} to a handshake in the existing Web \ac{pki}, each log
 aggregator indicates which domains in its signaling set have a \ac{name} policy
-value greater than 1.
+value (\policy) greater than 1.
 
 When establishing an HTTPS connection with a server, clients use the
-signaling set to if the domain has a \ac{name} policy value that is
+signaling set to check if the domain has a \ac{name} policy value that is
 exactly one or greater than one. In the former case, the client connects to
 the domain using the standard \ac{tls} handshake, but in the latter case, the
 client requests policy information from the domain using a \ac{tls} extension
@@ -128,12 +128,13 @@ the connection.
 
 The current PKI actually supports three classes of certificates: standard
 domain-validated (DV) certificates, organization-validated (OV) certificates,
-and extended validation (EV) certificates. EV certificates require domains to
-undergo more rigorous screening than the other two. Hence, the actual \ac{name}
-policy value is a pair $(\policy_{EV}, \policy_{!EV})$. For a given domain,
-\ac{name} will treat as authoritative a public key with the largest observed
-$\policy_{EV}$, with ties broken based on the largest value of $\policy_{!EV}$,
-which represents the policy value of all non-EV certificates for the domain.
+and extended validation (EV) certificates~\cite{cabf2018guidelines}. EV
+certificates require domains to undergo more rigorous screening than the other
+two. Hence, the actual \ac{name} policy value is a pair $(\policy_{EV},
+\policy_{!EV})$. For a given domain, \ac{name} will treat as authoritative a
+public key with the largest observed $\policy_{EV}$, with ties broken based on
+the largest value of $\policy_{!EV}$, which represents the policy value of all
+non-EV certificates for the domain.
 
 \section{CAPS Detailed Design}
 
@@ -153,9 +154,8 @@ The signaling set represents
 \begin{inparaenum}
 \item a set of \acp{fqdn} (hereafter names) known to have deployed \ac{https}
   (by virtue of having a valid public-key certificate appear in a public log), and
-\item the subset of names that have adopted \ac{name} (by
-  virtue of having multiple independent certificate chains for the same public
-  key).
+\item the subset of names that have adopted \ac{name} (by virtue of having
+  multiple independent certificate chains (MC) for the same public key).
 \end{inparaenum}
 Formally, the signaling set is a pair $(\httpsset, \multicertset)$ where
 $\httpsset$ and $\multicertset$ are unordered sets of valid names in
@@ -188,9 +188,10 @@ using information from public sources, namely,
 \item revocation information retrieved from OCSP responders~\cite{rfc6960}.
 \end{inparaenum}
 The log aggregator updates this database regularly (e.g., each day), thus
-maintaining a list of certificates valid on a given day.\footnote{A certificate
-  is valid on a given day if the signature on the certificate is valid and if
-  that day falls in the certificate's validity period as defined by its
+maintaining a list of certificates valid on a given
+day.\footnote{\label{note:valid}A certificate
+  is valid on a given day if the signature on it is valid, it chains to a
+recognized root certificate store, and that day falls between the certificate's
 \texttt{notBefore} and \texttt{notAfter} fields~\cite{rfc5280}.}
 
 The log aggregator extracts the names from the currently valid
@@ -457,13 +458,13 @@ ensure that the log aggregator has a list of currently valid certificates. The
 log aggregator can then use the database to construct a mapping of names to
 policies. Specifically, the aggregator creates a graph of certificate
 fingerprints as shown in \autoref{fig:chain}, and computes the \emph{policy
-value}, the minimum number of \ac{ca} public keys that must be compromised for a
-\ac{name}-enabled browser to accept a fraudulent certificate for this site. The
-policy value can be computed using a straightforward approach (e.g., computing a
-minimal vertex separator), allowing the log aggregator to easily construct a
-mapping of certificate fingerprints to policy values. The log aggregator can
-then perform a series of simple join operations to map each name to the maximum
-policy number associated with a certificate containing the name.
+value} (\policy), the minimum number of \ac{ca} public keys that must be
+compromised for a \ac{name}-enabled browser to accept a fraudulent certificate
+for this site. The policy value can be computed using a straightforward approach
+(e.g., computing a minimal vertex separator), allowing the log aggregator to
+easily construct a mapping of certificate fingerprints to policy values. The log
+aggregator can then perform a series of simple join operations to map each name
+to the maximum policy number associated with a certificate containing the name.
 
 The log aggregator constructs this name-to-policy mapping each time it receives
 data from public sources, which 
@@ -485,13 +486,13 @@ aggregator \logagg, the policy proof is
 \begin{align}
   %data &= \logagg \concat \hostname \concat \timestamp \concat \policy \\
   \policyproof(\logagg, \hostname, \policy, \timestamp) &= 
-  \left\{data, \signature(\pk_{\logagg}^{-1}, data)\right\} \mbox{ where}
+  \left\{data, \signature_{\logagg}(data)\right\} \mbox{ where}
   \nonumber \\
   data &= \logagg \concat \pk_{\logagg} \concat \hostname \concat \timestamp \concat \policy
 \end{align}
 where $\pk_{\logagg}$ and $\pk_{\logagg}^{-1}$ denote respectively the public
-and private keys of \logagg, and $\signature(K, m)$ denotes a signature on $m$
-with private key $K$. The domain uses these proofs in the handshake described
+and private keys of \logagg, and $\signature_{\logagg}(m)$ denotes a signature on $m$
+with $\pk_{\logagg}^{-1}$. The domain uses these proofs in the handshake described
 below.
 
 \subsection{Connection Establishment}
@@ -570,17 +571,16 @@ by CDNs).
 \label{sec:design:bootstrapping}
 
 Once an authoritative public key for a domain has been established through the
-\ac{name} handshake, signatures made by the corresponding private key are useful 
-beyond simply improving the domain's security in the current \ac{pki}.
-In particular, a signature from the authoritative public key can be
-used to verify the binding between a domain and a richer set of policies. For
-example, in systems such as ARPKI~\cite{basin2014arpki} and
+\ac{name} handshake, signatures made by the corresponding private key are useful
+beyond simply improving the domain's security in the current \ac{pki}. In
+particular, a signature from the authoritative public key can be used to verify
+the binding between a domain and a richer set of policies. For example, in
+systems such as ARPKI~\cite{basin2014arpki} and
 PoliCert~\cite{szalachowski2014policert}, these policies can specify a set of
-\acp{ca} that are authorized to issue certificate for the domain, or even make
-the domain a \ac{ca} for itself by pinning specific public keys to the domain.
-In this way, the authoritative public key established in \ac{name} can be used
-to bootstrap confidence in these advanced policies while preventing downgrades
-to the old \ac{pki}.
+\acp{ca} that are authorized to issue certificates for the domain, or pin
+specific public keys to the domain. In this way, the authoritative public key
+established in \ac{name} can be used to bootstrap confidence in these advanced
+policies while preventing downgrades to the old \ac{pki}.
 
 This bootstrapping approach obviates the need for logs to directly store the
 policies, which can be quite large in these previously proposed systems.

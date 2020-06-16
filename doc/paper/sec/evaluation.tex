@@ -57,13 +57,14 @@ July 3, 2018.
 \end{figure}
 
 On each of these days, we consider an ``active set'' of certificates consisting
-of all certificates that were valid on that day and had an associated
-certificate chain rooted in one of the three major root certificate stores,
-determined by Apple, Microsoft, or Mozilla. In the Censys dataset, because we
-observed a great deal of churn (i.e., certificates disappearing and appearing in
-consecutive scans), we included a certificate in the active set from the time it
-was first observed in our data until its expiration. We then consider the number
-of unique, valid domain names to build the signaling set.
+of all certificates that were valid on that day\footnote{Recall our definition
+in \autoref{note:valid}.} and chained to one of the three major root certificate
+stores, determined by Apple, Microsoft, or Mozilla, respectively. In the Censys
+dataset, because we observed a great deal of churn (i.e., certificates
+disappearing and appearing in consecutive scans), we included a certificate in
+the active set from the time it was first observed in our data until its
+expiration. We then consider the number of unique, valid domain names to build
+the signaling set.
 
 \autoref{fig:count:names} shows the number of domain names observed by Censys,
 \ac{ct}, and both over time. We found that \ac{ct} observes vastly more
@@ -244,7 +245,7 @@ approach over a list of names decreases. This makes sense, given that the
 \begin{figure}[t]
   \centering
   %\vspace{-2mm}
-  \includegraphics[width=0.95\linewidth]{fig/combined_update_size}
+  \includegraphics[width=0.9\linewidth]{fig/combined_update_size}
   \vspace{-2mm}
   \caption{Size of update set (added name set and deleted name set) in different
   formats over time.}
