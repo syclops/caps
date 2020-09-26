@@ -1,11 +1,10 @@
 \section{Evaluation}
 \label{sec:evaluation}
 
-Below, we evaluate the performance of \ac{name} in our prototype.
-%We first describe the domains represented by the signaling set,
-%including how we identified these domains. Next, we compare different approaches
-%and optimizations for representing the signaling set. Finally, we describe the
-%performance effects of \ac{name} on connection establishment.
+Below, we evaluate the performance of \ac{name} in our prototype. All of the
+code for this section, including our prototype implementation of the core
+\ac{name} components and the scripts we used for testing, are available at
+\url{https://github.com/syclops/caps}.
 
 \subsection{Signaling Set Domains}
 \label{sec:evaluation:https}
@@ -294,8 +293,8 @@ found this affected only 0.11\% of the overall set. This
 %72,034 names in our test set of names, or 
 is a conservative upper bound, containing certificates that are almost certainly
 from the same issuer with slightly different issuer organization names, such as
-``Gandi'' and ``GANDI SAS'', indicating that these failures are likely to be
-almost nonexistent in practice.
+``Gandi'' and ``GANDI SAS'', indicating that much of even this small percentage
+of failures can be mitigated in a straightforward way.
 
 % BP: Why release once a week instead of every day?
 %Releasing signaling set updates each week means that some false positives and
@@ -392,8 +391,10 @@ with latency varying from 30 to 300 ms), as well as over the local loopback
 interface. The tests over the internet (\emph{WAN}) provide an indication of the
 effect of the extension on ``real world'' servers, whereas the \emph{localhost}
 tests provide a lower bound on time added due to sending/receiving/processing
-extra data. A total of 15385 TLS connections were established for our testing:
-5768 over WAN, 9617 over localhost.
+extra data. For all tests, we used a single active client at any given time to
+isolate the overhead added by \ac{name} from factors such as load balancing. A
+total of 15385 TLS connections were established for our testing: 5768 over WAN,
+9617 over localhost.
 
 Our results were similar in each case, with a representative example shown in
 \autoref{fig:numchain} (others in \autoref{sec:overhead}). In comparison to the

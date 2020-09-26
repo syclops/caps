@@ -1,20 +1,47 @@
 \input{setup/preclass}
 
-\documentclass[sigconf,anonymous]{acmart}
+\documentclass[sigconf]{acmart}
 
 \input{setup/main}
 
 \begin{document}
 
-%\acmConference[ACSAC '20]{Annual Computer Security Applications
-%Conference}{December 7--11}{Austin, TX, USA}
+\acmConference[ACSAC '20]{Annual Computer Security Applications
+Conference}{December 7--11}{Austin, TX, USA}
 
 \title{
   CAPS: Smoothly Transitioning to a More Resilient Web PKI
 }
-\author{
-  Submission \#53
+
+\author{Stephanos Matsumoto}
+\affiliation{
+  \institution{Olin College of Engineering}
 }
+\email{smatsumoto@olin.edu}
+
+\author{Jay Bosamiya}
+\affiliation{
+  \institution{Carnegie Mellon University}
+}
+\email{jaybosamiya@cmu.edu}
+
+\author{Yucheng Dai}
+\affiliation{
+  \institution{Carnegie Mellon University}
+}
+\email{yuchengd@andrew.cmu.edu}
+
+\author{Paul van Oorschot}
+\affiliation{
+  \institution{Carleton University}
+}
+\email{paulv@scs.carleton.ca}
+
+\author{Bryan Parno}
+\affiliation{
+  \institution{Carnegie Mellon University}
+}
+\email{parno@cmu.edu}
 
 % For acmart, the abstract needs to be declared before maketitle.
 \begin{abstract}
@@ -36,11 +63,18 @@
 \input{sec/discussion}
 
 \input{sec/conclusion}
-\newpage
+
+\begin{acks}
+We thank the anonymous reviewers for valuable feedback. Stephanos Matsumoto was
+supported, in part, by a CyLab Presidential Fellowship. Paul Van Oorschot is
+supported by an NSERC Discovery Grant. Work at Carnegie Mellon University was
+supported in part by the NSF under Grant No. CNS 1900996, the Alfred P. Sloan
+Foundation, and the CONIX Research Center, one of six centers in JUMP, a
+Semiconductor Research Corporation (SRC) program sponsored by DARPA.
+\end{acks}
+
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{bib}
-
-\newpage
 
 \appendix
 

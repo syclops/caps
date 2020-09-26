@@ -491,9 +491,9 @@ aggregator \logagg, the policy proof is
   data &= \logagg \concat \pk_{\logagg} \concat \hostname \concat \timestamp \concat \policy
 \end{align}
 where $\pk_{\logagg}$ and $\pk_{\logagg}^{-1}$ denote respectively the public
-and private keys of \logagg, and $\signature_{\logagg}(m)$ denotes a signature on $m$
-with $\pk_{\logagg}^{-1}$. The domain uses these proofs in the handshake described
-below.
+and private keys of \logagg, and $\signature_{\logagg}(m)$ denotes a signature
+on $m$ with $\pk_{\logagg}^{-1}$. The domain caches these proofs and serves them
+to clients in the handshake protocol described below.
 
 \subsection{Connection Establishment}
 \label{sec:design:handshake}

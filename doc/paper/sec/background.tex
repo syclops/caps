@@ -35,6 +35,14 @@ certificates~\cite{larisch2017crlite}.
 \subsection{Enforcing \ac{https}}
 \label{sec:background:https}
 
+Recent work to enforce the use of \ac{https} has aimed to address and prevent
+\ac{mitm} attacks that use \emph{\ac{tls} stripping}. In a \ac{tls} stripping
+attack, an adversary causes a client and server to establish a connection over
+plain HTTP, even when they could have established a connection over \ac{https}.
+Since HTTP is unencrypted, this makes \iac{mitm} attack possible by \emph{any}
+entity between the client and server. Below, we describe several efforts in this
+space.
+
 \ac{hsts} is a mechanism that allows sites to tell a client connecting over HTTP
 that all future connections to the site should take place over
 \ac{https}~\cite{rfc6797}. A site typically does this by redirecting to
