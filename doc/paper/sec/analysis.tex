@@ -13,24 +13,24 @@ We then describe potential weaknesses not covered by our security claim.
 \label{sec:analysis:informal}
 
 In making our main security claim, we assume that the client requests \numlas
-policy proofs and that the domain has a domain name of \domain. We assume that
+policy proofs and that the domain has domain name \domain. We assume that
 the domain has a policy value of \policy and thus at least \policy independent
 certificate chains, along with at least \numlas policy proofs for this policy
 value. We also assume that our adversary controls $\numlas - 1$ private keys of
 log aggregators and the private keys of $\policy - 1$ \acp{ca}. The adversary
 can also, of course, create its own public key pairs, e.g., $(\pk_\adversary,
-\pk_\adversary^{-1})$. (Recall that controlling a log aggregator's private key
+\pk_\adversary^{-1})$. Recall that controlling a log aggregator's private key
 allows the adversary to forge policy proofs for any domain with any policy
 value, and controlling \iac{ca}'s private key allows the adversary to forge
-certificates binding any domain name to any public key.) We assume that the
+certificates binding any domain name to any public key.  We assume that the
 adversary can intercept, suppress, replay, and modify any handshake message sent
-between the client and domain, and can use its private keys to sign any message
+between the client and domain, and the adversary can use its private keys to sign any message
 it can construct with the information it obtains. We also assume that the
 adversary cannot obtain a certificate binding \domain to $\pk_\adversary$ from
 any \ac{ca} besides the ones it controls. Under these assumptions, we claim that
 a \ac{name}-enabled client will abort the handshake protocol if it receives any
 certificate chain containing the adversary's $\pk_\adversary$ as the leaf public
-key. This claim supports the security of \ac{name} because to mount a successful
+key for \domain. This claim supports the security of \ac{name}, because to mount a successful
 MITM attack, the adversary must convince the client to complete the \ac{name}
 handshake based on a key that the adversary controls.
 
@@ -98,13 +98,14 @@ misbehaving log.
 A log aggregator's private key may be lost or stolen, causing it to provide
 incorrect policy information or signaling sets. A successful \ac{mitm} attack
 would require $\numlas$ aggregators to send incorrect policy information.
-Clients can use a sufficiently high value of $\numlas$ to minimize this risk,
-though we expect that in practice, a value of 2 or 3 will be
-sufficient.\footnote{Currently, major browsers use a maximum certificate
-  validity period of just over a year~\cite{apple2020about} and it is
-recommended in \ac{ct} that at least two log proofs be included for a
-certificate with a lifetime of this length~\cite{apple2019apples}.} Clients can
-also take a similar approach to verify signaling sets and their updates.
+Clients can choose a value of $\numlas$ to minimize this risk;
+in practice, we expect a value of 2 or 3 will suffice.
+Indeed, major browsers already
+%Currently, major browsers use a maximum certificate
+%validity period of just over a year~\cite{apple2020about}, and it is
+expect to see at least two \ac{ct} log proofs during a normal TLS handshake~\cite{apple2019apples}.
+%be included for a certificate with a lifetime of this length. 
+Clients can take a similar approach to verify signaling sets and their updates.
 
 A log aggregator may not provide updates in a timely manner.
 %leading to policy values that are incorrect or mismatched with those of other

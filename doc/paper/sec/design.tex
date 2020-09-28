@@ -524,10 +524,13 @@ During the initial
   %maximum.
 In an initial deployment, we expect that typically $k=1$, but allowing the use
 of larger values for $k$ provides resilience against compromised log
-aggregators.  See Section~\ref{sec:analysis:weaknesses} for further discussion.
+aggregators.  
+If the client asks for more proofs than the domain is willing to provide,
+then the connection simply fails.
+See Section~\ref{sec:analysis:weaknesses} for further discussion.
 
 The domain then sends back a ServerHello message that contains
-policy proofs from \numlas distinct log aggregators, as well as \policy
+cached policy proofs from \numlas distinct log aggregators, as well as \policy
 certificate chains.  The client can then verify the domain's policy value
 and the certificate chains supporting it. Formally, suppose a domain has
 hostname \hostname and policy value \policy, and selects a set of log
