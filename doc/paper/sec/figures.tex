@@ -1,55 +1,55 @@
-\section{Independent Certificate Chains}
-\label{sec:independence}
+%\section{Independent Certificate Chains}
+%\label{sec:independence}
 
-In \autoref{sec:design:policy} we describe how we can use a graph of certificate
-fingerprints to compute the policy value for a domain. Specifically, we compute
-the policy value as the minimum number of \ac{ca} private keys that would need
-to be compromised to create an independent set of certificate chains for an
-adversary's public key. However, this value does not necessarily result in truly
-independent certificate chains, as many \acp{ca} control multiple private keys.
-If a single \ac{ca} with poor issuance practices possesses multiple private
-keys, an adversary may gain fraudulent certificates from multiple private keys
-in a single attack. If these certificates are in multiple independent chains,
-then an adversary may be able to mount \iac{mitm} attack.
+%In \autoref{sec:design:policy} we describe how we can use a graph of certificate
+%fingerprints to compute the policy value for a domain. Specifically, we compute
+%the policy value as the minimum number of \ac{ca} private keys that would need
+%to be compromised to create an independent set of certificate chains for an
+%adversary's public key. However, this value does not necessarily result in truly
+%independent certificate chains, as many \acp{ca} control multiple private keys.
+%If a single \ac{ca} with poor issuance practices possesses multiple private
+%keys, an adversary may gain fraudulent certificates from multiple private keys
+%in a single attack. If these certificates are in multiple independent chains,
+%then an adversary may be able to mount \iac{mitm} attack.
 
-One solution to this vulnerability is to use the certificate's issuer
-organization name to differentiate \acp{ca}, but the success of this approach
-depends on the \ac{ca} itself. As we describe in
-\autoref{sec:evaluation:updates}, we found certificates that are likely from the
-same issuer, but have slightly different issue organization names. Furthermore,
-one \acp{ca} may own another and use similar security practices. If these
-\acp{ca} do not certify one another, their certificate chains may be considered
-independent by log aggregators. While we leave deeper exploration of this area
-to future work, we can easily configure \ac{name} to determine the independence
-of certificate chains by the issuer key or organization name, and this is likely
-to provide sufficient security for the vast majority of cases.
+%One solution to this vulnerability is to use the certificate's issuer
+%organization name to differentiate \acp{ca}, but the success of this approach
+%depends on the \ac{ca} itself. As we describe in
+%\autoref{sec:evaluation:updates}, we found certificates that are likely from the
+%same issuer, but have slightly different issue organization names. Furthermore,
+%one \acp{ca} may own another and use similar security practices. If these
+%\acp{ca} do not certify one another, their certificate chains may be considered
+%independent by log aggregators. While we leave deeper exploration of this area
+%to future work, we can easily configure \ac{name} to determine the independence
+%of certificate chains by the issuer key or organization name, and this is likely
+%to provide sufficient security for the vast majority of cases.
 
-\section{Certificate Issuance Trends}
-\label{sec:certificates}
+%\section{Certificate Issuance Trends}
+%\label{sec:certificates}
 
-In \autoref{sec:evaluation:https}, we computed the set of domain names that
-could potentially\footnote{we say ``potentially'' here because as we point out
-in \autoref{sec:evaluation:https}, the presence of a certificate does not
-necessarily mean the name is publicly reachable via \ac{https}.} deploy
-\ac{https} over time. We extracted this by computing an ``active set'' of
-certificates on each day between March 26, 2013 and July 3, 2018.
+%In \autoref{sec:evaluation:https}, we computed the set of domain names that
+%could potentially\footnote{we say ``potentially'' here because as we point out
+%in \autoref{sec:evaluation:https}, the presence of a certificate does not
+%necessarily mean the name is publicly reachable via \ac{https}.} deploy
+%\ac{https} over time. We extracted this by computing an ``active set'' of
+%certificates on each day between March 26, 2013 and July 3, 2018.
 
-\begin{figure}
-  \centering
-  \includegraphics[width=0.8\linewidth]{fig/cert_count_valid}
-  \caption{Number of unique certificates seen by Censys and \ac{ct} over time.}
-  \label{fig:certs}
-\end{figure}
+%\begin{figure}
+  %\centering
+  %\includegraphics[width=0.8\linewidth]{fig/cert_count_valid}
+  %\caption{Number of unique certificates seen by Censys and \ac{ct} over time.}
+  %\label{fig:certs}
+%\end{figure}
 
-\autoref{fig:certs} shows that for the most part, the trend in the number of
-active certificates on a given day matches the trend in the number of active
-domain names as seen in \autoref{fig:count:names}. There does, however, seem to
-be slightly more churn in the number of active certificates over time,
-particularly during 2017, in which the usage of Let's Encrypt was becoming
-increasingly widespread. We point out that the number of names is almost
-consistently greater than the number of certificates due to the fact that
-certificates can contain multiple names (and many popular sites such as Google
-have certificates with all of their domain names).
+%\autoref{fig:certs} shows that for the most part, the trend in the number of
+%active certificates on a given day matches the trend in the number of active
+%domain names as seen in \autoref{fig:count:names}. There does, however, seem to
+%be slightly more churn in the number of active certificates over time,
+%particularly during 2017, in which the usage of Let's Encrypt was becoming
+%increasingly widespread. We point out that the number of names is almost
+%consistently greater than the number of certificates due to the fact that
+%certificates can contain multiple names (and many popular sites such as Google
+%have certificates with all of their domain names).
 
 \section{Updates to the Signaling Set}
 \label{sec:updates}

@@ -74,6 +74,24 @@ is the increasing use of Server Name Indication (SNI)~\cite{rfc6066}, which
 cause Censys' probes to be rejected when they do not include the correct server
 name.
 
+\begin{figure}
+  \centering
+  \includegraphics[width=0.8\linewidth]{fig/cert_count_valid}
+  \caption{Number of unique certificates seen by Censys and \ac{ct} over time.}
+  \label{fig:certs}
+\end{figure}
+
+\autoref{fig:certs} shows the size of the ``active set'' of certificates as
+observed by our two data sources. For the most part, the trend in the number of
+active certificates on a given day matches the trend in the number of active
+domain names as seen in \autoref{fig:count:names}. There does, however, seem to
+be slightly more churn in the number of active certificates over time,
+particularly during 2017, in which the usage of Let's Encrypt was becoming
+increasingly widespread. We point out that the number of names is almost
+consistently greater than the number of certificates due to the fact that
+certificates can contain multiple names (and many popular sites such as Google
+have certificates with all of their domain names).
+
 From Censys and \ac{ct}, we obtained a total of 156,289,973 valid domain names
 for which a certificate had been issued. To address the possibility that many of
 these names may not be used for public-facing sites, we performed a scan of port

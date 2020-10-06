@@ -1,7 +1,8 @@
 \section{Deployment Considerations}
 \label{sec:discussion}
 
-We now discuss the deployment of \ac{name} in practice. 
+We now discuss potential issues related to the deployment of \ac{name} in
+practice, and propose possible ways to address them.
 %Specifically, we discuss possible candidates for log aggregators and the expected performance of
 %\ac{name} in the modern Web.
 
@@ -20,6 +21,30 @@ availability, minimizing the risk of synchronization issues. Finally, lists
 of major browser vendors and logs are already widely known, making it easy to
 present clients with a list of available log aggregators to provide policy
 proofs.
+
+\paragraph{Independent Certificate Chains}
+In \autoref{sec:design:policy} we described how we can use a graph of certificate
+fingerprints to compute the policy value for a domain. Specifically, we compute
+the policy value as the minimum number of \ac{ca} private keys that would need
+to be compromised to create an independent set of certificate chains for an
+adversary's public key. However, this value does not necessarily result in truly
+independent certificate chains, as many \acp{ca} control multiple private keys.
+If a single \ac{ca} with poor issuance practices possesses multiple private
+keys, an adversary may gain fraudulent certificates from multiple private keys
+in a single attack. If these certificates are in multiple independent chains,
+then an adversary may be able to mount \iac{mitm} attack.
+
+One solution to this vulnerability is to use the certificate's issuer
+organization name to differentiate \acp{ca}, but the success of this approach
+depends on the \ac{ca} itself. As we describe in
+\autoref{sec:evaluation:updates}, we found certificates that are likely from the
+same issuer, but have slightly different issue organization names. Furthermore,
+one \acp{ca} may own another and use similar security practices. If these
+\acp{ca} do not certify one another, their certificate chains may be considered
+independent by log aggregators. While we leave deeper exploration of this area
+to future work, we can easily configure \ac{name} to determine the independence
+of certificate chains by the issuer key or organization name, and this is likely
+to provide sufficient security for the vast majority of cases.
 
 \paragraph{\ac{name} in the Modern Web}
 The use of \ac{https} has increased significantly over the past years
