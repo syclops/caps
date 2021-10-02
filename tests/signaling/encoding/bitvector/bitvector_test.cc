@@ -69,10 +69,34 @@ TYPED_TEST(BitVectorTest, WriteEmptyBitVectorToNonempty)
 
 // TODO: write nonempty to empty and nonempty to nonempty
 
-// TODO: test pop_back
+TYPED_TEST(BitVectorTest, PopBack)
+{
+this->bv_.push_back(false);
+this->bv_.push_back(true);
+EXPECT_EQ(2, this->bv_.size());
+EXPECT_FALSE(this->bv_[0]);
+EXPECT_TRUE(this->bv_[1]);
+this->bv_.pop_back();
+EXPECT_EQ(1, this->bv_.size());
+EXPECT_FALSE(this->bv_[0]);
+}
 
 // TODO: test flip
-
+TYPED_TEST(BitVectorTest, Flip)
+{
+this->bv_.push_back(false);
+this->bv_.push_back(true);
+this->bv_.push_back(false);
+EXPECT_EQ(3, this->bv_.size());
+EXPECT_FALSE(this->bv_[0]);
+EXPECT_TRUE(this->bv_[1]);
+EXPECT_FALSE(this->bv_[0]);
+this->bv_.flip();
+EXPECT_EQ(3, this->bv_.size());
+EXPECT_TRUE(this->bv_[0]);
+EXPECT_FALSE(this->bv_[1]);
+EXPECT_TRUE(this->bv_[0]);
+}
 TYPED_TEST_SUITE(BitVectorComparisonTest, Implementations);
 
 TYPED_TEST(BitVectorComparisonTest, DefaultIsEqual)
