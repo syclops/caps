@@ -15,6 +15,12 @@ target_link_libraries(signed_int_coder
     INTERFACE coder bitvector
 )
 
+add_library(unary_coder_micah_practice INTERFACE)
+target_sources(unary_coder_micah_practice INTERFACE ${CMAKE_CURRENT_LIST_DIR}/unary_coder_micah_practice.h)
+target_link_libraries(unary_coder_micah_practice
+        INTERFACE coder bitvector
+        )
+
 add_library(unary_coder INTERFACE)
 target_sources(unary_coder INTERFACE ${CMAKE_CURRENT_LIST_DIR}/unary_coder.h)
 target_link_libraries(unary_coder
