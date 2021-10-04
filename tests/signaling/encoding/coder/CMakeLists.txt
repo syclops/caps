@@ -8,3 +8,10 @@
 #        )
 #gtest_discover_tests(huffman_test)
 
+
+# Unary encoding (practice)
+add_executable(unary_coder_micah_practice_test unary_coder_micah_practice_test.cc)
+target_link_libraries(unary_coder_micah_practice_test
+        PRIVATE contains unary_coder_micah_practice bitvector gtest gtest_main
+        )
+gtest_discover_tests(unary_coder_micah_practice_test)
