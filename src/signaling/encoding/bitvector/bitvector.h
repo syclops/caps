@@ -155,7 +155,7 @@ class BitVector
 
   BitVector& flip()
   {
-    return bits_.flip();
+    bits_.flip();
   }
 
   void pad(bool b = false)
