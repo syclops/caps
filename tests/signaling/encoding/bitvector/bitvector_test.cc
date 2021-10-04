@@ -81,7 +81,6 @@ EXPECT_EQ(1, this->bv_.size());
 EXPECT_FALSE(this->bv_[0]);
 }
 
-// TODO: test flip
 TYPED_TEST(BitVectorTest, Flip)
 {
 this->bv_.push_back(false);
