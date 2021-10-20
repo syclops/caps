@@ -46,17 +46,18 @@ void print_lexicon_info(const FSALexicon& lexicon)
   std::cout << "Lexicon has " << lexicon.get_graph().get_num_nodes()
             << " nodes and " << lexicon.get_graph().get_num_edges() << " edges"
             << std::endl;
-/*  std::map<int, int> mp{};
+  std::map<int, int> mp{};
   for(auto& [label, count]: lexicon.get_graph().get_label_counts()){
     if (mp.find(count)!=mp.end()){
       mp.at(count)++;
     }else{
       mp.emplace(count, 1);
     }
+    std::cout << label << " : " << count << std::endl; //prints the count for each label
   }
-  for(auto& [length, count]: mp){
-    std::cout << length << " : " << count << std::endl;
-  }*/
+//  for(auto& [length, count]: mp){
+//    std::cout << length << " : " << count << std::endl; //prints how many labels for each count
+//  }
 }
 
 struct option_string
