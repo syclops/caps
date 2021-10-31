@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/lexicon.h
+iostream
+-
+set
+-
+string
+-
+unordered_set
+-
+
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/set_lexicon.cc
+set_lexicon.h
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/set_lexicon.h
+iostream
+-
+sstream
+-
+
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/set_lexicon.h
+lexicon.h
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/lexicon.h
+

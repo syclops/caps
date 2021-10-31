@@ -1,0 +1,74 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/micah/Documents/caps research/caps/src/signaling/common/contains.h
+
+/home/micah/Documents/caps research/caps/src/signaling/common/iterable.h
+
+/home/micah/Documents/caps research/caps/src/signaling/common/pointer_comparator.h
+iostream
+-
+memory
+-
+
+/home/micah/Documents/caps research/caps/src/signaling/graph/labeled_graph/graph.h
+iostream
+-
+memory
+-
+stack
+-
+string
+-
+unordered_map
+-
+queue
+-
+string
+-
+../node/node.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/node/node.h
+../../common/pointer_comparator.h
+/home/micah/Documents/caps research/caps/src/signaling/common/pointer_comparator.h
+
+/home/micah/Documents/caps research/caps/src/signaling/graph/node/node.h
+map
+-
+memory
+-
+optional
+-
+set
+-
+string
+-
+../../common/iterable.h
+/home/micah/Documents/caps research/caps/src/signaling/common/iterable.h
+boost/functional/hash.hpp
+-
+
+/home/micah/Documents/caps research/caps/src/signaling/graph/ordering.cc
+unordered_set
+-
+ordering.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/ordering.h
+../common/contains.h
+/home/micah/Documents/caps research/caps/src/signaling/common/contains.h
+
+/home/micah/Documents/caps research/caps/src/signaling/graph/ordering.h
+functional
+-
+unordered_set
+-
+labeled_graph/graph.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/labeled_graph/graph.h
+node/node.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/node/node.h
+../common/iterable.h
+/home/micah/Documents/caps research/caps/src/signaling/common/iterable.h
+

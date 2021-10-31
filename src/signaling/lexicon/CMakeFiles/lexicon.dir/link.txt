@@ -1,0 +1,2 @@
+/usr/bin/ar qc liblexicon.a  CMakeFiles/lexicon.dir/lexicon.cc.o
+/usr/bin/ranlib liblexicon.a

@@ -1,0 +1,2 @@
+/usr/bin/ar qc libconnected_component.a  CMakeFiles/connected_component.dir/connected_component.cc.o
+/usr/bin/ranlib libconnected_component.a

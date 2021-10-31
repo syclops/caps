@@ -1,0 +1,2 @@
+/usr/bin/ar qc libnode_right_language.a  CMakeFiles/node_right_language.dir/node_right_language.cc.o
+/usr/bin/ranlib libnode_right_language.a

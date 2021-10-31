@@ -1,0 +1,2 @@
+/usr/bin/ar qc libfsa_lexicon.a  CMakeFiles/fsa_lexicon.dir/fsa_lexicon.cc.o
+/usr/bin/ranlib libfsa_lexicon.a

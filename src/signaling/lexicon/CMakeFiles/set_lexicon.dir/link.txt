@@ -1,0 +1,2 @@
+/usr/bin/ar qc libset_lexicon.a  CMakeFiles/set_lexicon.dir/set_lexicon.cc.o
+/usr/bin/ranlib libset_lexicon.a

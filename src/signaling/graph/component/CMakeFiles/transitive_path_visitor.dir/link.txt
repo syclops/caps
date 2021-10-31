@@ -1,0 +1,2 @@
+/usr/bin/ar qc libtransitive_path_visitor.a  CMakeFiles/transitive_path_visitor.dir/transitive_path_visitor.cc.o
+/usr/bin/ranlib libtransitive_path_visitor.a

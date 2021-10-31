@@ -1,0 +1,18 @@
+Making lexicon from standard input...done! (took 0.000706966 seconds)
+Lexicon has 31 nodes and 34 edges
+k : 1
+i : 1
+h : 1
+w : 4
+u : 1
+e : 2
+a : 2
+c : 2
+g : 4
+. : 5
+l : 3
+m : 2
+o : 6
+3
+4
+Writing lexicon to standard output...q‘õºêëï«®{¾ï¹îË–®½ï{ßp¹Ğ]÷m]sİ÷}Ïv\µuÛ÷uÃtİdone! (took 0.00026736 seconds)

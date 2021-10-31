@@ -1,0 +1,242 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/micah/Documents/caps research/caps/src/signaling/common/contains.h
+
+/home/micah/Documents/caps research/caps/src/signaling/common/iterable.h
+
+/home/micah/Documents/caps research/caps/src/signaling/common/pointer_comparator.h
+iostream
+-
+memory
+-
+
+/home/micah/Documents/caps research/caps/src/signaling/common/powerset.h
+set
+-
+vector
+-
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/bitvector/bitvector.h
+cmath
+-
+cstddef
+-
+iostream
+-
+vector
+-
+../defs.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/defs.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/defs.h
+limits
+-
+
+/home/micah/Documents/caps research/caps/src/signaling/graph/component/connected_component.h
+cstddef
+-
+memory
+-
+set
+-
+string
+-
+tuple
+-
+unordered_map
+-
+unordered_set
+-
+vector
+-
+../node/node.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/node/node.h
+../visitor/visitor.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/visitor/visitor.h
+
+/home/micah/Documents/caps research/caps/src/signaling/graph/component/connected_component_utils.h
+vector
+-
+connected_component.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/component/connected_component.h
+transitive_path_visitor.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/component/transitive_path_visitor.h
+
+/home/micah/Documents/caps research/caps/src/signaling/graph/component/transitive_path_visitor.h
+functional
+-
+optional
+-
+set
+-
+string
+-
+unordered_map
+-
+../node/node.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/node/node.h
+../visitor/visitor.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/visitor/visitor.h
+connected_component.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/component/connected_component.h
+
+/home/micah/Documents/caps research/caps/src/signaling/graph/labeled_graph/graph.h
+iostream
+-
+memory
+-
+stack
+-
+string
+-
+unordered_map
+-
+queue
+-
+string
+-
+../node/node.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/node/node.h
+../../common/pointer_comparator.h
+/home/micah/Documents/caps research/caps/src/signaling/common/pointer_comparator.h
+
+/home/micah/Documents/caps research/caps/src/signaling/graph/node/node.h
+map
+-
+memory
+-
+optional
+-
+set
+-
+string
+-
+../../common/iterable.h
+/home/micah/Documents/caps research/caps/src/signaling/common/iterable.h
+boost/functional/hash.hpp
+-
+
+/home/micah/Documents/caps research/caps/src/signaling/graph/traversal/graph_search.h
+memory
+-
+queue
+-
+stack
+-
+unordered_set
+-
+../labeled_graph/graph.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/labeled_graph/graph.h
+../node/node.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/node/node.h
+../visitor/visitor.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/visitor/visitor.h
+
+/home/micah/Documents/caps research/caps/src/signaling/graph/visitor/visitor.h
+memory
+-
+../node/node.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/node/node.h
+
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/fsa_lexicon/accept_string_visitor.h
+set
+-
+string
+-
+unordered_map
+-
+../../graph/node/node.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/node/node.h
+../../graph/visitor/visitor.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/visitor/visitor.h
+
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/fsa_lexicon/fsa_lexicon.cc
+../../graph/traversal/graph_search.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/traversal/graph_search.h
+../lexicon.h
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/lexicon.h
+fsa_lexicon.h
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/fsa_lexicon/fsa_lexicon.h
+cmath
+-
+algorithm
+-
+iostream
+-
+memory
+-
+set
+-
+sstream
+-
+string
+-
+unordered_set
+-
+utility
+-
+vector
+-
+../../common/contains.h
+/home/micah/Documents/caps research/caps/src/signaling/common/contains.h
+../../common/powerset.h
+/home/micah/Documents/caps research/caps/src/signaling/common/powerset.h
+../../encoding/bitvector/bitvector.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/bitvector/bitvector.h
+../../graph/component/connected_component.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/component/connected_component.h
+../../graph/component/connected_component_utils.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/component/connected_component_utils.h
+../../graph/traversal/graph_search.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/traversal/graph_search.h
+../lexicon.h
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/lexicon.h
+accept_string_visitor.h
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/fsa_lexicon/accept_string_visitor.h
+
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/fsa_lexicon/fsa_lexicon.h
+functional
+-
+iostream
+-
+memory
+-
+set
+-
+string
+-
+unordered_map
+-
+../lexicon.h
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/lexicon.h
+../../graph/node/node.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/node/node.h
+../../graph/labeled_graph/graph.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/labeled_graph/graph.h
+../../graph/visitor/visitor.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/visitor/visitor.h
+../../common/contains.h
+/home/micah/Documents/caps research/caps/src/signaling/common/contains.h
+node_right_language.h
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/fsa_lexicon/node_right_language.h
+
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/fsa_lexicon/node_right_language.h
+../../graph/node/node.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/node/node.h
+
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/lexicon.h
+iostream
+-
+set
+-
+string
+-
+unordered_set
+-
+

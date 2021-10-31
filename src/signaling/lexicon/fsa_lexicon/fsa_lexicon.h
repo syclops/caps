@@ -102,7 +102,7 @@ class FSALexicon: public Lexicon
 //
 //  std::shared_ptr<DebugVisitor> clone();
 //
-//  void process_node(const std::shared_ptr<Node>& node) override;
+//  void process_node(const std::shared_ptr<Node>& node);
 //
 //  std::string get_debug_string() const;
 //
@@ -119,7 +119,7 @@ class FSALexicon: public Lexicon
 //
 //  std::shared_ptr<OrderVisitor> clone();
 //
-//  void process_node(const std::shared_ptr<Node>& node) override;
+//  void process_node(const std::shared_ptr<Node>& node);
 //
 //  const std::unordered_map<std::shared_ptr<Node>, int>& get_order() const;
 //
@@ -194,7 +194,7 @@ class FSALexicon: public Lexicon
 //
 //  std::shared_ptr<CompactionVisitor> clone();
 //
-//  void process_node(const std::shared_ptr<Node>& node) override;
+//  void process_node(const std::shared_ptr<Node>& node);
 //
 //  void reset_selection();
 //

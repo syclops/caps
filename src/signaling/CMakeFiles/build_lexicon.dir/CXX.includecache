@@ -1,0 +1,508 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/micah/Documents/caps research/caps/src/signaling/build_lexicon.cc
+chrono
+-
+iostream
+-
+fstream
+-
+utility
+-
+map
+-
+lexicon/fsa_lexicon/fsa_lexicon.h
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/fsa_lexicon/fsa_lexicon.h
+common/io_option.h
+/home/micah/Documents/caps research/caps/src/signaling/common/io_option.h
+common/measure_time.h
+/home/micah/Documents/caps research/caps/src/signaling/common/measure_time.h
+encoding/fsa_encoder/fsa_encoder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/fsa_encoder/fsa_encoder.h
+encoding/fsa_encoder/fsa_char_encoder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/fsa_encoder/fsa_char_encoder.h
+encoding/fsa_encoder/fsa_huffman_encoder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/fsa_encoder/fsa_huffman_encoder.h
+encoding/fsa_encoder/fsa_mixed_huffman_encoder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/fsa_encoder/fsa_mixed_huffman_encoder.h
+encoding/fsa_encoder/fsa_partial_huffman_encoder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/fsa_encoder/fsa_partial_huffman_encoder.h
+encoding/fsa_encoder/fsa_char_huffman_encoder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/fsa_encoder/fsa_char_huffman_encoder.h
+encoding/bitvector_io.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/bitvector_io.h
+cxxopts.hpp
+-
+
+/home/micah/Documents/caps research/caps/src/signaling/common/compare.h
+utility
+-
+
+/home/micah/Documents/caps research/caps/src/signaling/common/contains.h
+
+/home/micah/Documents/caps research/caps/src/signaling/common/io_option.h
+fstream
+-
+functional
+-
+iostream
+-
+string
+-
+
+/home/micah/Documents/caps research/caps/src/signaling/common/iterable.h
+
+/home/micah/Documents/caps research/caps/src/signaling/common/measure_time.h
+chrono
+-
+functional
+-
+type_traits
+-
+utility
+-
+
+/home/micah/Documents/caps research/caps/src/signaling/common/pointer_comparator.h
+iostream
+-
+memory
+-
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/bitvector/bitvector.h
+cmath
+-
+cstddef
+-
+iostream
+-
+vector
+-
+../defs.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/defs.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/bitvector_io.h
+cstddef
+-
+iostream
+-
+bitvector/bitvector.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/bitvector/bitvector.h
+coder/char_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/char_coder.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/binary_coder.h
+cmath
+-
+cstdlib
+-
+coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/coder.h
+../bitvector/bitvector.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/bitvector/bitvector.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/char_coder.h
+limits
+-
+coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/coder.h
+../defs.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/defs.h
+../bitvector/bitvector.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/bitvector/bitvector.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/char_huffman_coder.h
+cstdlib
+-
+optional
+-
+queue
+-
+unordered_map
+-
+utility
+-
+vector
+-
+coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/coder.h
+small_int_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/small_int_coder.h
+huffman_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/huffman_coder.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/coder.h
+optional
+-
+utility
+-
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/delta_coder.h
+coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/coder.h
+gamma_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/gamma_coder.h
+binary_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/binary_coder.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/gamma_coder.h
+cstddef
+-
+optional
+-
+utility
+-
+coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/coder.h
+unary_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/unary_coder.h
+binary_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/binary_coder.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/huffman_coder.h
+cstdlib
+-
+optional
+-
+queue
+-
+unordered_map
+-
+utility
+-
+vector
+-
+coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/coder.h
+delta_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/delta_coder.h
+string_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/string_coder.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/mixed_huffman_coder.h
+cstdlib
+-
+optional
+-
+queue
+-
+unordered_map
+-
+utility
+-
+vector
+-
+coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/coder.h
+char_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/char_coder.h
+char_huffman_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/char_huffman_coder.h
+huffman_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/huffman_coder.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/partial_huffman_coder.h
+cstdlib
+-
+optional
+-
+queue
+-
+unordered_map
+-
+utility
+-
+vector
+-
+coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/coder.h
+small_int_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/small_int_coder.h
+huffman_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/huffman_coder.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/signed_int_coder.h
+coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/coder.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/small_int_coder.h
+optional
+-
+utility
+-
+char_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/char_coder.h
+coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/coder.h
+../defs.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/defs.h
+../bitvector/bitvector.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/bitvector/bitvector.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/string_coder.h
+optional
+-
+utility
+-
+char_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/char_coder.h
+coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/coder.h
+../defs.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/defs.h
+../bitvector/bitvector.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/bitvector/bitvector.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/unary_coder.h
+optional
+-
+utility
+-
+coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/coder.h
+../bitvector/bitvector.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/bitvector/bitvector.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/defs.h
+limits
+-
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/fsa_encoder/fsa_char_encoder.h
+functional
+-
+memory
+-
+string
+-
+../../lexicon/fsa_lexicon/fsa_lexicon.h
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/fsa_lexicon/fsa_lexicon.h
+../coder/small_int_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/small_int_coder.h
+../coder/huffman_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/huffman_coder.h
+fsa_encoder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/fsa_encoder/fsa_encoder.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/fsa_encoder/fsa_char_huffman_encoder.h
+memory
+-
+string
+-
+../../lexicon/fsa_lexicon/fsa_lexicon.h
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/fsa_lexicon/fsa_lexicon.h
+../coder/char_huffman_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/char_huffman_coder.h
+../coder/char_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/char_coder.h
+../coder/huffman_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/huffman_coder.h
+../coder/signed_int_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/signed_int_coder.h
+fsa_encoder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/fsa_encoder/fsa_encoder.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/fsa_encoder/fsa_encoder.h
+functional
+-
+memory
+-
+../../common/contains.h
+/home/micah/Documents/caps research/caps/src/signaling/common/contains.h
+../../common/compare.h
+/home/micah/Documents/caps research/caps/src/signaling/common/compare.h
+../../graph/ordering.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/ordering.h
+../../lexicon/fsa_lexicon/fsa_lexicon.h
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/fsa_lexicon/fsa_lexicon.h
+../bitvector/bitvector.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/bitvector/bitvector.h
+../coder/string_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/string_coder.h
+../coder/binary_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/binary_coder.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/fsa_encoder/fsa_huffman_encoder.h
+memory
+-
+string
+-
+../../lexicon/fsa_lexicon/fsa_lexicon.h
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/fsa_lexicon/fsa_lexicon.h
+../coder/huffman_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/huffman_coder.h
+../coder/signed_int_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/signed_int_coder.h
+fsa_encoder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/fsa_encoder/fsa_encoder.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/fsa_encoder/fsa_mixed_huffman_encoder.h
+memory
+-
+string
+-
+../../lexicon/fsa_lexicon/fsa_lexicon.h
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/fsa_lexicon/fsa_lexicon.h
+../coder/mixed_huffman_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/mixed_huffman_coder.h
+../coder/char_huffman_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/char_huffman_coder.h
+../coder/huffman_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/huffman_coder.h
+../coder/signed_int_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/signed_int_coder.h
+fsa_encoder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/fsa_encoder/fsa_encoder.h
+
+/home/micah/Documents/caps research/caps/src/signaling/encoding/fsa_encoder/fsa_partial_huffman_encoder.h
+memory
+-
+string
+-
+../../lexicon/fsa_lexicon/fsa_lexicon.h
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/fsa_lexicon/fsa_lexicon.h
+../coder/partial_huffman_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/partial_huffman_coder.h
+../coder/huffman_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/huffman_coder.h
+../coder/signed_int_coder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/coder/signed_int_coder.h
+fsa_encoder.h
+/home/micah/Documents/caps research/caps/src/signaling/encoding/fsa_encoder/fsa_encoder.h
+
+/home/micah/Documents/caps research/caps/src/signaling/graph/labeled_graph/graph.h
+iostream
+-
+memory
+-
+stack
+-
+string
+-
+unordered_map
+-
+queue
+-
+string
+-
+../node/node.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/node/node.h
+../../common/pointer_comparator.h
+/home/micah/Documents/caps research/caps/src/signaling/common/pointer_comparator.h
+
+/home/micah/Documents/caps research/caps/src/signaling/graph/node/node.h
+map
+-
+memory
+-
+optional
+-
+set
+-
+string
+-
+../../common/iterable.h
+/home/micah/Documents/caps research/caps/src/signaling/common/iterable.h
+boost/functional/hash.hpp
+-
+
+/home/micah/Documents/caps research/caps/src/signaling/graph/ordering.h
+functional
+-
+unordered_set
+-
+labeled_graph/graph.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/labeled_graph/graph.h
+node/node.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/node/node.h
+../common/iterable.h
+/home/micah/Documents/caps research/caps/src/signaling/common/iterable.h
+
+/home/micah/Documents/caps research/caps/src/signaling/graph/visitor/visitor.h
+memory
+-
+../node/node.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/node/node.h
+
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/fsa_lexicon/fsa_lexicon.h
+functional
+-
+iostream
+-
+memory
+-
+set
+-
+string
+-
+unordered_map
+-
+../lexicon.h
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/lexicon.h
+../../graph/node/node.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/node/node.h
+../../graph/labeled_graph/graph.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/labeled_graph/graph.h
+../../graph/visitor/visitor.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/visitor/visitor.h
+../../common/contains.h
+/home/micah/Documents/caps research/caps/src/signaling/common/contains.h
+node_right_language.h
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/fsa_lexicon/node_right_language.h
+
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/fsa_lexicon/node_right_language.h
+../../graph/node/node.h
+/home/micah/Documents/caps research/caps/src/signaling/graph/node/node.h
+
+/home/micah/Documents/caps research/caps/src/signaling/lexicon/lexicon.h
+iostream
+-
+set
+-
+string
+-
+unordered_set
+-
+
+_deps/cxxopts-src/include/cxxopts.hpp
+cctype
+-
+cstring
+-
+exception
+-
+iostream
+-
+limits
+-
+list
+-
+map
+-
+memory
+-
+sstream
+-
+string
+-
+unordered_map
+-
+unordered_set
+-
+utility
+-
+vector
+-
+algorithm
+-
+regex
+-
+optional
+-
+unicode/unistr.h
+-
+
