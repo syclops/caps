@@ -47,6 +47,22 @@ void print_lexicon_info(const FSALexicon& lexicon)
             << " nodes and " << lexicon.get_graph().get_num_edges() << " edges"
             << std::endl;
   std::map<int, int> mp{};
+  //can print other label info here
+  for(auto& node: lexicon.get_graph().get_nodes()){
+      if(!node->get_accept()
+      && node->get_in_degree() != 0
+      && node->get_out_degree() != 0
+      && (node->get_in_degree() == 1 || node->get_out_degree() ==1)){
+          //these are "nodes of interest", that can be changed from length 1 to length >1
+          for(const auto& in_edge: node->get_in_edges()){
+              std::cout << node.get() << " < " << in_edge.first << std::endl;
+          }
+          for(const auto& out_edge: node->get_out_edges()){
+              std::cout << node.get() << " > " << out_edge.first << std::endl;
+          }
+      }
+  }
+
   for(auto& [label, count]: lexicon.get_graph().get_label_counts()){
     if (mp.find(count)!=mp.end()){
       mp.at(count)++;
